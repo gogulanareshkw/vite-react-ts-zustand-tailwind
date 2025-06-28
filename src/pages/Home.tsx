@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -6,224 +6,373 @@ import {
   Card,
   CardContent,
   Button,
-  Avatar,
-  Chip,
-  CircularProgress,
+  Paper,
   Alert,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Divider,
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Remove as RemoveIcon,
-  Refresh as RefreshIcon,
-  Api as ApiIcon,
-  Storage as StorageIcon,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  KeyboardArrowUp,
+  Casino,
+  EmojiEvents,
+  TrendingUp,
+  Security,
+  History,
+  Public,
 } from '@mui/icons-material';
-import { useStore } from '../store/useStore';
-import moment from 'moment';
 
 const Home: React.FC = () => {
-  const { count, increment, decrement, reset, data, loading, error, fetchData } = useStore();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Sample lottery images (you can replace with actual lottery images)
+  const slides = [
+    {
+      id: 1,
+      title: "Win Big with GulfLotto",
+      description: "Join millions of players for your chance to win life-changing prizes",
+      image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=800&h=400&fit=crop",
+      color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    },
+    {
+      id: 2,
+      title: "Monthly Draws",
+      description: "Draws held on the 1st and 16th of every month",
+      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop",
+      color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+    },
+    {
+      id: 3,
+      title: "Secure & Trusted",
+      description: "Government-administered lottery with guaranteed security",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=400&fit=crop",
+      color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+    }
+  ];
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom align="center" className="mb-8">
-        Welcome to Modern React App
-      </Typography>
-      
-      <Typography variant="h6" color="text.secondary" align="center" className="mb-12">
-        A comprehensive React application showcasing modern development practices
-      </Typography>
-
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
-        {/* Counter Section */}
-        <Box sx={{ flex: 1 }}>
-          <Card elevation={2} className="h-full">
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <StorageIcon color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h5" component="h2">
-                  Zustand State Management
+    <Box sx={{ minHeight: '100vh' }}>
+      {/* Hero Section with Image Slides */}
+      <Box sx={{ position: 'relative', height: { xs: '60vh', md: '70vh' }, overflow: 'hidden' }}>
+        {slides.map((slide, index) => (
+          <Box
+            key={slide.id}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: index === currentSlide ? 1 : 0,
+              transition: 'opacity 0.8s ease-in-out',
+              background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${slide.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Container maxWidth="lg">
+              <Box sx={{ textAlign: 'center', color: 'white' }}>
+                <Typography 
+                  variant={isMobile ? "h3" : "h2"} 
+                  component="h1" 
+                  gutterBottom
+                  sx={{ 
+                    fontWeight: 'bold',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                    mb: 2
+                  }}
+                >
+                  {slide.title}
                 </Typography>
-              </Box>
-              
-              <Typography variant="body1" color="text.secondary" paragraph>
-                This counter demonstrates Zustand state management. The state persists across component re-renders and can be accessed from anywhere in the app.
-              </Typography>
-
-              <Box display="flex" alignItems="center" justifyContent="center" mb={3}>
-                <Typography variant="h2" component="div" color="primary.main" fontWeight="bold">
-                  {count}
+                <Typography 
+                  variant={isMobile ? "h6" : "h5"} 
+                  sx={{ 
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                    mb: 4
+                  }}
+                >
+                  {slide.description}
                 </Typography>
-              </Box>
-
-              <Box display="flex" gap={2} justifyContent="center" flexWrap="wrap">
                 <Button
                   variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={increment}
                   size="large"
+                  sx={{
+                    background: slide.color,
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
                 >
-                  Increment
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<RemoveIcon />}
-                  onClick={decrement}
-                  size="large"
-                >
-                  Decrement
-                </Button>
-                <Button
-                  variant="text"
-                  startIcon={<RefreshIcon />}
-                  onClick={reset}
-                  size="large"
-                >
-                  Reset
+                  Play Now
                 </Button>
               </Box>
-            </CardContent>
-          </Card>
-        </Box>
+            </Container>
+          </Box>
+        ))}
 
-        {/* API Integration Section */}
-        <Box sx={{ flex: 1 }}>
-          <Card elevation={2} className="h-full">
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <ApiIcon color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h5" component="h2">
-                  API Integration
-                </Typography>
-              </Box>
-              
-              <Typography variant="body1" color="text.secondary" paragraph>
-                This section demonstrates external API integration using the GitHub API. The data is fetched and managed through Zustand state.
-              </Typography>
+        {/* Slide Navigation */}
+        <IconButton
+          onClick={prevSlide}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            bgcolor: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+          }}
+        >
+          <KeyboardArrowLeft />
+        </IconButton>
+        <IconButton
+          onClick={nextSlide}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            bgcolor: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+          }}
+        >
+          <KeyboardArrowRight />
+        </IconButton>
 
-              {loading && (
-                <Box display="flex" justifyContent="center" my={3}>
-                  <CircularProgress />
-                </Box>
-              )}
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
-              )}
-
-              {data && !loading && (
-                <Box>
-                  <Box display="flex" alignItems="center" mb={2}>
-                    <Avatar
-                      src={data.avatar_url}
-                      alt={data.login}
-                      sx={{ width: 60, height: 60, mr: 2 }}
-                    />
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold">
-                        {data.name || data.login}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        @{data.login}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Typography variant="body2" paragraph>
-                    {data.bio || 'No bio available'}
-                  </Typography>
-                  
-                  <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
-                    <Chip label={`${data.public_repos} repos`} size="small" />
-                    <Chip label={`${data.followers} followers`} size="small" />
-                    <Chip label={`${data.following} following`} size="small" />
-                  </Box>
-                  
-                  <Typography variant="caption" color="text.secondary">
-                    Member since {moment(data.created_at).format('MMMM YYYY')}
-                  </Typography>
-                </Box>
-              )}
-
-              <Box mt={3}>
-                <Button
-                  variant="contained"
-                  startIcon={<RefreshIcon />}
-                  onClick={fetchData}
-                  disabled={loading}
-                  fullWidth
-                >
-                  {loading ? 'Loading...' : 'Refresh Data'}
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-
-      {/* Features Section */}
-      <Box mt={8}>
-        <Typography variant="h4" component="h2" gutterBottom align="center" className="mb-6">
-          Features
-        </Typography>
-        
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-          gap: 3 
-        }}>
-          {[
-            {
-              title: 'Modern React 19',
-              description: 'Built with the latest React features including hooks and concurrent rendering',
-              color: 'primary',
-            },
-            {
-              title: 'TypeScript',
-              description: 'Full TypeScript support for better development experience and type safety',
-              color: 'secondary',
-            },
-            {
-              title: 'Material-UI',
-              description: 'Beautiful, accessible components following Material Design principles',
-              color: 'success',
-            },
-            {
-              title: 'Tailwind CSS',
-              description: 'Utility-first CSS framework for rapid UI development',
-              color: 'info',
-            },
-            {
-              title: 'Zustand',
-              description: 'Lightweight state management with minimal boilerplate',
-              color: 'warning',
-            },
-            {
-              title: 'React Router',
-              description: 'Declarative routing for React applications',
-              color: 'error',
-            },
-          ].map((feature, index) => (
-            <Card key={index} elevation={1} className="h-full hover:shadow-lg transition-shadow">
-              <CardContent>
-                <Typography variant="h6" component="h3" gutterBottom color={`${feature.color}.main`}>
-                  {feature.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </CardContent>
-            </Card>
+        {/* Slide Indicators */}
+        <Box sx={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 1 }}>
+          {slides.map((_, index) => (
+            <Box
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                bgcolor: index === currentSlide ? 'white' : 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.8)' },
+              }}
+            />
           ))}
         </Box>
       </Box>
-    </Container>
+
+      {/* Official Notice Section */}
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Alert 
+          severity="info" 
+          sx={{ 
+            mb: 4,
+            fontSize: '1.1rem',
+            '& .MuiAlert-message': { fontSize: '1.1rem' }
+          }}
+          icon={<Security sx={{ fontSize: 28 }} />}
+        >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            OFFICIAL NOTICE
+          </Typography>
+          <Typography variant="body1">
+            OFFICIAL NATIONAL LOTTERY IS ADMINISTERED BY THE GOVERNMENT LOTTERY OFFICE. 
+            THAILAND NATIONAL LOTTERY IS DRAWN ON FIRST AND THE SIXTEENTH OF EVERY MONTH.
+          </Typography>
+        </Alert>
+
+        {/* Thai Lottery Information Section */}
+        <Box sx={{ mb: 6 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <History sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+            <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold' }}>
+              Thai Lottery History & Information
+            </Typography>
+          </Box>
+          
+          <Card elevation={3} sx={{ p: 4, mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+              Play Thai Lottery Online Through GulfLotto
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
+              Experience the excitement of Thai Lottery online through our secure platform GulfLotto by registering your account in just a few clicks. 
+              The Thai Lottery is the official national lottery in Thailand, administered by the Government Lottery Office (GLO) and is extremely popular 
+              not only in Thailand but also in Saudi Arabia, Kuwait, Pakistan, and many other countries.
+            </Typography>
+            
+            <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
+              The Thai Lottery draws are held twice monthly on the 1st and 16th of every month, providing regular opportunities for players to win 
+              life-changing prizes. Our platform ensures secure transactions and fair play, maintaining the integrity of this historic lottery system.
+            </Typography>
+          </Card>
+
+          <Card elevation={3} sx={{ p: 4, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Public sx={{ fontSize: 32, color: 'secondary.main', mr: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+                Historical Background
+              </Typography>
+            </Box>
+            
+            <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
+              The history of lottery issuance in Thailand dates back to the reign of King Chulalongkorn (Rama V). The first lottery was introduced 
+              by an Englishman named 'Teacher Al Baster' who was instrumental in bringing European lottery systems to Thailand. In 1874, 
+              King Chulalongkorn graciously granted royal permission to the Royal Thai Army Department to issue the first official lottery in Thailand.
+            </Typography>
+            
+            <Typography variant="body1" paragraph sx={{ lineHeight: 1.8 }}>
+              The original purpose was to support foreign merchants who brought products to exhibit in the museum at the Khong Khadod building 
+              in the Grand Palace. This marked the beginning of what would become one of the most popular and trusted lottery systems in Southeast Asia.
+            </Typography>
+            
+            <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+              Today, the Thai Lottery continues this rich tradition under the administration of the Government Lottery Office, maintaining the same 
+              level of trust and integrity established over a century ago.
+            </Typography>
+          </Card>
+        </Box>
+
+        {/* Features Section */}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 4, fontWeight: 'bold' }}>
+            Why Choose GulfLotto?
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gap: 3 
+          }}>
+            <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+              <Casino sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Easy to Play
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Simple number selection process with multiple ways to play and win
+              </Typography>
+            </Card>
+
+            <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+              <EmojiEvents sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Big Prizes
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Life-changing jackpots and multiple prize tiers for every draw
+              </Typography>
+            </Card>
+
+            <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+              <TrendingUp sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Regular Draws
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Monthly draws on the 1st and 16th with instant results
+              </Typography>
+            </Card>
+          </Box>
+        </Box>
+
+        {/* Quick Stats */}
+        <Paper elevation={2} sx={{ p: 4, textAlign: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+            Lottery Statistics
+          </Typography>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gap: 3 
+          }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>2</Typography>
+              <Typography variant="body2">Draws per Month</Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>1M+</Typography>
+              <Typography variant="body2">Active Players</Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>฿50M</Typography>
+              <Typography variant="body2">Total Prizes</Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>99%</Typography>
+              <Typography variant="body2">Satisfaction Rate</Typography>
+            </Box>
+          </Box>
+        </Paper>
+      </Container>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <IconButton
+          onClick={handleScrollTop}
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            bgcolor: 'primary.main',
+            color: 'white',
+            width: 56,
+            height: 56,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            '&:hover': {
+              bgcolor: 'primary.dark',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
+            },
+            transition: 'all 0.3s ease',
+            zIndex: 1000,
+          }}
+        >
+          <KeyboardArrowUp />
+        </IconButton>
+      )}
+    </Box>
   );
 };
 
