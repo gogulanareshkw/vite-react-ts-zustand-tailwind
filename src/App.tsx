@@ -7,42 +7,13 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
-
-// Placeholder components for other pages
-const Prizes: React.FC = () => (
-  <Box sx={{ p: 4, textAlign: 'center' }}>
-    <h1>Prizes</h1>
-    <p>Prize information will be displayed here.</p>
-  </Box>
-);
-
-const Results: React.FC = () => (
-  <Box sx={{ p: 4, textAlign: 'center' }}>
-    <h1>Results</h1>
-    <p>Lottery results will be displayed here.</p>
-  </Box>
-);
-
-const HowToPlay: React.FC = () => (
-  <Box sx={{ p: 4, textAlign: 'center' }}>
-    <h1>How to Play</h1>
-    <p>Instructions on how to play the lottery will be displayed here.</p>
-  </Box>
-);
-
-const Contact: React.FC = () => (
-  <Box sx={{ p: 4, textAlign: 'center' }}>
-    <h1>Contact Us</h1>
-    <p>Contact information will be displayed here.</p>
-  </Box>
-);
-
-const Help: React.FC = () => (
-  <Box sx={{ p: 4, textAlign: 'center' }}>
-    <h1>Help</h1>
-    <p>Help and support information will be displayed here.</p>
-  </Box>
-);
+import Prizes from './pages/Prizes';
+import Results from './pages/Results';
+import HowToPlay from './pages/HowToPlay';
+import Contact from './pages/Contact';
+import Help from './pages/Help';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 
 function App() {
   return (
@@ -66,6 +37,8 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
             </Routes>
           </Box>
           <Footer />

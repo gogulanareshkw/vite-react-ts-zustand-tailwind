@@ -15,13 +15,14 @@ import {
   Avatar,
 } from '@mui/material';
 import { Menu as MenuIcon, AccountCircle, EmojiEvents, Star, Diamond } from '@mui/icons-material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const location = useLocation();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
   const navItems = [
@@ -39,7 +40,15 @@ const Header: React.FC = () => {
   };
 
   const handleLogin = () => {
-    setIsLoggedIn(!isLoggedIn);
+    if (isLoggedIn) {
+      setIsLoggedIn(false);
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleSignUp = () => {
+    navigate('/signup');
   };
 
   const drawer = (
@@ -102,6 +111,7 @@ const Header: React.FC = () => {
             variant="outlined"
             color="primary"
             fullWidth
+            onClick={handleSignUp}
           >
             Sign Up
           </Button>
@@ -215,6 +225,7 @@ const Header: React.FC = () => {
                   variant="outlined"
                   color="primary"
                   size="small"
+                  onClick={handleSignUp}
                 >
                   Sign Up
                 </Button>
