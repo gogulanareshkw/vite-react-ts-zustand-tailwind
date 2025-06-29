@@ -1,160 +1,166 @@
-# Modern React Application
+# WahLotto - Modern Lottery Application
 
-A comprehensive React application showcasing modern development practices with TypeScript, Material-UI, Zustand, and more.
+A modern lottery application built with Vite, React, TypeScript, Zustand, and Tailwind CSS, integrated with a Node.js backend.
 
-## 🚀 Features
+## Features
 
-- **React 19** - Latest version with concurrent features
-- **TypeScript** - Full type safety and better development experience
-- **Material-UI** - Beautiful, accessible components following Material Design
-- **Zustand** - Lightweight state management with minimal boilerplate
-- **React Router** - Declarative routing for single-page applications
-- **Tailwind CSS** - Utility-first CSS framework for rapid styling
-- **Axios** - Promise-based HTTP client for API requests
-- **Moment.js** - Date/time manipulation and formatting
-- **Vite** - Fast build tool and development server
+### ✅ Completed
+- **Authentication System**
+  - Login with email/password
+  - Session persistence with localStorage
+  - Automatic token management
+  - User role-based redirects
+  - Modern UI with Material-UI and Tailwind CSS
 
-## 📦 Installation
+- **State Management**
+  - Zustand store with persistence
+  - Centralized API service layer
+  - Type-safe TypeScript interfaces
+  - Global notification system
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd cursorweb
-```
+- **API Integration**
+  - Complete API service layer
+  - Error handling and validation
+  - Automatic token injection
+  - Response interceptors
 
-2. Install dependencies:
-```bash
-npm install
-```
+### 🚧 In Progress
+- User registration
+- Email verification
+- Password reset
+- Lottery game interface
+- Wallet management
+- Game history
 
-3. Start the development server:
-```bash
-npm run dev
-```
+## Getting Started
 
-4. Open your browser and navigate to `http://localhost:5173`
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Running Node.js backend server (port 3001)
 
-## 🏗️ Project Structure
+### Installation
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+## API Integration
+
+### Authentication Flow
+1. User enters email/password
+2. API call to `/user/public/login` with app key
+3. On success:
+   - Store token and user data in localStorage
+   - Update Zustand store
+   - Redirect based on user verification status
+4. On error:
+   - Display error notification
+   - Show validation errors
+
+### Key Components
+
+#### Login Page (`/src/pages/Login.tsx`)
+- Modern Material-UI design
+- Form validation
+- API integration with error handling
+- Automatic redirects based on user status
+
+#### API Service (`/src/services/api.ts`)
+- Centralized API calls
+- Automatic token management
+- Error handling utilities
+- Type-safe responses
+
+#### Store (`/src/store/useStore.ts`)
+- Zustand with persistence
+- User authentication state
+- Global notifications
+- Loading states
+
+## Project Structure
 
 ```
 src/
 ├── components/          # Reusable UI components
-│   ├── Header.tsx      # Navigation header with responsive design
-│   └── Footer.tsx      # Application footer
+│   ├── Notification.tsx # Global notification system
+│   └── ...
 ├── pages/              # Page components
-│   ├── Home.tsx        # Home page with counter and API demo
-│   └── About.tsx       # About page with project information
-├── store/              # State management
-│   └── useStore.ts     # Zustand store with counter and API state
-├── types/              # TypeScript type definitions
-├── App.tsx             # Main application component
-├── main.tsx            # Application entry point
-├── theme.ts            # Material-UI theme configuration
-└── index.css           # Global styles with Tailwind CSS
+│   ├── Login.tsx       # Login page with API integration
+│   ├── Dashboard.tsx   # User dashboard
+│   └── ...
+├── services/           # API and external services
+│   └── api.ts         # Centralized API service
+├── store/             # State management
+│   └── useStore.ts    # Zustand store
+├── types/             # TypeScript type definitions
+│   └── index.ts       # All application types
+├── config/            # Configuration
+│   └── constants.ts   # API URLs, constants
+└── App.tsx            # Main app component
 ```
 
-## 🎯 Key Features Demonstrated
+## API Endpoints
 
-### State Management (Zustand)
-- Counter functionality with increment, decrement, and reset
-- State persistence across component re-renders
-- Accessible from anywhere in the application
+### Authentication
+- `POST /user/public/login` - User login
+- `POST /user/public/create` - User registration
+- `POST /user/public/createAgent` - Agent registration
+- `POST /user/verifyEmailOtp` - Email verification
+- `POST /user/public/forgotPassword` - Forgot password
+- `POST /user/public/resetPassword` - Reset password
 
-### API Integration
-- GitHub API integration using fetch
-- Loading states and error handling
-- Data display with Material-UI components
+### User Management
+- `GET /user/getUserInfo` - Get user information
+- `PUT /user/updateProfile` - Update user profile
+- `POST /user/changePassword` - Change password
 
-### Routing
-- React Router DOM setup
-- Navigation between Home and About pages
-- Responsive navigation with mobile drawer
+### Game Settings
+- `GET /gameSettings/getBasicGameSettings` - Get basic settings
+- `GET /lotteryGameSetting/getAllLotteryGameSettings` - Get game settings
+- `GET /lotteryGamePermission/getAllLotteryGamePermissions` - Get permissions
+- `GET /lotteryGameBoard/getAllLotteryGameBoards` - Get game boards
 
-### UI/UX
-- Material-UI theme with custom colors and typography
-- Responsive design that works on all devices
-- Modern card-based layout
-- Hover effects and transitions
+## Environment Configuration
 
-## 🛠️ Available Scripts
+Update `src/config/constants.ts` for your environment:
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## 🎨 Customization
-
-### Theme
-The Material-UI theme can be customized in `src/theme.ts`:
-- Colors (primary, secondary, background)
-- Typography settings
-- Component style overrides
-
-### Styling
-The application uses both Material-UI and Tailwind CSS:
-- Material-UI for component styling and theming
-- Tailwind CSS for utility classes and custom styling
-
-### State Management
-Add new state slices to `src/store/useStore.ts`:
 ```typescript
-interface NewState {
-  // your state properties
-  newAction: () => void;
-}
-
-// Add to the store
-export const useStore = create<AppState & NewState>((set) => ({
-  // existing state
-  // new state
-}));
+export const API_URL = 'http://localhost:3001/api'; // Your backend URL
+export const APP_KEY = 'your-app-key'; // Your application key
 ```
 
-## 📱 Responsive Design
+## Development
 
-The application is fully responsive with:
-- Mobile-first design approach
-- Responsive navigation with hamburger menu
-- Adaptive grid layouts
-- Touch-friendly interface
-
-## 🔧 Development
+### Adding New API Endpoints
+1. Add the method to `src/services/api.ts`
+2. Add corresponding types to `src/types/index.ts`
+3. Use in components with proper error handling
 
 ### Adding New Pages
-1. Create a new component in `src/pages/`
+1. Create the page component in `src/pages/`
 2. Add the route to `src/App.tsx`
-3. Update navigation in `src/components/Header.tsx`
+3. Update navigation as needed
 
-### Adding New Components
-1. Create the component in `src/components/`
-2. Import and use in your pages
-3. Follow the existing component patterns
+## Contributing
 
-### API Integration
-1. Add API calls to the Zustand store
-2. Handle loading and error states
-3. Use Material-UI components for data display
+1. Follow TypeScript best practices
+2. Use the existing API service pattern
+3. Add proper error handling
+4. Update types when adding new features
+5. Test with the backend server
 
-## 🚀 Deployment
+## License
 
-The application is ready for deployment to any static hosting service:
-
-1. Build the application:
-```bash
-npm run build
-```
-
-2. Deploy the `dist` folder to your hosting service
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📞 Support
-
-If you have any questions or need help, please open an issue on GitHub.
+This project is part of the WahLotto lottery application.

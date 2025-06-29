@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -29,26 +30,50 @@ import {
   Apple,
 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import apiService from '../services/api';
+import type { LoginRequest } from '../types';
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Store actions
+  const { 
+    setUser, 
+    setToken, 
+    setAuthenticated, 
+    setLoading, 
+    addNotification,
+    isAuthenticated 
+  } = useStore();
+
+  const [formData, setFormData] = useState<LoginRequest>({
     email: '',
     password: '',
-    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'error'>('idle');
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+    // Clear submit status when user starts typing
+    if (submitStatus === 'error') {
+      setSubmitStatus('idle');
     }
   };
 
@@ -63,6 +88,8 @@ const Login: React.FC = () => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -76,34 +103,59 @@ const Login: React.FC = () => {
 
     setIsLoading(true);
     setSubmitStatus('idle');
+    setLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await loginAPI(formData);
+      const response = await apiService.login(formData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Store authentication data
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
       
-      // TODO: Handle successful login
-      // Store token, redirect to dashboard, etc.
-      console.log('Login successful:', formData);
+      // Update store
+      setUser(response.user);
+      setToken(response.token);
+      setAuthenticated(true);
       
+      // Show success notification
+      addNotification({
+        message: 'Login successful! Welcome back.',
+        type: 'success',
+      });
+
+      // Redirect based on user verification status
+      if (!response.user.isEmailVerified) {
+        navigate('/verify-email');
+      } else if (!response.user.isChangedDefaultPassword) {
+        navigate('/change-password');
+      } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
+        navigate('/verify-agent');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       setSubmitStatus('error');
+      const errorMessage = apiService.handleError(error);
+      addNotification({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('Login error:', error);
     } finally {
       setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleSocialLogin = (provider: string) => {
-    // TODO: Implement social login
-    console.log(`Logging in with ${provider}`);
+    addNotification({
+      message: `${provider} login is not available yet. Please use email/password login.`,
+      type: 'info',
+    });
   };
 
   const handleForgotPassword = () => {
-    // TODO: Implement forgot password flow
-    console.log('Forgot password clicked');
+    navigate('/forgot-password');
   };
 
   return (
@@ -125,7 +177,7 @@ const Login: React.FC = () => {
           Welcome Back
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Sign in to your GulfLotto account
+          Sign in to your WahLotto account
         </Typography>
       </Box>
 
@@ -192,9 +244,8 @@ const Login: React.FC = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={formData.rememberMe}
-                    onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
                     color="primary"
+                    disabled
                   />
                 }
                 label="Remember me"

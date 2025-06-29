@@ -1,21 +1,37 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { theme } from './theme';
+import { useStore } from './store/useStore';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import About from './pages/About';
-import Prizes from './pages/Prizes';
-import Results from './pages/Results';
-import HowToPlay from './pages/HowToPlay';
-import Contact from './pages/Contact';
-import Help from './pages/Help';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
+import Notification from './components/Notification';
+import AppRoutes from './routes';
+import type { User } from './types';
 
 function App() {
+  const { setUser, setToken, setAuthenticated } = useStore();
+
+  // Initialize app state from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
+    if (token && userStr) {
+      try {
+        const user: User = JSON.parse(userStr);
+        setUser(user);
+        setToken(token);
+        setAuthenticated(true);
+      } catch (error) {
+        console.error('Failed to parse user data from localStorage:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, [setUser, setToken, setAuthenticated]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -29,19 +45,10 @@ function App() {
         >
           <Header />
           <Box component="main" sx={{ flexGrow: 1 }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/prizes" element={<Prizes />} />
-              <Route path="/results" element={<Results />} />
-              <Route path="/how-to-play" element={<HowToPlay />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-            </Routes>
+            <AppRoutes />
           </Box>
           <Footer />
+          <Notification />
         </Box>
       </Router>
     </ThemeProvider>

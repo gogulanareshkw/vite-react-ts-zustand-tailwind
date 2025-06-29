@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -8,13 +9,6 @@ import {
   TextField,
   Button,
   Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   FormControlLabel,
   Checkbox,
   Alert,
@@ -27,162 +21,237 @@ import {
 import {
   Visibility,
   VisibilityOff,
-  Person,
   Email,
   Phone,
-  Security,
+  GroupAdd,
+  Person,
   CheckCircle,
-  ArrowForward,
-  ArrowBack,
+  Security,
 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import apiService from '../services/api';
+import type { SignUpRequest } from '../types';
 
 const SignUp: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    dateOfBirth: '',
-    gender: '',
-    address: '',
-    city: '',
-    country: '',
-    postalCode: '',
-    acceptTerms: false,
-    acceptMarketing: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const steps = ['Personal Information', 'Account Details', 'Verification'];
+  // Store actions
+  const { 
+    setUser, 
+    setToken, 
+    setAuthenticated, 
+    setLoading, 
+    addNotification,
+    isAuthenticated 
+  } = useStore();
 
-  const handleNext = () => {
-    if (validateStep(activeStep)) {
-      setActiveStep((prevStep) => prevStep + 1);
+  const [formData, setFormData] = useState<SignUpRequest>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    referredBy: searchParams.get('ref') || '',
+  });
+  const [age, setAge] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [checkedRefCode, setCheckedRefCode] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'error'>('idle');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
     }
-  };
+  }, [isAuthenticated, navigate]);
 
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    // Clear submit status when user starts typing
+    if (submitStatus === 'error') {
+      setSubmitStatus('idle');
+    }
   };
 
-  const validateStep = (step: number): boolean => {
+  const handleAgeChange = (value: string) => {
+    setAge(value);
+    if (errors.age) {
+      setErrors(prev => ({ ...prev, age: '' }));
+    }
+  };
+
+  const handleCheckboxChange = () => {
+    setCheckedRefCode(!checkedRefCode);
+    if (checkedRefCode) {
+      setFormData(prev => ({ ...prev, referredBy: searchParams.get('ref') || '' }));
+    } else {
+      setFormData(prev => ({ ...prev, referredBy: '1411851980' }));
+    }
+  };
+
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    switch (step) {
-      case 0:
-        if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-        if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-        if (!formData.email.trim()) {
-          newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-          newErrors.email = 'Please enter a valid email';
-        }
-        if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-        if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-        if (!formData.gender) newErrors.gender = 'Gender is required';
-        break;
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
 
-      case 1:
-        if (!formData.password) {
-          newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-          newErrors.password = 'Password must be at least 8 characters';
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-          newErrors.password = 'Password must contain uppercase, lowercase, and number';
-        }
-        if (!formData.confirmPassword) {
-          newErrors.confirmPassword = 'Please confirm your password';
-        } else if (formData.password !== formData.confirmPassword) {
-          newErrors.confirmPassword = 'Passwords do not match';
-        }
-        if (!formData.address.trim()) newErrors.address = 'Address is required';
-        if (!formData.city.trim()) newErrors.city = 'City is required';
-        if (!formData.country.trim()) newErrors.country = 'Country is required';
-        break;
+    // Phone validation
+    if (!formData.phone?.trim()) {
+      newErrors.phone = 'Phone number is required';
+    }
 
-      case 2:
-        if (!formData.acceptTerms) newErrors.acceptTerms = 'You must accept the terms and conditions';
-        break;
+    // Age validation
+    if (!age || Number(age) < 18) {
+      newErrors.age = 'You must be at least 18 years old to use this application';
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateStep(activeStep)) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
 
     setIsLoading(true);
     setSubmitStatus('idle');
+    setLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await signUpAPI(formData);
+      // Get user location if available
+      let latitude = 0;
+      let longitude = 0;
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch (error) {
+          console.log('Location access denied or unavailable');
+        }
+      }
+
+      const signUpData = {
+        ...formData,
+        latitude,
+        longitude,
+      };
+
+      const response = await apiService.signUp(signUpData);
       
-      setSubmitStatus('success');
-      // TODO: Handle successful registration
-      // Redirect to login or verification page
-      
+      if (response.success) {
+        // Store authentication data
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        // Update store
+        setUser(response.user);
+        setToken(response.token);
+        setAuthenticated(true);
+        
+        // Show success notification
+        addNotification({
+          message: 'Account created successfully! Welcome to WahLotto.',
+          type: 'success',
+        });
+
+        // Redirect based on user verification status
+        if (!response.user.isEmailVerified) {
+          navigate('/verify-email');
+        } else if (!response.user.isChangedDefaultPassword) {
+          navigate('/change-password');
+        } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
+          navigate('/verify-agent');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        setSubmitStatus('error');
+        addNotification({
+          message: 'Registration failed. Please try again.',
+          type: 'error',
+        });
+      }
     } catch (error) {
       setSubmitStatus('error');
+      const errorMessage = apiService.handleError(error);
+      addNotification({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Personal Information
-            </Typography>
-            
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-              <TextField
-                label="First Name"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                error={!!errors.firstName}
-                helperText={errors.firstName}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Last Name"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                error={!!errors.lastName}
-                helperText={errors.lastName}
-                fullWidth
-                required
-              />
-            </Box>
+  return (
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography 
+          variant={isMobile ? "h3" : "h2"} 
+          component="h1" 
+          gutterBottom
+          sx={{ 
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #667eea, #764ba2)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 2
+          }}
+        >
+          Join WahLotto
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Create your account and start playing
+        </Typography>
+      </Box>
 
+      <Card elevation={4} sx={{ maxWidth: 500, mx: 'auto' }}>
+        <CardContent sx={{ p: 4 }}>
+          {/* Error Message */}
+          {submitStatus === 'error' && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              Registration failed. Please check your information and try again.
+            </Alert>
+          )}
+
+          {/* Sign Up Form */}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
             <TextField
               label="Email Address"
               type="email"
@@ -192,6 +261,14 @@ const SignUp: React.FC = () => {
               helperText={errors.email}
               fullWidth
               required
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email color="action" />
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <TextField
@@ -202,42 +279,34 @@ const SignUp: React.FC = () => {
               helperText={errors.phone}
               fullWidth
               required
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Phone color="action" />
+                  </InputAdornment>
+                ),
+              }}
             />
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-              <TextField
-                label="Date of Birth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                error={!!errors.dateOfBirth}
-                helperText={errors.dateOfBirth}
-                fullWidth
-                required
-                InputLabelProps={{ shrink: true }}
-              />
-              <FormControl fullWidth error={!!errors.gender} required>
-                <InputLabel>Gender</InputLabel>
-                <Select
-                  value={formData.gender}
-                  onChange={(e) => handleInputChange('gender', e.target.value)}
-                  label="Gender"
-                >
-                  <MenuItem value="male">Male</MenuItem>
-                  <MenuItem value="female">Female</MenuItem>
-                  <MenuItem value="other">Other</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        );
-
-      case 1:
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Account Details
-            </Typography>
+            <TextField
+              label="Age"
+              type="number"
+              value={age}
+              onChange={(e) => handleAgeChange(e.target.value)}
+              error={!!errors.age}
+              helperText={errors.age}
+              fullWidth
+              required
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Person color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             <TextField
               label="Password"
@@ -245,10 +314,16 @@ const SignUp: React.FC = () => {
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               error={!!errors.password}
-              helperText={errors.password || 'Must be at least 8 characters with uppercase, lowercase, and number'}
+              helperText={errors.password}
               fullWidth
               required
+              sx={{ mb: 3 }}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Security color="action" />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -271,7 +346,13 @@ const SignUp: React.FC = () => {
               helperText={errors.confirmPassword}
               fullWidth
               required
+              sx={{ mb: 3 }}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Security color="action" />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -286,218 +367,110 @@ const SignUp: React.FC = () => {
             />
 
             <TextField
-              label="Address"
-              value={formData.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              error={!!errors.address}
-              helperText={errors.address}
+              label="Referral Code (Optional)"
+              value={formData.referredBy}
+              onChange={(e) => handleInputChange('referredBy', e.target.value)}
               fullWidth
-              required
-              multiline
-              rows={2}
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <GroupAdd color="action" />
+                  </InputAdornment>
+                ),
+              }}
             />
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-              <TextField
-                label="City"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                error={!!errors.city}
-                helperText={errors.city}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Country"
-                value={formData.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-                error={!!errors.country}
-                helperText={errors.country}
-                fullWidth
-                required
-              />
-            </Box>
-
-            <TextField
-              label="Postal Code"
-              value={formData.postalCode}
-              onChange={(e) => handleInputChange('postalCode', e.target.value)}
-              fullWidth
-            />
-          </Box>
-        );
-
-      case 2:
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Terms & Verification
-            </Typography>
 
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formData.acceptTerms}
-                  onChange={(e) => handleInputChange('acceptTerms', e.target.checked)}
+                  checked={checkedRefCode}
+                  onChange={handleCheckboxChange}
                   color="primary"
                 />
               }
-              label={
-                <Typography variant="body2">
-                  I accept the{' '}
-                  <Link to="/terms" style={{ color: theme.palette.primary.main }}>
-                    Terms and Conditions
-                  </Link>{' '}
-                  and{' '}
-                  <Link to="/privacy" style={{ color: theme.palette.primary.main }}>
-                    Privacy Policy
-                  </Link>
-                </Typography>
-              }
-            />
-            {errors.acceptTerms && (
-              <Typography variant="caption" color="error">
-                {errors.acceptTerms}
-              </Typography>
-            )}
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.acceptMarketing}
-                  onChange={(e) => handleInputChange('acceptMarketing', e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="I would like to receive marketing communications and updates"
+              label="Don't have Referral Code"
+              sx={{ mb: 3 }}
             />
 
-            <Alert severity="info">
-              <Typography variant="body2">
-                By creating an account, you confirm that you are at least 18 years old and 
-                eligible to participate in lottery games according to your local regulations.
-              </Typography>
-            </Alert>
-          </Box>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography 
-          variant={isMobile ? "h3" : "h2"} 
-          component="h1" 
-          gutterBottom
-          sx={{ 
-            fontWeight: 'bold',
-            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2
-          }}
-        >
-          Create Account
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Join GulfLotto and start your winning journey today
-        </Typography>
-      </Box>
-
-      <Card elevation={4} sx={{ maxWidth: 600, mx: 'auto' }}>
-        <CardContent sx={{ p: 4 }}>
-          {/* Stepper */}
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
-          {/* Status Messages */}
-          {submitStatus === 'success' && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              Account created successfully! Please check your email for verification.
-            </Alert>
-          )}
-
-          {submitStatus === 'error' && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              Registration failed. Please try again or contact support.
-            </Alert>
-          )}
-
-          {/* Step Content */}
-          <Box sx={{ mb: 4 }}>
-            {renderStepContent(activeStep)}
-          </Box>
-
-          {/* Navigation Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Button
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              startIcon={<ArrowBack />}
+              type="submit"
+              variant="contained"
+              fullWidth
+              size="large"
+              disabled={isLoading}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                py: 1.5,
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
+              }}
             >
-              Back
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
+          </Box>
 
-            <Box>
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                  endIcon={<CheckCircle />}
-                  sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    },
-                  }}
-                >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  endIcon={<ArrowForward />}
-                  sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    },
-                  }}
-                >
-                  Next
-                </Button>
-              )}
-            </Box>
+          {/* Divider */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Divider sx={{ flex: 1 }} />
+            <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
+              OR
+            </Typography>
+            <Divider sx={{ flex: 1 }} />
+          </Box>
+
+          {/* Sign In Link */}
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: theme.palette.primary.main, fontWeight: 'bold' }}>
+                Sign In
+              </Link>
+            </Typography>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Login Link */}
-      <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="body1" color="text.secondary">
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: theme.palette.primary.main, fontWeight: 'bold' }}>
-            Sign In
-          </Link>
+      {/* Benefits Section */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold', mb: 3 }}>
+          Why Choose WahLotto?
         </Typography>
+        
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 3 }}>
+          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Secure & Safe
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Bank-level security to protect your account and transactions
+            </Typography>
+          </Paper>
+
+          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Instant Results
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Get your lottery results instantly with real-time updates
+            </Typography>
+          </Paper>
+
+          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+            <CheckCircle sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Referral Rewards
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Earn bonuses by referring friends and family
+            </Typography>
+          </Paper>
+        </Box>
       </Box>
     </Container>
   );

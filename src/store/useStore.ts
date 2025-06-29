@@ -1,40 +1,204 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { 
+  AppState, 
+  User, 
+  GameSetting, 
+  LotteryGameSetting, 
+  LotteryGamePermission, 
+  LotteryGameBoard, 
+  LotteryGameResult, 
+  LotteryGamePlay, 
+  Recharge, 
+  Withdraw, 
+  BankCard, 
+  Notification, 
+  ModalState 
+} from '../types';
 
-interface CounterState {
-  count: number;
-  increment: () => void;
-  decrement: () => void;
-  reset: () => void;
+interface LotteryStore extends AppState {
+  // Auth Actions
+  setUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
+  setAuthenticated: (isAuthenticated: boolean) => void;
+  logout: () => void;
+  
+  // Loading Actions
+  setLoading: (isLoading: boolean) => void;
+  
+  // Game Data Actions
+  setGameSettings: (settings: GameSetting | null) => void;
+  setLotteryGameSettings: (settings: LotteryGameSetting[]) => void;
+  setLotteryGamePermissions: (permissions: LotteryGamePermission[]) => void;
+  setLotteryGameBoards: (boards: LotteryGameBoard[]) => void;
+  setLotteryGameResults: (results: LotteryGameResult[]) => void;
+  
+  // User Data Actions
+  setUserGameHistory: (history: LotteryGamePlay[]) => void;
+  setUserRecharges: (recharges: Recharge[]) => void;
+  setUserWithdrawals: (withdrawals: Withdraw[]) => void;
+  setUserBankCards: (cards: BankCard[]) => void;
+  
+  // UI Actions
+  addNotification: (notification: Omit<Notification, 'id'>) => void;
+  removeNotification: (id: string) => void;
+  clearNotifications: () => void;
+  openModal: (type: string, data?: any) => void;
+  closeModal: () => void;
+  
+  // Utility Actions
+  updateUserBalance: (amount: number) => void;
+
+  // Utility getters with defaults
+  getUserBalance: () => number;
+  getUserReferralCount: () => number;
+  getUserDisplayName: () => string;
 }
 
-interface ApiState {
-  data: any;
-  loading: boolean;
-  error: string | null;
-  fetchData: () => Promise<void>;
-}
+export const useStore = create<LotteryStore>()(
+  persist(
+    (set, get) => ({
+      // Initial State
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+      
+      gameSettings: null,
+      lotteryGameSettings: [],
+      lotteryGamePermissions: [],
+      lotteryGameBoards: [],
+      lotteryGameResults: [],
+      
+      userGameHistory: [],
+      userRecharges: [],
+      userWithdrawals: [],
+      userBankCards: [],
+      
+      notifications: [],
+      modals: {
+        isOpen: false,
+        type: '',
+        data: null,
+      },
 
-interface AppState extends CounterState, ApiState {}
+      // Auth Actions
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ token }),
+      setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+      logout: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          userGameHistory: [],
+          userRecharges: [],
+          userWithdrawals: [],
+          userBankCards: [],
+        });
+      },
 
-export const useStore = create<AppState>((set, get) => ({
-  // Counter state
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
-  reset: () => set({ count: 0 }),
+      // Loading Actions
+      setLoading: (isLoading) => set({ isLoading }),
 
-  // API state
-  data: null,
-  loading: false,
-  error: null,
-  fetchData: async () => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch('https://api.github.com/users/octocat');
-      const data = await response.json();
-      set({ data, loading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch data', loading: false });
+      // Game Data Actions
+      setGameSettings: (settings) => set({ gameSettings: settings }),
+      setLotteryGameSettings: (settings) => set({ lotteryGameSettings: settings }),
+      setLotteryGamePermissions: (permissions) => set({ lotteryGamePermissions: permissions }),
+      setLotteryGameBoards: (boards) => set({ lotteryGameBoards: boards }),
+      setLotteryGameResults: (results) => set({ lotteryGameResults: results }),
+
+      // User Data Actions
+      setUserGameHistory: (history) => set({ userGameHistory: history }),
+      setUserRecharges: (recharges) => set({ userRecharges: recharges }),
+      setUserWithdrawals: (withdrawals) => set({ userWithdrawals: withdrawals }),
+      setUserBankCards: (cards) => set({ userBankCards: cards }),
+
+      // UI Actions
+      addNotification: (notification) => {
+        const id = Date.now().toString();
+        const duration = notification.duration ?? 5000;
+        const newNotification: Notification = {
+          id,
+          ...notification,
+          duration,
+        };
+        
+        set((state) => ({
+          notifications: [...state.notifications, newNotification],
+        }));
+
+        // Auto remove notification after duration
+        if (duration > 0) {
+          setTimeout(() => {
+            get().removeNotification(id);
+          }, duration);
+        }
+      },
+
+      removeNotification: (id) =>
+        set((state) => ({
+          notifications: state.notifications.filter((n) => n.id !== id),
+        })),
+
+      clearNotifications: () => set({ notifications: [] }),
+
+      openModal: (type, data) =>
+        set({
+          modals: {
+            isOpen: true,
+            type,
+            data,
+          },
+        }),
+
+      closeModal: () =>
+        set({
+          modals: {
+            isOpen: false,
+            type: '',
+            data: null,
+          },
+        }),
+
+      // Utility Actions
+      updateUserBalance: (amount) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, availableAmount: amount } : null,
+        })),
+
+      // Utility getters with defaults
+      getUserBalance: () => {
+        const state = get();
+        return state.user?.availableAmount || 0;
+      },
+
+      getUserReferralCount: () => {
+        const state = get();
+        return state.user?.referralCount || 0;
+      },
+
+      getUserDisplayName: () => {
+        const state = get();
+        if (!state.user) return '';
+        return state.user.firstName && state.user.lastName 
+          ? `${state.user.firstName} ${state.user.lastName}`
+          : state.user.email;
+      },
+    }),
+    {
+      name: 'lottery-storage',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+        gameSettings: state.gameSettings,
+        lotteryGameSettings: state.lotteryGameSettings,
+        lotteryGamePermissions: state.lotteryGamePermissions,
+        lotteryGameBoards: state.lotteryGameBoards,
+      }),
     }
-  },
-})); 
+  )
+); 
