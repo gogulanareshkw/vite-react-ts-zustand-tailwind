@@ -1,312 +1,395 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
   Box,
   Card,
   CardContent,
-  Paper,
+  Button,
+  Alert,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  Button,
-  useTheme,
-  useMediaQuery,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Tabs,
   Tab,
 } from '@mui/material';
 import {
   EmojiEvents,
-  CalendarToday,
+  Casino,
+  ArrowBack,
+  Search,
+  FilterList,
   TrendingUp,
-  History,
 } from '@mui/icons-material';
+import { useStore } from '../store/useStore';
+import apiService from '../services/api';
+import type { LotteryGameResult, WinnerDetail } from '../types';
 
 const Results: React.FC = () => {
+  const navigate = useNavigate();
+  const { addNotification } = useStore();
+
+  const [results, setResults] = useState<LotteryGameResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedGameType, setSelectedGameType] = useState('all');
   const [selectedTab, setSelectedTab] = useState(0);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [gameTypes, setGameTypes] = useState<string[]>([]);
 
-  // Sample results data
-  const recentResults = [
-    {
-      date: '2024-01-16',
-      drawNumber: '001/2024',
-      numbers: ['123456', '234567', '345678', '456789', '567890'],
-      status: 'Completed',
-    },
-    {
-      date: '2024-01-01',
-      drawNumber: '002/2024',
-      numbers: ['111111', '222222', '333333', '444444', '555555'],
-      status: 'Completed',
-    },
-    {
-      date: '2024-12-16',
-      drawNumber: '003/2023',
-      numbers: ['999999', '888888', '777777', '666666', '555555'],
-      status: 'Completed',
-    },
-  ];
+  useEffect(() => {
+    loadResults();
+    loadGameTypes();
+  }, []);
 
-  const upcomingDraws = [
-    {
-      date: '2024-02-01',
-      drawNumber: '004/2024',
-      time: '14:30',
-      status: 'Upcoming',
-    },
-    {
-      date: '2024-02-16',
-      drawNumber: '005/2024',
-      time: '14:30',
-      status: 'Upcoming',
-    },
-  ];
+  const loadResults = async () => {
+    setIsLoading(true);
+    try {
+      // Load results for all game types (using type 1 as default)
+      const response = await apiService.getLotteryGameResults(1);
+      if (response.success) {
+        setResults(response.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to load results:', error);
+      addNotification({
+        message: 'Failed to load lottery results',
+        type: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
+  const loadGameTypes = async () => {
+    try {
+      const response = await apiService.getLotteryGameBoards();
+      if (response.success) {
+        const types = [...new Set(response.data?.map((game: any) => game.lotteryGameType) || [])];
+        setGameTypes(types.map(String));
+      }
+    } catch (error) {
+      console.error('Failed to load game types:', error);
+    }
+  };
+
+  const filteredResults = results.filter(result => {
+    if (selectedGameType === 'all') return true;
+    return result.lotteryGameType.toString() === selectedGameType;
+  });
+
+  const recentResults = filteredResults.slice(0, 10);
+  const topWinners = filteredResults
+    .flatMap(result => result.winners?.details || [])
+    .sort((a, b) => b.finalWinningAmount - a.finalWinningAmount)
+    .slice(0, 10);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'success';
+      case 'pending': return 'warning';
+      case 'cancelled': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1: return '🥇';
+      case 2: return '🥈';
+      case 3: return '🥉';
+      default: return `${rank}`;
+    }
   };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header Section */}
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography 
-          variant={isMobile ? "h3" : "h2"} 
-          component="h1" 
-          gutterBottom
-          sx={{ 
-            fontWeight: 'bold',
-            background: 'linear-gradient(45deg, #667eea, #764ba2)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2
-          }}
-        >
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Lottery Results
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-          Check the latest lottery results and upcoming draws
+        <Typography variant="h6" color="text.secondary">
+          Check the latest lottery results and winners
         </Typography>
       </Box>
 
-      {/* Latest Result Highlight */}
-      <Card elevation={4} sx={{ mb: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-        <CardContent sx={{ p: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <EmojiEvents sx={{ fontSize: 40, mr: 2 }} />
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                Latest Draw Result
-              </Typography>
-              <Typography variant="body1">
-                January 16, 2024 • Draw #001/2024
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, 1fr)' }, gap: 2 }}>
-            {['123456', '234567', '345678', '456789', '567890'].map((number, index) => (
-              <Box
-                key={index}
-                sx={{
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: 2,
-                  p: 2,
-                  textAlign: 'center',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  {number}
-                </Typography>
-                <Typography variant="caption">
-                  Prize {index + 1}
-                </Typography>
-              </Box>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to Dashboard
+        </Button>
+
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Filter by Game Type</InputLabel>
+          <Select
+            value={selectedGameType}
+            onChange={(e) => setSelectedGameType(e.target.value)}
+            label="Filter by Game Type"
+          >
+            <MenuItem value="all">All Games</MenuItem>
+            {gameTypes.map((type) => (
+              <MenuItem key={type} value={type}>
+                Game Type {type}
+              </MenuItem>
             ))}
-          </Box>
-        </CardContent>
-      </Card>
+          </Select>
+        </FormControl>
+      </Box>
 
-      {/* Tabs for Results and Upcoming */}
-      <Paper elevation={3} sx={{ mb: 4 }}>
-        <Tabs value={selectedTab} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tab 
-            icon={<History />} 
-            label="Recent Results" 
-            iconPosition="start"
-            sx={{ fontWeight: 'bold' }}
-          />
-          <Tab 
-            icon={<CalendarToday />} 
-            label="Upcoming Draws" 
-            iconPosition="start"
-            sx={{ fontWeight: 'bold' }}
-          />
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={selectedTab} onChange={(e, newValue) => setSelectedTab(newValue)}>
+          <Tab label="Recent Results" />
+          <Tab label="Top Winners" />
         </Tabs>
+      </Box>
 
-        {/* Recent Results Tab */}
-        {selectedTab === 0 && (
-          <Box sx={{ p: 3 }}>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Draw Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Draw Number</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Winning Numbers</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentResults.map((result, index) => (
-                    <TableRow key={index} hover>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <CalendarToday sx={{ mr: 1, fontSize: 16 }} />
-                          {new Date(result.date).toLocaleDateString()}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {result.drawNumber}
+      {selectedTab === 0 && (
+        <Box>
+          {recentResults.length === 0 ? (
+            <Card elevation={4}>
+              <CardContent sx={{ p: 6, textAlign: 'center' }}>
+                <EmojiEvents sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  No Results Found
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  No lottery results available for the selected criteria.
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {recentResults.map((result) => (
+                <Card elevation={4} key={result._id}>
+                  <CardContent sx={{ p: 4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                      <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+                          Game Type {result.lotteryGameType}
                         </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {result.numbers.slice(0, 3).map((num, idx) => (
-                            <Chip 
-                              key={idx} 
-                              label={num} 
-                              size="small" 
-                              color="primary"
-                              variant="outlined"
-                            />
-                          ))}
-                          {result.numbers.length > 3 && (
-                            <Chip 
-                              label={`+${result.numbers.length - 3} more`} 
-                              size="small" 
-                              color="secondary"
-                            />
-                          )}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={result.status} 
-                          color="success" 
-                          size="small"
-                          icon={<EmojiEvents />}
+                        <Typography variant="body2" color="text.secondary">
+                          Game Number: {result.gameNumber} • Draw Date: {formatDate(result.drawDate)}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label="Completed"
+                        color="success"
+                        size="small"
+                      />
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        Winning Result
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Chip
+                          label={result.result}
+                          color="primary"
+                          variant="outlined"
+                          sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="outlined" size="small">
-                          View Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
+                      </Box>
+                    </Box>
 
-        {/* Upcoming Draws Tab */}
-        {selectedTab === 1 && (
-          <Box sx={{ p: 3 }}>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Draw Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Draw Number</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {upcomingDraws.map((draw, index) => (
-                    <TableRow key={index} hover>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <CalendarToday sx={{ mr: 1, fontSize: 16 }} />
-                          {new Date(draw.date).toLocaleDateString()}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        Game Statistics
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Game Number
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            {result.gameNumber}
+                          </Typography>
                         </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {draw.drawNumber}
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Draw Date
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            {formatDate(result.drawDate)}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Winners
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            {result.winners?.details?.length || 0}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    {result.winners?.details && result.winners.details.length > 0 && (
+                      <Box>
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                          Winners
                         </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {draw.time}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={draw.status} 
-                          color="warning" 
-                          size="small"
-                          icon={<TrendingUp />}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="contained" size="small" color="primary">
-                          Set Reminder
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
-      </Paper>
+                        <TableContainer component={Paper} variant="outlined">
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Rank</TableCell>
+                                <TableCell>Ticket Number</TableCell>
+                                <TableCell>Gross Amount</TableCell>
+                                <TableCell>Commission</TableCell>
+                                <TableCell align="right">Final Amount</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {result.winners.details.slice(0, 5).map((winner, index) => (
+                                <TableRow key={winner._id}>
+                                  <TableCell>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <span style={{ fontSize: '1.2rem' }}>
+                                        {getRankIcon(index + 1)}
+                                      </span>
+                                      <Typography variant="body2">
+                                        {index + 1}
+                                      </Typography>
+                                    </Box>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                      #{winner.ticketNumber}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      ₹{winner.grossWinningAmount?.toLocaleString()}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" color="text.secondary">
+                                      ₹{winner.commission?.toLocaleString()}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                                      ₹{winner.finalWinningAmount?.toLocaleString()}
+                                    </Typography>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        {result.winners.details.length > 5 && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+                            And {result.winners.details.length - 5} more winners...
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          )}
+        </Box>
+      )}
 
-      {/* Statistics */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
-        <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-          <EmojiEvents sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-            24
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Draws This Year
-          </Typography>
-        </Card>
+      {selectedTab === 1 && (
+        <Box>
+          <Card elevation={4}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                Top Winners
+              </Typography>
 
-        <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-          <TrendingUp sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-          <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-            1,250+
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Total Winners
-          </Typography>
-        </Card>
+              {topWinners.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" textAlign="center">
+                  No winners found for the selected criteria.
+                </Typography>
+              ) : (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Rank</TableCell>
+                        <TableCell>Ticket Number</TableCell>
+                        <TableCell>Gross Amount</TableCell>
+                        <TableCell>Commission</TableCell>
+                        <TableCell align="right">Final Amount</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {topWinners.map((winner, index) => (
+                        <TableRow key={winner._id}>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <span style={{ fontSize: '1.2rem' }}>
+                                {getRankIcon(index + 1)}
+                              </span>
+                              <Typography variant="body2">
+                                {index + 1}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                              #{winner.ticketNumber}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              ₹{winner.grossWinningAmount?.toLocaleString()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              ₹{winner.commission?.toLocaleString()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                              ₹{winner.finalWinningAmount?.toLocaleString()}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+      )}
 
-        <Card elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-          <History sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
-          <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-            150+
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Years of History
-          </Typography>
-        </Card>
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/lottery-game')}
+        >
+          Play Lottery Games
+        </Button>
       </Box>
     </Container>
   );

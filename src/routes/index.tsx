@@ -12,6 +12,27 @@ import SignUp from '../pages/SignUp';
 import VerifyEmail from '../pages/VerifyEmail';
 import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
+import ChangePassword from '../pages/ChangePassword';
+import RechargePage from '../pages/RechargePage';
+import WithDrawPage from '../pages/WithDrawPage';
+import BankCards from '../pages/BankCards';
+import LotteryGame from '../pages/LotteryGame';
+import Results from '../pages/Results';
+import ForgotPassword from '../pages/ForgotPassword';
+import ResetPassword from '../pages/ResetPassword';
+import HowToPlay from '../pages/HowToPlay';
+import Prizes from '../pages/Prizes';
+import RulesConditions from '../pages/RulesConditions';
+import Privacy from '../pages/Privacy';
+
+// Admin Pages
+import UsersList from '../pages/admin/UsersList';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import OffersManagement from '../pages/admin/OffersManagement';
+import GameSettings from '../pages/admin/GameSettings';
+import ApplicationLogs from '../pages/admin/ApplicationLogs';
+import DatabaseHistory from '../pages/admin/DatabaseHistory';
+import SystemMonitor from '../pages/admin/SystemMonitor';
 
 // Placeholder Components
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -65,8 +86,14 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/how-to-play" element={<HowToPlay />} />
+      <Route path="/prizes" element={<Prizes />} />
+      <Route path="/rules" element={<RulesConditions />} />
+      <Route path="/privacy" element={<Privacy />} />
 
-      {/* Protected Routes */}
+      {/* Protected User Routes */}
       <Route 
         path="/dashboard" 
         element={
@@ -75,24 +102,80 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/change-password" element={<ChangePassword />} />
+      <Route path="/recharge" element={<RechargePage />} />
+      <Route path="/withdraw" element={<WithDrawPage />} />
+      <Route path="/bank-cards" element={<BankCards />} />
+      <Route path="/lottery-game" element={<LotteryGame />} />
+      <Route path="/results" element={<Results />} />
 
-      {/* Placeholder Routes */}
-      <Route path="/forgot-password" element={<PlaceholderPage title="Forgot Password" />} />
-      <Route path="/reset-password" element={<PlaceholderPage title="Reset Password" />} />
-      <Route path="/rules" element={<PlaceholderPage title="Rules & Conditions" />} />
-      <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
+      {/* Admin Routes */}
+      <Route 
+        path="/admin/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/users" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <UsersList />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/offers" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <OffersManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/game-settings" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <GameSettings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/application-logs" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <ApplicationLogs />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/database-history" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <DatabaseHistory />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/system-monitor" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <SystemMonitor />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Placeholder Routes - Consolidated */}
       <Route path="/agent-registration" element={<PlaceholderPage title="Agent Registration" />} />
       <Route path="/verify-agent" element={<PlaceholderPage title="Agent Verification" />} />
-      <Route path="/change-password" element={<PlaceholderPage title="Change Password" />} />
-      <Route path="/profile" element={<Profile />} />
       <Route path="/profile-settings" element={<PlaceholderPage title="Profile Settings" />} />
       <Route path="/game-options" element={<PlaceholderPage title="Game Options" />} />
       <Route path="/play-lottery/:lotteryGameType" element={<PlaceholderPage title="Play Lottery" />} />
       <Route path="/buy-lottery-ticket" element={<PlaceholderPage title="Buy Lottery Ticket" />} />
-      <Route path="/recharge" element={<PlaceholderPage title="Recharge" />} />
-      <Route path="/withdraw" element={<PlaceholderPage title="Withdraw" />} />
       <Route path="/lottery-history" element={<PlaceholderPage title="Lottery History" />} />
-      <Route path="/bank-cards" element={<PlaceholderPage title="Bank Cards" />} />
       <Route path="/offers" element={<PlaceholderPage title="Offers" />} />
       <Route path="/transactions/:userId" element={<PlaceholderPage title="Transactions" />} />
       <Route path="/referrals/:userId" element={<PlaceholderPage title="Referrals" />} />
@@ -102,10 +185,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/lottery-results" element={<PlaceholderPage title="Lottery Results" />} />
       <Route path="/exchange-rates" element={<PlaceholderPage title="Exchange Rates" />} />
 
-      {/* Admin Routes */}
-      <Route path="/admin/users" element={<PlaceholderPage title="Users List" />} />
-      <Route path="/admin/user/:userId" element={<PlaceholderPage title="User Information" />} />
-      <Route path="/admin/game-settings" element={<PlaceholderPage title="Game Settings" />} />
+      {/* Admin Placeholder Routes */}
       <Route path="/admin/lottery-settings" element={<PlaceholderPage title="Lottery Settings" />} />
       <Route path="/admin/search-transactions" element={<PlaceholderPage title="Search Transactions" />} />
       <Route path="/admin/payment-transactions" element={<PlaceholderPage title="Payment Transactions" />} />
@@ -118,7 +198,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/admin/bank-details" element={<PlaceholderPage title="Bank Details" />} />
       <Route path="/admin/email-summary" element={<PlaceholderPage title="Email Summary" />} />
       <Route path="/admin/filter-mobile-data" element={<PlaceholderPage title="Filter Mobile Data" />} />
-      <Route path="/admin/application-logs" element={<PlaceholderPage title="Application Logs" />} />
       <Route path="/admin/update-tickets" element={<PlaceholderPage title="Update Tickets" />} />
       <Route path="/admin/user-mobile-data/:userId" element={<PlaceholderPage title="User Mobile Data" />} />
       <Route path="/admin/user-mobile-data-new/:userId" element={<PlaceholderPage title="User Mobile Data New" />} />

@@ -1,20 +1,34 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
-import { theme } from './theme';
 import { useStore } from './store/useStore';
+import AppRoutes from './routes';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
-import AppRoutes from './routes';
+import AdminNav from './components/AdminNav';
 import type { User } from './types';
 
-function App() {
-  const { setUser, setToken, setAuthenticated } = useStore();
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
 
-  // Initialize app state from localStorage
+const App: React.FC = () => {
+  const { isAuthenticated, user, setUser, setToken, setAuthenticated } = useStore();
+
   useEffect(() => {
+    // Initialize app state from localStorage
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     
@@ -32,27 +46,39 @@ function App() {
     }
   }, [setUser, setToken, setAuthenticated]);
 
+  const isAdminRoute = () => {
+    const path = window.location.pathname;
+    return path.startsWith('/admin');
+  };
+
+  const isAdminUser = () => {
+    return user && (user.userRole === 4 || user.userRole === 5);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-          }}
-        >
-          <Header />
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          {/* Show AdminNav for admin routes, Header for others */}
+          {isAuthenticated && isAdminRoute() && isAdminUser() ? (
+            <AdminNav />
+          ) : (
+            <Header />
+          )}
+          
           <Box component="main" sx={{ flexGrow: 1 }}>
             <AppRoutes />
           </Box>
-          <Footer />
-          <Notification />
+          
+          {/* Show Footer only for non-admin routes */}
+          {!isAdminRoute() && <Footer />}
         </Box>
+        
+        <Notification />
       </Router>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

@@ -377,7 +377,77 @@ class ApiService {
   }
 
   async updateLotteryGamePermission(permissionId: string, data: Partial<LotteryGamePermission>): Promise<ApiResponse<LotteryGamePermission>> {
-    const response: AxiosResponse<ApiResponse<LotteryGamePermission>> = await this.api.put(`/lotteryGamePermission/updateLotteryGamePermission/${permissionId}`, data);
+    const response: AxiosResponse<ApiResponse<LotteryGamePermission>> = await this.api.put(
+      `/lotteryGamePermission/updatePermission`,
+      { permissionId, ...data }
+    );
+    return response.data;
+  }
+
+  // Advanced Admin APIs
+  async getApplicationLogs(pageNumber = 1, pageSize = 50): Promise<PaginatedResponse<any>> {
+    const response: AxiosResponse<PaginatedResponse<any>> = await this.api.get(
+      `/applicationLog?pageNumber=${pageNumber}&pageSize=${pageSize}`
+    );
+    return response.data;
+  }
+
+  async deleteApplicationLogs(): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.delete('/applicationLog');
+    return response.data;
+  }
+
+  async getDatabaseHistory(pageNumber = 1, pageSize = 50, filters?: any): Promise<PaginatedResponse<any>> {
+    const params = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+      ...filters
+    });
+    const response: AxiosResponse<PaginatedResponse<any>> = await this.api.get(
+      `/dbHistory/history?${params}`
+    );
+    return response.data;
+  }
+
+  async cleanupCollection(collectionType: string, startDate: string, endDate: string): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.post('/dbHistory/cleanupCollection', {
+      type: collectionType,
+      startDate,
+      endDate
+    });
+    return response.data;
+  }
+
+  async getCollectionCount(collectionType: string, startDate: string, endDate: string): Promise<ApiResponse<{ collectionCount: number }>> {
+    const response: AxiosResponse<ApiResponse<{ collectionCount: number }>> = await this.api.post('/dbHistory/collectionCount', {
+      type: collectionType,
+      startDate,
+      endDate
+    });
+    return response.data;
+  }
+
+  async initializeLotterySettings(lotteryGameType: number): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.post(
+      `/lotteryGameSetting/${lotteryGameType}`
+    );
+    return response.data;
+  }
+
+  async initializeLotteryPermissions(lotteryGameType: number): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.post(
+      `/lotteryGamePermission/${lotteryGameType}`
+    );
+    return response.data;
+  }
+
+  async getSystemStatus(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> = await this.api.get('/system/status');
+    return response.data;
+  }
+
+  async getCronJobs(): Promise<ApiResponse<any[]>> {
+    const response: AxiosResponse<ApiResponse<any[]>> = await this.api.get('/system/cronjobs');
     return response.data;
   }
 

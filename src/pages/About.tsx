@@ -1,200 +1,347 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
   Box,
   Card,
   CardContent,
+  Button,
   Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
+  Chip,
 } from '@mui/material';
 import {
-  CheckCircle as CheckIcon,
-  Code as CodeIcon,
-  Palette as PaletteIcon,
-  Storage as StorageIcon,
-  Router as RouterIcon,
-  Api as ApiIcon,
+  ArrowBack,
+  Security,
+  Speed,
+  Support,
+  EmojiEvents,
+  Payment,
+  Casino,
+  VerifiedUser,
+  TrendingUp,
+  Group,
 } from '@mui/icons-material';
 
 const About: React.FC = () => {
-  const technologies = [
-    {
-      name: 'React 19',
-      description: 'Latest version with concurrent features and improved performance',
-      icon: <CodeIcon color="primary" />,
-    },
-    {
-      name: 'TypeScript',
-      description: 'Static type checking for better development experience',
-      icon: <CodeIcon color="secondary" />,
-    },
-    {
-      name: 'Material-UI',
-      description: 'Comprehensive component library following Material Design',
-      icon: <PaletteIcon color="success" />,
-    },
-    {
-      name: 'Zustand',
-      description: 'Lightweight state management with minimal boilerplate',
-      icon: <StorageIcon color="info" />,
-    },
-    {
-      name: 'React Router',
-      description: 'Declarative routing for single-page applications',
-      icon: <RouterIcon color="warning" />,
-    },
-    {
-      name: 'Axios',
-      description: 'Promise-based HTTP client for API requests',
-      icon: <ApiIcon color="error" />,
-    },
-  ];
+  const navigate = useNavigate();
 
   const features = [
-    'Responsive design that works on all devices',
-    'Modern UI with Material Design principles',
-    'State management with Zustand',
-    'Type-safe development with TypeScript',
-    'API integration with error handling',
-    'Routing with React Router DOM',
-    'Utility-first styling with Tailwind CSS',
-    'Component-based architecture',
-    'Hot reload development experience',
-    'Production-ready build configuration',
+    {
+      icon: <Security />,
+      title: 'Secure & Safe',
+      description: 'Bank-level security with SSL encryption to protect your data and transactions.',
+      color: 'primary.main'
+    },
+    {
+      icon: <Speed />,
+      title: 'Fast & Reliable',
+      description: 'Instant ticket purchases and real-time results with 99.9% uptime guarantee.',
+      color: 'success.main'
+    },
+    {
+      icon: <Support />,
+      title: '24/7 Support',
+      description: 'Round-the-clock customer support through email, phone, and WhatsApp.',
+      color: 'info.main'
+    },
+    {
+      icon: <EmojiEvents />,
+      title: 'Big Prizes',
+      description: 'Huge prize pools with multiple winning categories and instant payouts.',
+      color: 'warning.main'
+    },
+    {
+      icon: <Payment />,
+      title: 'Easy Payments',
+      description: 'Multiple payment options including UPI, cards, and bank transfers.',
+      color: 'secondary.main'
+    },
+    {
+      icon: <Casino />,
+      title: 'Multiple Games',
+      description: 'Various lottery games with different odds and prize structures.',
+      color: 'error.main'
+    }
+  ];
+
+  const stats = [
+    { label: 'Active Users', value: '50,000+', icon: <Group /> },
+    { label: 'Games Played', value: '1M+', icon: <Casino /> },
+    { label: 'Prizes Awarded', value: '₹10Cr+', icon: <EmojiEvents /> },
+    { label: 'Success Rate', value: '99.9%', icon: <TrendingUp /> }
+  ];
+
+  const team = [
+    {
+      name: 'Rahul Sharma',
+      role: 'CEO & Founder',
+      description: '10+ years in gaming industry with expertise in lottery systems.',
+      image: '/api/placeholder/150/150'
+    },
+    {
+      name: 'Priya Patel',
+      role: 'CTO',
+      description: 'Technology leader with experience in scalable gaming platforms.',
+      image: '/api/placeholder/150/150'
+    },
+    {
+      name: 'Amit Kumar',
+      role: 'Head of Operations',
+      description: 'Operations expert ensuring smooth day-to-day lottery operations.',
+      image: '/api/placeholder/150/150'
+    }
   ];
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom align="center" className="mb-8">
-        About This Project
-      </Typography>
-      
-      <Typography variant="h6" color="text.secondary" align="center" className="mb-12">
-        A modern React application showcasing best practices and popular technologies
-      </Typography>
-
-      <Grid container spacing={4}>
-        {/* Project Overview */}
-        <Grid item xs={12} md={6}>
-          <Card elevation={2} className="h-full">
-            <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom>
-                Project Overview
-              </Typography>
-              
-              <Typography variant="body1" paragraph>
-                This is a comprehensive React application that demonstrates modern web development practices. 
-                It serves as a template for building scalable, maintainable React applications with a focus 
-                on developer experience and user interface quality.
-              </Typography>
-              
-              <Typography variant="body1" paragraph>
-                The application includes state management, routing, API integration, and a beautiful, 
-                responsive user interface. It's built with TypeScript for type safety and uses the latest 
-                React features for optimal performance.
-              </Typography>
-              
-              <Typography variant="body1">
-                Whether you're building a small project or a large-scale application, this template 
-                provides a solid foundation that you can extend and customize according to your needs.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Key Features */}
-        <Grid item xs={12} md={6}>
-          <Card elevation={2} className="h-full">
-            <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom>
-                Key Features
-              </Typography>
-              
-              <List>
-                {features.map((feature, index) => (
-                  <React.Fragment key={index}>
-                    <ListItem>
-                      <ListItemIcon>
-                        <CheckIcon color="success" />
-                      </ListItemIcon>
-                      <ListItemText primary={feature} />
-                    </ListItem>
-                    {index < features.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Technologies Used */}
-      <Box mt={8}>
-        <Typography variant="h4" component="h2" gutterBottom align="center" className="mb-6">
-          Technologies Used
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          About WahLotto
         </Typography>
-        
-        <Grid container spacing={3}>
-          {technologies.map((tech, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card elevation={1} className="h-full hover:shadow-lg transition-shadow">
-                <CardContent>
-                  <Box display="flex" alignItems="center" mb={2}>
-                    {tech.icon}
-                    <Typography variant="h6" component="h3" sx={{ ml: 1 }}>
-                      {tech.name}
+        <Typography variant="h6" color="text.secondary">
+          India's most trusted online lottery platform
+        </Typography>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to Dashboard
+        </Button>
+      </Box>
+
+      {/* Hero Section */}
+      <Card elevation={4} sx={{ mb: 6, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        <CardContent sx={{ p: 6, textAlign: 'center' }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+            Welcome to WahLotto
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
+            WahLotto is India's premier online lottery platform, offering secure, fair, and exciting lottery games to players across the country. 
+            Our mission is to provide a safe and entertaining gaming experience while giving players the chance to win life-changing prizes.
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Chip label="Licensed & Regulated" color="primary" variant="outlined" sx={{ color: 'white', borderColor: 'white' }} />
+            <Chip label="SSL Secured" color="primary" variant="outlined" sx={{ color: 'white', borderColor: 'white' }} />
+            <Chip label="24/7 Support" color="primary" variant="outlined" sx={{ color: 'white', borderColor: 'white' }} />
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Mission & Vision */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}>
+          Our Mission & Vision
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          <Card elevation={4} sx={{ flex: 1 }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <VerifiedUser sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Our Mission
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                To provide a secure, fair, and entertaining lottery platform that gives players the opportunity to win life-changing prizes while maintaining the highest standards of integrity and customer service.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card elevation={4} sx={{ flex: 1 }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <TrendingUp sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Our Vision
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                To become India's most trusted and preferred online lottery platform, known for innovation, transparency, and exceptional player experience.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* Features */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}>
+          Why Choose WahLotto?
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {features.map((feature, index) => (
+            <Card key={index} elevation={4}>
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Box sx={{ color: feature.color }}>
+                    {feature.icon}
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {feature.description}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {tech.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
       </Box>
 
-      {/* Getting Started */}
-      <Box mt={8}>
-        <Card elevation={2}>
-          <CardContent>
-            <Typography variant="h5" component="h2" gutterBottom>
-              Getting Started
-            </Typography>
-            
-            <Typography variant="body1" paragraph>
-              To get started with this project:
-            </Typography>
-            
-            <Box component="ol" sx={{ pl: 2 }}>
-              <Typography component="li" variant="body1" paragraph>
-                Clone the repository and install dependencies with <code>npm install</code>
-              </Typography>
-              <Typography component="li" variant="body1" paragraph>
-                Start the development server with <code>npm run dev</code>
-              </Typography>
-              <Typography component="li" variant="body1" paragraph>
-                Open your browser and navigate to <code>http://localhost:5173</code>
-              </Typography>
-              <Typography component="li" variant="body1" paragraph>
-                Explore the codebase and customize it for your needs
-              </Typography>
-            </Box>
-            
-            <Typography variant="body1" sx={{ mt: 3 }}>
-              The application is now running in development mode. You can test the counter functionality, 
-              API integration, and navigation between pages. The development server will automatically 
-              reload when you make changes to the code.
-            </Typography>
-          </CardContent>
-        </Card>
+      {/* Statistics */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}>
+          WahLotto in Numbers
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3 }}>
+          {stats.map((stat, index) => (
+            <Card key={index} elevation={4} sx={{ flex: 1 }}>
+              <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                <Box sx={{ color: 'primary.main', mb: 2 }}>
+                  {stat.icon}
+                </Box>
+                <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {stat.label}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
       </Box>
+
+      {/* Team */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}>
+          Our Leadership Team
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          {team.map((member, index) => (
+            <Card key={index} elevation={4} sx={{ flex: 1 }}>
+              <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    margin: '0 auto 2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '2rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {member.name.split(' ').map(n => n[0]).join('')}
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                  {member.name}
+                </Typography>
+                <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {member.role}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {member.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Values */}
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}>
+          Our Core Values
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Card elevation={4}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>
+                Integrity & Transparency
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                We believe in complete transparency in all our operations. Every draw is conducted fairly and results are published immediately. 
+                Our random number generators are certified and audited regularly to ensure fairness.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card elevation={4}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'success.main' }}>
+                Customer First
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Our customers are at the heart of everything we do. We provide 24/7 support, secure transactions, 
+                and a user-friendly platform designed to enhance your gaming experience.
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card elevation={4}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'warning.main' }}>
+                Innovation & Excellence
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                We continuously innovate to provide the best lottery experience. Our platform uses cutting-edge technology 
+                to ensure security, speed, and reliability while maintaining the highest standards of excellence.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* Call to Action */}
+      <Card elevation={4} sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        <CardContent sx={{ p: 6, textAlign: 'center' }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+            Ready to Start Playing?
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
+            Join thousands of players who trust WahLotto for their lottery entertainment. 
+            Create your account today and start your journey to winning big!
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => navigate('/lottery-game')}
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                fontWeight: 'bold',
+                '&:hover': {
+                  bgcolor: 'grey.100'
+                }
+              }}
+            >
+              Play Now
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/help')}
+              sx={{
+                color: 'white',
+                borderColor: 'white',
+                fontWeight: 'bold',
+                '&:hover': {
+                  borderColor: 'grey.300'
+                }
+              }}
+            >
+              Learn More
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
     </Container>
   );
 };
