@@ -451,6 +451,45 @@ class ApiService {
     return response.data;
   }
 
+  // Wallet History APIs
+  async getWalletHistory(pageNumber = 1, pageSize = 10, type = ""): Promise<{ walletHistory: any[]; totalCount: number; totalPages: number }> {
+    const params = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+      type: type || ""
+    });
+    const response = await this.api.get(`/dbHistory/walletHistory?${params}`);
+    return response.data;
+  }
+
+  async getUserWalletHistory(userId: string, pageNumber = 1, pageSize = 10, type = ""): Promise<{ walletHistory: any[]; totalCount: number; totalPages: number }> {
+    const params = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+      type: type || ""
+    });
+    const response = await this.api.get(`/dbHistory/walletHistory/${userId}?${params}`);
+    return response.data;
+  }
+
+  // User Transactions History API
+  async getUserTransactionsHistory(pageNumber = 1, pageSize = 10, filters?: any): Promise<{ transactions: any[]; totalCount: number; totalPages: number }> {
+    const params = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+      ...(filters?.type ? { type: filters.type } : {}),
+      ...(filters?.status ? { status: filters.status } : {})
+    });
+    const response = await this.api.get(`/dbHistory/usertransactionsHistory?${params}`);
+    return response.data;
+  }
+
+  // User Referrals History API
+  async getMyReferralsHistory(): Promise<any[]> {
+    const response = await this.api.get('/user/ref');
+    return response.data.referrals || [];
+  }
+
   // Utility method for error handling
   handleError(error: any): string {
     if (error.response?.data?.message) {
