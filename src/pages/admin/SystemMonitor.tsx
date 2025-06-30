@@ -10,7 +10,7 @@ import {
   ArrowPathIcon,
   CpuChipIcon,
   WifiIcon,
-  DatabaseIcon
+  ServerStackIcon
 } from '@heroicons/react/24/outline';
 
 interface CronJob {
@@ -277,7 +277,7 @@ const SystemMonitor: React.FC = () => {
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <DatabaseIcon className="h-6 w-6 text-yellow-400" />
+                    <ServerStackIcon className="h-6 w-6 text-yellow-400" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
@@ -307,7 +307,7 @@ const SystemMonitor: React.FC = () => {
             <div className="bg-white shadow rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <DatabaseIcon className="h-8 w-8 text-blue-500" />
+                  <ServerStackIcon className="h-8 w-8 text-blue-500" />
                   <div className="ml-4">
                     <h3 className="text-lg font-medium text-gray-900">Database</h3>
                     <p className="text-sm text-gray-500">MongoDB Connection</p>

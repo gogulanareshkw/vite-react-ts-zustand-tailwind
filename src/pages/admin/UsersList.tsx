@@ -42,7 +42,7 @@ import {
 import { useStore } from '../../store/useStore';
 import apiService from '../../services/api';
 
-interface User {
+interface AdminUser {
   _id: string;
   firstName: string;
   lastName: string;
@@ -59,16 +59,16 @@ interface User {
 
 const UsersList: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, setLoading } = useStore();
+  const { addNotification } = useStore();
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
 
@@ -132,7 +132,7 @@ const UsersList: React.FC = () => {
     }
   };
 
-  const getStatusChip = (user: User) => {
+  const getStatusChip = (user: AdminUser) => {
     if (user.isBlocked) {
       return <Chip label="Blocked" color="error" size="small" />;
     }

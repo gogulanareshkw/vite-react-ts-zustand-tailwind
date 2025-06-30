@@ -15,6 +15,7 @@ import type {
   Notification, 
   ModalState 
 } from '../types';
+import { api } from '../services/api';
 
 interface LotteryStore extends AppState {
   // Auth Actions
@@ -53,6 +54,11 @@ interface LotteryStore extends AppState {
   getUserBalance: () => number;
   getUserReferralCount: () => number;
   getUserDisplayName: () => string;
+
+  api: typeof api;
+  notification: {
+    show: (message: string, type: 'success' | 'error' | 'warning' | 'info', duration?: number) => void;
+  };
 }
 
 export const useStore = create<LotteryStore>()(
@@ -82,8 +88,15 @@ export const useStore = create<LotteryStore>()(
         data: null,
       },
 
+      api,
+      notification: {
+        show: (message: string, type: 'success' | 'error' | 'warning' | 'info', duration = 5000) => {
+          get().addNotification({ message, type, duration });
+        },
+      },
+
       // Auth Actions
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user: user ? { ...user, availableAmount: Number(user.availableAmount) || 0 } : null }),
       setToken: (token) => set({ token }),
       setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
       logout: () => {

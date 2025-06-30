@@ -98,10 +98,14 @@ export interface LotteryGamePermission {
   _id: string;
   lotteryGameType: number;
   canPlayLotteryGame: boolean;
-  showGameWinnersListScroll: boolean;
-  showGameWinnersList: boolean;
-  showGameResults: boolean;
-  showGameHistory: boolean;
+  isAvailableLotteryGame: boolean;
+  showGameWinnersListScroll?: boolean;
+  showGameWinnersList?: boolean;
+  showGameResults?: boolean;
+  showGameHistory?: boolean;
+  enableLastDayDiscounts?: boolean;
+  isAvailableSingleDigitGame?: boolean;
+  isAvailableGameTotal?: boolean;
 }
 
 export interface LotteryGameBoard {

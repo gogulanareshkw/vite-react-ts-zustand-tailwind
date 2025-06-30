@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { 
-  DatabaseIcon, 
+  ServerStackIcon, 
   MagnifyingGlassIcon,
   CalendarIcon,
   UserIcon,
@@ -98,7 +98,7 @@ const DatabaseHistory: React.FC = () => {
       case 'user':
         return <UserIcon className="h-5 w-5 text-blue-500" />;
       case 'game':
-        return <DatabaseIcon className="h-5 w-5 text-purple-500" />;
+        return <ServerStackIcon className="h-5 w-5 text-purple-500" />;
       default:
         return <DocumentTextIcon className="h-5 w-5 text-gray-500" />;
     }
@@ -153,7 +153,7 @@ const DatabaseHistory: React.FC = () => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <DatabaseIcon className="h-6 w-6 text-blue-400" />
+                  <ServerStackIcon className="h-6 w-6 text-blue-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
@@ -317,7 +317,7 @@ const DatabaseHistory: React.FC = () => {
           
           {filteredHistory.length === 0 ? (
             <div className="text-center py-12">
-              <DatabaseIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <ServerStackIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No history found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {searchTerm || filterType || startDate || endDate ? 'Try adjusting your search criteria.' : 'No database history available.'}

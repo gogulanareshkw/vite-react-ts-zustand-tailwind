@@ -24,6 +24,7 @@ import HowToPlay from '../pages/HowToPlay';
 import Prizes from '../pages/Prizes';
 import RulesConditions from '../pages/RulesConditions';
 import Privacy from '../pages/Privacy';
+import AgentVerification from '../pages/AgentVerification';
 
 // Admin Pages
 import UsersList from '../pages/admin/UsersList';
@@ -170,7 +171,7 @@ const AppRoutes: React.FC = () => {
 
       {/* Placeholder Routes - Consolidated */}
       <Route path="/agent-registration" element={<PlaceholderPage title="Agent Registration" />} />
-      <Route path="/verify-agent" element={<PlaceholderPage title="Agent Verification" />} />
+      <Route path="/verify-agent" element={<AgentVerification />} />
       <Route path="/profile-settings" element={<PlaceholderPage title="Profile Settings" />} />
       <Route path="/game-options" element={<PlaceholderPage title="Game Options" />} />
       <Route path="/play-lottery/:lotteryGameType" element={<PlaceholderPage title="Play Lottery" />} />
