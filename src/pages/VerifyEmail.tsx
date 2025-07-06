@@ -100,7 +100,10 @@ const VerifyEmail: React.FC = () => {
       const response = await apiService.sendActivationMail();
       
       if (response.success) {
-        notification.show('OTP sent successfully!', 'success');
+        // Clear the OTP input field when new OTP is sent
+        setOtp('');
+        // Clear any validation errors
+        setValidationErrors(prev => ({ ...prev, otp: '' }));
       }
     } catch (error: any) {
       // Error will be handled by API service and shown as snackbar
@@ -149,27 +152,22 @@ const VerifyEmail: React.FC = () => {
             <TextField
               fullWidth
               label="Enter OTP"
-              type={showOtp ? 'text' : 'password'}
+              type="text"
               value={otp}
               onChange={(e) => handleOtpChange(e.target.value)}
               error={!!validationErrors.otp}
               helperText={validationErrors.otp}
               required
               sx={{ mb: 3 }}
+              inputProps={{
+                maxLength: 6,
+                pattern: '[0-9]*',
+                inputMode: 'numeric'
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <Security color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowOtp(!showOtp)}
-                      edge="end"
-                    >
-                      {showOtp ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
                   </InputAdornment>
                 ),
               }}

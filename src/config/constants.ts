@@ -83,6 +83,7 @@ export const API_ENDPOINTS = {
   SIGNUP: '/user/public/create',
   AGENT_SIGNUP: '/user/public/createAgent',
   VERIFY_EMAIL: '/user/verifyEmailOtp',
+  SEND_ACTIVATION_MAIL: '/user/sendActivationMail',
   FORGOT_PASSWORD: '/user/public/forgotPassword',
   RESET_PASSWORD: '/user/public/resetPassword',
   CHANGE_PASSWORD: '/user/changePassword',

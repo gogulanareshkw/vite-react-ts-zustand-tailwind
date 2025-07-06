@@ -350,7 +350,7 @@ class ApiService {
   }
 
   async sendActivationMail(): Promise<ApiResponse> {
-    const response = await this.enhancedRequest<ApiResponse>('post', API_ENDPOINTS.VERIFY_EMAIL);
+    const response = await this.enhancedRequest<ApiResponse>('get', API_ENDPOINTS.SEND_ACTIVATION_MAIL);
     this.showSuccessNotification('Activation email sent successfully! Please check your inbox.');
     return response;
   }
