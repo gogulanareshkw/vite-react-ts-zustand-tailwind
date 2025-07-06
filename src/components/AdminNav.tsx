@@ -43,6 +43,26 @@ const AdminNav: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = React.useState<null | HTMLElement>(null);
 
+  // Helper function to categorize navigation items
+  const getCategoryFromPath = (path: string) => {
+    if (path.includes('dashboard') || path.includes('analytics') || path.includes('monitor')) {
+      return 'Dashboard & Overview';
+    } else if (path.includes('users') || path.includes('agents') || path.includes('support')) {
+      return 'User Management';
+    } else if (path.includes('transaction') || path.includes('bank') || path.includes('recharge') || path.includes('withdrawal') || path.includes('financial')) {
+      return 'Financial Management';
+    } else if (path.includes('lottery') || path.includes('game') || path.includes('casino')) {
+      return 'Game Management';
+    } else if (path.includes('offers') || path.includes('media') || path.includes('feedback')) {
+      return 'Content Management';
+    } else if (path.includes('logs') || path.includes('database') || path.includes('system') || path.includes('backup') || path.includes('api') || path.includes('security') || path.includes('audit')) {
+      return 'System Management';
+    } else if (path.includes('admin-management')) {
+      return 'Admin Management';
+    }
+    return 'Other';
+  };
+
   // Get navigation items based on user role
   const navigationItems = user ? getNavigationItems(user.userRole) : [];
   
@@ -63,25 +83,6 @@ const AdminNav: React.FC = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
-
-  const getCategoryFromPath = (path: string) => {
-    if (path.includes('dashboard') || path.includes('analytics') || path.includes('monitor')) {
-      return 'Dashboard & Overview';
-    } else if (path.includes('users') || path.includes('agents') || path.includes('support')) {
-      return 'User Management';
-    } else if (path.includes('transaction') || path.includes('bank') || path.includes('recharge') || path.includes('withdrawal') || path.includes('financial')) {
-      return 'Financial Management';
-    } else if (path.includes('lottery') || path.includes('game') || path.includes('casino')) {
-      return 'Game Management';
-    } else if (path.includes('offers') || path.includes('media') || path.includes('feedback')) {
-      return 'Content Management';
-    } else if (path.includes('logs') || path.includes('database') || path.includes('system') || path.includes('backup') || path.includes('api') || path.includes('security') || path.includes('audit')) {
-      return 'System Management';
-    } else if (path.includes('admin-management')) {
-      return 'Admin Management';
-    }
-    return 'Other';
-  };
 
   const renderIcon = (iconName: string) => {
     const IconComponent = ICON_MAP[iconName as keyof typeof ICON_MAP];

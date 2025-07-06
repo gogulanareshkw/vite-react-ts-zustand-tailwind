@@ -92,7 +92,7 @@ export const API_ENDPOINTS = {
   
   // Game Settings
   GAME_SETTINGS: '/gameSettings/getBasicGameSettings',
-  LOTTERY_SETTINGS: '/lotteryGameSetting/getAllLotteryGameSettings',
+  LOTTERY_SETTINGS: '/lotteryGameSetting/public',
   LOTTERY_PERMISSIONS: '/lotteryGamePermission/public',
   LOTTERY_BOARDS: '/lotteryGameBoard/public/all',
   LOTTERY_RESULTS: '/lotteryGameResultSummery/public/lastGameWinners',
