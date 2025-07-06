@@ -61,16 +61,16 @@ const VerifyEmail: React.FC = () => {
     try {
       const response = await apiService.verifyEmail(otp);
       
-      if (response.success && response.data) {
+      if (response && response.success) {
         addNotification({
           message: 'Email verified successfully!',
           type: 'success',
         });
 
         // Redirect based on user status
-        if (!response.data.isChangedDefaultPassword) {
+        if (!response.isChangedDefaultPassword) {
           navigate('/change-password');
-        } else if (!response.data.isAgentVerified && response.data.userRole === 4) {
+        } else if (!response.isAgentVerified && response.userRole === 4) {
           navigate('/verify-agent');
         } else {
           navigate('/dashboard');

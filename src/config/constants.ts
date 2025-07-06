@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:3001/api';
+export const API_URL = 'http://localhost:3002/api';
 export const APP_KEY = '68c1b935-1c1f-4c10-b16b-3fd6e3cba270';
 
 // User Roles

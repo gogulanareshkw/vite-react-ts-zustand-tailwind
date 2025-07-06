@@ -25,6 +25,11 @@ import Prizes from '../pages/Prizes';
 import RulesConditions from '../pages/RulesConditions';
 import Privacy from '../pages/Privacy';
 import AgentVerification from '../pages/AgentVerification';
+import Offers from '../pages/Offers';
+import ExchangeRates from '../pages/ExchangeRates';
+import LotteryHistory from '../pages/LotteryHistory';
+import TransactionInfo from '../pages/TransactionInfo';
+import LotteryTicketInfo from '../pages/LotteryTicketInfo';
 
 // Admin Pages
 import UsersList from '../pages/admin/UsersList';
@@ -34,6 +39,10 @@ import GameSettings from '../pages/admin/GameSettings';
 import ApplicationLogs from '../pages/admin/ApplicationLogs';
 import DatabaseHistory from '../pages/admin/DatabaseHistory';
 import SystemMonitor from '../pages/admin/SystemMonitor';
+import LotterySettings from '../pages/admin/LotterySettings';
+import SearchTransactions from '../pages/admin/SearchTransactions';
+import ApplicationAgents from '../pages/admin/ApplicationAgents';
+import TransactionManagement from '../pages/admin/TransactionManagement';
 
 // Placeholder Components
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -110,6 +119,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/bank-cards" element={<BankCards />} />
       <Route path="/lottery-game" element={<LotteryGame />} />
       <Route path="/results" element={<Results />} />
+      <Route path="/offers" element={<Offers />} />
+      <Route path="/exchange-rates" element={<ExchangeRates />} />
+      <Route path="/lottery-history" element={<LotteryHistory />} />
 
       {/* Admin Routes */}
       <Route 
@@ -168,6 +180,38 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/admin/lottery-settings" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <LotterySettings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/search-transactions" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <SearchTransactions />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/application-agents" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <ApplicationAgents />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/transaction-management" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <TransactionManagement />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Placeholder Routes - Consolidated */}
       <Route path="/agent-registration" element={<PlaceholderPage title="Agent Registration" />} />
@@ -176,24 +220,18 @@ const AppRoutes: React.FC = () => {
       <Route path="/game-options" element={<PlaceholderPage title="Game Options" />} />
       <Route path="/play-lottery/:lotteryGameType" element={<PlaceholderPage title="Play Lottery" />} />
       <Route path="/buy-lottery-ticket" element={<PlaceholderPage title="Buy Lottery Ticket" />} />
-      <Route path="/lottery-history" element={<PlaceholderPage title="Lottery History" />} />
-      <Route path="/offers" element={<PlaceholderPage title="Offers" />} />
       <Route path="/transactions/:userId" element={<PlaceholderPage title="Transactions" />} />
       <Route path="/referrals/:userId" element={<PlaceholderPage title="Referrals" />} />
       <Route path="/wallet/:userId" element={<PlaceholderPage title="Wallet" />} />
-      <Route path="/transaction-info/:txnId" element={<PlaceholderPage title="Transaction Info" />} />
-      <Route path="/ticket-info/:ticketId" element={<PlaceholderPage title="Ticket Info" />} />
+      <Route path="/transaction-info/:txnId" element={<TransactionInfo />} />
+      <Route path="/ticket-info/:ticketId" element={<LotteryTicketInfo />} />
       <Route path="/lottery-results" element={<PlaceholderPage title="Lottery Results" />} />
-      <Route path="/exchange-rates" element={<PlaceholderPage title="Exchange Rates" />} />
 
       {/* Admin Placeholder Routes */}
-      <Route path="/admin/lottery-settings" element={<PlaceholderPage title="Lottery Settings" />} />
-      <Route path="/admin/search-transactions" element={<PlaceholderPage title="Search Transactions" />} />
       <Route path="/admin/payment-transactions" element={<PlaceholderPage title="Payment Transactions" />} />
       <Route path="/admin/filter-transactions" element={<PlaceholderPage title="Filter Transactions" />} />
       <Route path="/admin/lottery-summary" element={<PlaceholderPage title="Lottery Summary" />} />
       <Route path="/admin/lottery-plays" element={<PlaceholderPage title="Lottery Plays" />} />
-      <Route path="/admin/application-agents" element={<PlaceholderPage title="Application Agents" />} />
       <Route path="/admin/feedbacks" element={<PlaceholderPage title="Feedbacks" />} />
       <Route path="/admin/media" element={<PlaceholderPage title="Manage Media" />} />
       <Route path="/admin/bank-details" element={<PlaceholderPage title="Bank Details" />} />
