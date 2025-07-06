@@ -83,13 +83,13 @@ const VerifyEmail: React.FC = () => {
         notification.show('Email verified successfully!', 'success');
         
         // Update user data in store with the response data
-        if (response.data && user) {
+        if (user) {
           const updatedUser = {
             ...user,
-            isEmailVerified: response.data.isEmailVerified,
-            isAgentVerified: response.data.isAgentVerified,
-            availableAmount: response.data.availableAmount,
-            isChangedDefaultPassword: response.data.isChangedDefaultPassword,
+            isEmailVerified: response.isEmailVerified,
+            isAgentVerified: response.isAgentVerified,
+            availableAmount: response.availableAmount,
+            isChangedDefaultPassword: response.isChangedDefaultPassword,
           };
           
           // Update store with new user data
@@ -98,8 +98,8 @@ const VerifyEmail: React.FC = () => {
         }
         
         // Navigate based on user verification status (same logic as webapp)
-        if (response.data?.isChangedDefaultPassword) {
-          if (response.data?.isAgentVerified) {
+        if (response.isChangedDefaultPassword) {
+          if (response.isAgentVerified) {
             navigate('/dashboard'); // Main dashboard (profile in webapp)
           } else {
             navigate('/verify-agent'); // Agent verification needed
