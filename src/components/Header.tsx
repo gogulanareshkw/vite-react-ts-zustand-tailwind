@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -9,253 +10,273 @@ import {
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
-  useTheme,
-  useMediaQuery,
   Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  Divider,
+  Chip,
 } from '@mui/material';
-import { Menu as MenuIcon, AccountCircle, EmojiEvents, Star, Diamond } from '@mui/icons-material';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Menu as MenuIcon,
+  AccountCircle,
+  Dashboard,
+  Logout,
+  Home,
+  EmojiEvents,
+  Assessment,
+  Help,
+  Info,
+  ContactSupport,
+  Support,
+} from '@mui/icons-material';
+import { useStore } from '../store/useStore';
+import { getPublicNavigation, getUserRoleDisplayName, getUserRoleColor, ICON_MAP } from '../config/navigation';
 
 const Header: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const location = useLocation();
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const location = useLocation();
+  const { isAuthenticated, user, logout } = useStore();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const navItems = [
-    { text: 'Home', path: '/' },
-    { text: 'Prizes', path: '/prizes' },
-    { text: 'Results', path: '/results' },
-    { text: 'How to Play', path: '/how-to-play' },
-    { text: 'About Us', path: '/about' },
-    { text: 'Contact Us', path: '/contact' },
-    { text: 'Help', path: '/help' },
-  ];
+  const publicNavItems = getPublicNavigation();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleLogin = () => {
-    if (isLoggedIn) {
-      setIsLoggedIn(false);
-    } else {
-      navigate('/login');
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    setUserMenuAnchor(null);
   };
 
-  const handleSignUp = () => {
-    navigate('/signup');
+  const isActive = (path: string) => location.pathname === path;
+
+  const renderIcon = (iconName: string) => {
+    const IconComponent = ICON_MAP[iconName as keyof typeof ICON_MAP];
+    return IconComponent ? <IconComponent /> : <Home />;
   };
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', my: 2 }}>
-        <Box
-          sx={{
-            position: 'relative',
-            width: 60,
-            height: 60,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mr: 2,
-            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-          }}
-        >
-          <EmojiEvents sx={{ fontSize: 28, color: 'white' }} />
-          <Star 
-            sx={{ 
-              position: 'absolute', 
-              top: -5, 
-              right: -5, 
-              fontSize: 16, 
-              color: '#FFD700',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }} 
-          />
-        </Box>
-        <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-          GulfLotto
-        </Typography>
-      </Box>
+      <Typography variant="h6" sx={{ my: 2 }}>
+        WahLotto
+      </Typography>
+      <Divider />
       <List>
-        {navItems.map((item) => (
-          <ListItem key={item.text} component={Link} to={item.path}>
-            <ListItemText 
-              primary={item.text} 
-              sx={{ 
-                color: location.pathname === item.path ? 'primary.main' : 'inherit',
-                textAlign: 'center'
+        {publicNavItems.map((item) => (
+          <ListItem key={item.path} disablePadding>
+            <ListItemButton
+              sx={{
+                textAlign: 'center',
+                backgroundColor: isActive(item.path) ? 'primary.light' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                },
               }}
-            />
+              onClick={() => navigate(item.path)}
+            >
+              <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.main' : 'inherit' }}>
+                {renderIcon(item.icon)}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.title}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    fontWeight: isActive(item.path) ? 'bold' : 'normal',
+                  },
+                }}
+              />
+            </ListItemButton>
           </ListItem>
         ))}
-        <ListItem>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleLogin}
-          >
-            {isLoggedIn ? 'Logout' : 'Login'}
-          </Button>
-        </ListItem>
-        <ListItem>
-          <Button
-            variant="outlined"
-            color="primary"
-            fullWidth
-            onClick={handleSignUp}
-          >
-            Sign Up
-          </Button>
-        </ListItem>
-        <ListItem>
-          <Button
-            variant="outlined"
-            color="secondary"
-            fullWidth
-          >
-            Agent SignUp
-          </Button>
-        </ListItem>
+        
+        {isAuthenticated && (
+          <>
+            <Divider />
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/dashboard')}>
+                <ListItemIcon>
+                  <Dashboard />
+                </ListItemIcon>
+                <ListItemText primary="Dashboard" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/profile')}>
+                <ListItemIcon>
+                  <AccountCircle />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <Logout />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
       </List>
     </Box>
   );
 
   return (
     <>
-      <AppBar position="static" elevation={0} sx={{ backgroundColor: 'white', color: 'text.primary' }}>
+      <AppBar position="static" sx={{ backgroundColor: 'primary.main' }}>
         <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Box
-              sx={{
-                position: 'relative',
-                width: 50,
-                height: 50,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mr: 2,
-                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
-                  transition: 'all 0.3s ease-in-out',
-                },
-              }}
-            >
-              <EmojiEvents sx={{ fontSize: 24, color: 'white' }} />
-              <Star 
-                sx={{ 
-                  position: 'absolute', 
-                  top: -3, 
-                  right: -3, 
-                  fontSize: 14, 
-                  color: '#FFD700',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-                }} 
-              />
-            </Box>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ 
-                fontWeight: 'bold', 
-                background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                letterSpacing: '0.5px',
-              }}
-            >
-              GulfLotto
-            </Typography>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
+            WahLotto
+          </Typography>
+          
+          {/* Desktop Navigation */}
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+            {publicNavItems.map((item) => (
+              <Button
+                key={item.path}
+                color="inherit"
+                onClick={() => navigate(item.path)}
+                sx={{
+                  backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                {item.title}
+              </Button>
+            ))}
           </Box>
           
-          {isMobile ? (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-            >
-              <MenuIcon />
-            </IconButton>
-          ) : (
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              {navItems.slice(0, 4).map((item) => (
-                <Button
-                  key={item.text}
-                  component={Link}
-                  to={item.path}
+          {/* User Menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
+            {isAuthenticated ? (
+              <>
+                <Chip
+                  label={getUserRoleDisplayName(user?.userRole || 3)}
+                  color={getUserRoleColor(user?.userRole || 3) as any}
                   size="small"
-                  sx={{
-                    color: location.pathname === item.path ? 'primary.main' : 'text.primary',
-                    fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                    '&:hover': {
-                      backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                    },
-                  }}
+                />
+                <IconButton
+                  color="inherit"
+                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
                 >
-                  {item.text}
+                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                    {user?.firstName?.charAt(0) || 'U'}
+                  </Avatar>
+                </IconButton>
+              </>
+            ) : (
+              <>
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/login')}
+                  sx={{ display: { xs: 'none', sm: 'block' } }}
+                >
+                  Login
                 </Button>
-              ))}
-              
-              <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                 <Button
                   variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={handleLogin}
-                  startIcon={<AccountCircle />}
-                >
-                  {isLoggedIn ? 'Logout' : 'Login'}
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={handleSignUp}
+                  color="secondary"
+                  onClick={() => navigate('/signup')}
+                  sx={{ display: { xs: 'none', sm: 'block' } }}
                 >
                   Sign Up
                 </Button>
                 <Button
                   variant="outlined"
-                  color="secondary"
-                  size="small"
+                  color="inherit"
+                  onClick={() => navigate('/agent-registration')}
+                  sx={{ display: { xs: 'none', sm: 'block' } }}
                 >
-                  Agent SignUp
+                  Agent Signup
                 </Button>
-              </Box>
-            </Box>
-          )}
+              </>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
+      {/* User Menu Dropdown */}
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={() => setUserMenuAnchor(null)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
         }}
-        sx={{
-          display: { xs: 'block', lg: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 280 },
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
         }}
       >
-        {drawer}
-      </Drawer>
+        <MenuItem onClick={() => {
+          navigate('/dashboard');
+          setUserMenuAnchor(null);
+        }}>
+          <ListItemIcon>
+            <Dashboard fontSize="small" />
+          </ListItemIcon>
+          Dashboard
+        </MenuItem>
+        <MenuItem onClick={() => {
+          navigate('/profile');
+          setUserMenuAnchor(null);
+        }}>
+          <ListItemIcon>
+            <AccountCircle fontSize="small" />
+          </ListItemIcon>
+          Profile
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
+
+      {/* Mobile Drawer */}
+      <Box component="nav">
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
     </>
   );
 };

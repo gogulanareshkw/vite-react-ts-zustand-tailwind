@@ -15,72 +15,78 @@ import {
   IconButton,
   Divider,
   Chip,
+  Avatar,
+  Menu,
+  MenuItem,
+  ListSubheader,
 } from '@mui/material';
 import {
-  Menu,
-  Dashboard,
-  People,
-  Settings,
-  Receipt,
-  Casino,
-  Security,
-  Notifications,
-  Logout,
+  Menu as MenuIcon,
   Home,
-  LocalOffer,
+  Logout,
+  AccountCircle,
+  AdminPanelSettings,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
+import { 
+  getNavigationItems, 
+  getUserRoleDisplayName, 
+  getUserRoleColor,
+  ICON_MAP,
+  USER_ROLES 
+} from '../config/navigation';
 
 const AdminNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useStore();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = React.useState<null | HTMLElement>(null);
 
-  const adminMenuItems = [
-    {
-      title: 'Dashboard',
-      path: '/admin/dashboard',
-      icon: <Dashboard />,
-    },
-    {
-      title: 'Users Management',
-      path: '/admin/users',
-      icon: <People />,
-    },
-    {
-      title: 'Offers Management',
-      path: '/admin/offers',
-      icon: <LocalOffer />,
-    },
-    {
-      title: 'Game Settings',
-      path: '/admin/game-settings',
-      icon: <Casino />,
-    },
-    {
-      title: 'Transactions',
-      path: '/admin/transactions',
-      icon: <Receipt />,
-    },
-    {
-      title: 'System Settings',
-      path: '/admin/system-settings',
-      icon: <Settings />,
-    },
-    {
-      title: 'Security',
-      path: '/admin/security',
-      icon: <Security />,
-    },
-  ];
+  // Get navigation items based on user role
+  const navigationItems = user ? getNavigationItems(user.userRole) : [];
+  
+  // Group navigation items by category
+  const groupedItems = navigationItems.reduce((groups, item) => {
+    const category = getCategoryFromPath(item.path);
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(item);
+    return groups;
+  }, {} as Record<string, typeof navigationItems>);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setUserMenuAnchor(null);
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  const getCategoryFromPath = (path: string) => {
+    if (path.includes('dashboard') || path.includes('analytics') || path.includes('monitor')) {
+      return 'Dashboard & Overview';
+    } else if (path.includes('users') || path.includes('agents') || path.includes('support')) {
+      return 'User Management';
+    } else if (path.includes('transaction') || path.includes('bank') || path.includes('recharge') || path.includes('withdrawal') || path.includes('financial')) {
+      return 'Financial Management';
+    } else if (path.includes('lottery') || path.includes('game') || path.includes('casino')) {
+      return 'Game Management';
+    } else if (path.includes('offers') || path.includes('media') || path.includes('feedback')) {
+      return 'Content Management';
+    } else if (path.includes('logs') || path.includes('database') || path.includes('system') || path.includes('backup') || path.includes('api') || path.includes('security') || path.includes('audit')) {
+      return 'System Management';
+    } else if (path.includes('admin-management')) {
+      return 'Admin Management';
+    }
+    return 'Other';
+  };
+
+  const renderIcon = (iconName: string) => {
+    const IconComponent = ICON_MAP[iconName as keyof typeof ICON_MAP];
+    return IconComponent ? <IconComponent /> : <AccountCircle />;
+  };
 
   return (
     <>
@@ -92,7 +98,7 @@ const AdminNav: React.FC = () => {
             onClick={() => setDrawerOpen(true)}
             sx={{ mr: 2 }}
           >
-            <Menu />
+            <MenuIcon />
           </IconButton>
           
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -101,10 +107,11 @@ const AdminNav: React.FC = () => {
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Chip
-              label={`${user?.firstName} ${user?.lastName}`}
-              color="secondary"
+              label={getUserRoleDisplayName(user?.userRole || 3)}
+              color={getUserRoleColor(user?.userRole || 3) as any}
               size="small"
             />
+            
             <Button
               color="inherit"
               startIcon={<Home />}
@@ -112,16 +119,59 @@ const AdminNav: React.FC = () => {
             >
               User View
             </Button>
-            <Button
+            
+            <IconButton
               color="inherit"
-              startIcon={<Logout />}
-              onClick={handleLogout}
+              onClick={(e) => setUserMenuAnchor(e.currentTarget)}
             >
-              Logout
-            </Button>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                {user?.firstName?.charAt(0) || 'U'}
+              </Avatar>
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* User Menu */}
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={() => setUserMenuAnchor(null)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => {
+          navigate('/profile');
+          setUserMenuAnchor(null);
+        }}>
+          <ListItemIcon>
+            <AccountCircle fontSize="small" />
+          </ListItemIcon>
+          Profile
+        </MenuItem>
+        <MenuItem onClick={() => {
+          navigate('/dashboard');
+          setUserMenuAnchor(null);
+        }}>
+          <ListItemIcon>
+            <Home fontSize="small" />
+          </ListItemIcon>
+          User Dashboard
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
 
       <Drawer
         anchor="left"
@@ -129,47 +179,65 @@ const AdminNav: React.FC = () => {
         onClose={() => setDrawerOpen(false)}
         sx={{
           '& .MuiDrawer-paper': {
-            width: 280,
+            width: 320,
             boxSizing: 'border-box',
           },
         }}
       >
         <Box sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
             Admin Menu
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {getUserRoleDisplayName(user?.userRole || 3)}
           </Typography>
         </Box>
         
         <Divider />
         
-        <List>
-          {adminMenuItems.map((item) => (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  navigate(item.path);
-                  setDrawerOpen(false);
-                }}
-                sx={{
-                  backgroundColor: isActive(item.path) ? 'primary.light' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'primary.light',
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.main' : 'inherit' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.title}
-                  sx={{
-                    '& .MuiListItemText-primary': {
-                      fontWeight: isActive(item.path) ? 'bold' : 'normal',
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
+        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+          {Object.entries(groupedItems).map(([category, items]) => (
+            <React.Fragment key={category}>
+              <ListSubheader sx={{ 
+                backgroundColor: 'primary.light', 
+                color: 'primary.contrastText',
+                fontWeight: 'bold'
+              }}>
+                {category}
+              </ListSubheader>
+              {items.map((item) => (
+                <ListItem key={item.path} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      navigate(item.path);
+                      setDrawerOpen(false);
+                    }}
+                    sx={{
+                      backgroundColor: isActive(item.path) ? 'primary.light' : 'transparent',
+                      '&:hover': {
+                        backgroundColor: 'primary.light',
+                      },
+                      pl: 3,
+                    }}
+                  >
+                    <ListItemIcon sx={{ 
+                      color: isActive(item.path) ? 'primary.main' : 'inherit',
+                      minWidth: 40
+                    }}>
+                      {renderIcon(item.icon)}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={item.title}
+                      sx={{
+                        '& .MuiListItemText-primary': {
+                          fontWeight: isActive(item.path) ? 'bold' : 'normal',
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </React.Fragment>
           ))}
         </List>
         
@@ -177,7 +245,10 @@ const AdminNav: React.FC = () => {
         
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => navigate('/dashboard')}>
+            <ListItemButton onClick={() => {
+              navigate('/dashboard');
+              setDrawerOpen(false);
+            }}>
               <ListItemIcon>
                 <Home />
               </ListItemIcon>

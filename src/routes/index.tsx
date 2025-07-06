@@ -30,6 +30,7 @@ import ExchangeRates from '../pages/ExchangeRates';
 import LotteryHistory from '../pages/LotteryHistory';
 import TransactionInfo from '../pages/TransactionInfo';
 import LotteryTicketInfo from '../pages/LotteryTicketInfo';
+import TestNotifications from '../pages/TestNotifications';
 
 // Admin Pages
 import UsersList from '../pages/admin/UsersList';
@@ -266,6 +267,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/admin/mobile-users" element={<PlaceholderPage title="Mobile Users" />} />
       <Route path="/admin/recharge-user" element={<PlaceholderPage title="Recharge User" />} />
       <Route path="/admin/recharge-list/:userId" element={<PlaceholderPage title="Recharge List" />} />
+
+      {/* Test Notifications Route */}
+      <Route path="/test-notifications" element={<TestNotifications />} />
 
       {/* Catch all route */}
       <Route path="*" element={<Navigate to="/" replace />} />

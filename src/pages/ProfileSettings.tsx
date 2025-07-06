@@ -10,8 +10,8 @@ const GENDERS = [
 ];
 
 const ProfileSettings: React.FC = () => {
-  const { api, notification } = useStore();
-  const [user, setUser] = useState<User | null>(null);
+  const { api, notification, user } = useStore();
+  const [profileUser, setProfileUser] = useState<User | null>(null);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -24,17 +24,21 @@ const ProfileSettings: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProfile();
+    if (user?._id) {
+      fetchProfile();
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [user?._id]);
 
   const fetchProfile = async () => {
+    if (!user?._id) return;
+    
     setLoading(true);
     setError(null);
     try {
-      const response = await api.getUserInfo();
+      const response = await api.getUserInfo(user._id);
       if (response.data) {
-        setUser(response.data);
+        setProfileUser(response.data);
         setForm({
           firstName: response.data.firstName || '',
           lastName: response.data.lastName || '',

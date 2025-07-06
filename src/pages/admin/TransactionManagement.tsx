@@ -62,10 +62,10 @@ interface Transaction {
 
 const TransactionManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, setLoading } = useStore();
+  const { addNotification } = useStore();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoadingState] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -84,7 +84,7 @@ const TransactionManagement: React.FC = () => {
 
   const loadTransactions = async () => {
     try {
-      setLoading(true);
+      setIsLoadingState(true);
       const response = await apiService.getAllTransactions(page, pageSize);
       setTransactions(response.data || []);
       setTotalPages(Math.ceil((response.totalCount || 0) / pageSize));
@@ -94,13 +94,13 @@ const TransactionManagement: React.FC = () => {
         type: 'error',
       });
     } finally {
-      setLoading(false);
+      setIsLoadingState(false);
     }
   };
 
   const handleUpdateStatus = async (transactionId: string, status: string) => {
     try {
-      setLoading(true);
+      setIsLoadingState(true);
       await apiService.updateTransactionStatus(transactionId, status);
       
       addNotification({
@@ -116,7 +116,7 @@ const TransactionManagement: React.FC = () => {
         type: 'error',
       });
     } finally {
-      setLoading(false);
+      setIsLoadingState(false);
     }
   };
 
@@ -195,7 +195,7 @@ const TransactionManagement: React.FC = () => {
             variant="contained"
             startIcon={<Refresh />}
             onClick={loadTransactions}
-            disabled={loading}
+            disabled={isLoading}
           >
             Refresh
           </Button>
