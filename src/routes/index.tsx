@@ -43,6 +43,9 @@ import LotterySettings from '../pages/admin/LotterySettings';
 import SearchTransactions from '../pages/admin/SearchTransactions';
 import ApplicationAgents from '../pages/admin/ApplicationAgents';
 import TransactionManagement from '../pages/admin/TransactionManagement';
+import Feedbacks from '../pages/admin/Feedbacks';
+import MediaManagement from '../pages/admin/MediaManagement';
+import BankDetails from '../pages/admin/BankDetails';
 
 // Placeholder Components
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -212,6 +215,30 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/admin/feedbacks" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <Feedbacks />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/media" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <MediaManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/bank-details" 
+        element={
+          <ProtectedRoute allowedRoles={[4, 5]}>
+            <BankDetails />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Placeholder Routes - Consolidated */}
       <Route path="/agent-registration" element={<PlaceholderPage title="Agent Registration" />} />
@@ -232,10 +259,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/admin/filter-transactions" element={<PlaceholderPage title="Filter Transactions" />} />
       <Route path="/admin/lottery-summary" element={<PlaceholderPage title="Lottery Summary" />} />
       <Route path="/admin/lottery-plays" element={<PlaceholderPage title="Lottery Plays" />} />
-      <Route path="/admin/feedbacks" element={<PlaceholderPage title="Feedbacks" />} />
-      <Route path="/admin/media" element={<PlaceholderPage title="Manage Media" />} />
-      <Route path="/admin/bank-details" element={<PlaceholderPage title="Bank Details" />} />
-      <Route path="/admin/email-summary" element={<PlaceholderPage title="Email Summary" />} />
       <Route path="/admin/filter-mobile-data" element={<PlaceholderPage title="Filter Mobile Data" />} />
       <Route path="/admin/update-tickets" element={<PlaceholderPage title="Update Tickets" />} />
       <Route path="/admin/user-mobile-data/:userId" element={<PlaceholderPage title="User Mobile Data" />} />
