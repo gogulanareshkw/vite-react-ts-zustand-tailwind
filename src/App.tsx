@@ -63,15 +63,39 @@ const App: React.FC = () => {
     return user && (user.userRole === 4 || user.userRole === 5);
   };
 
+  const isUserRoute = () => {
+    const path = window.location.pathname;
+    return path.startsWith('/dashboard') || 
+           path.startsWith('/profile') || 
+           path.startsWith('/recharge') || 
+           path.startsWith('/withdraw') || 
+           path.startsWith('/lottery') || 
+           path.startsWith('/bank-cards') || 
+           path.startsWith('/offers') || 
+           path.startsWith('/exchange-rates') || 
+           path.startsWith('/lottery-history') || 
+           path.startsWith('/verify-email') || 
+           path.startsWith('/verify-agent') || 
+           path.startsWith('/change-password');
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {/* Show AdminNav for admin routes, Header for others */}
-          {isAuthenticated && isAdminRoute() && isAdminUser() ? (
-            <AdminNav />
+          {/* Layout based on authentication and route type */}
+          {isAuthenticated ? (
+            // Authenticated user layout
+            isAdminRoute() && isAdminUser() ? (
+              // Admin layout
+              <AdminNav />
+            ) : (
+              // Regular user layout - no header, UserNav will be in individual pages
+              null
+            )
           ) : (
+            // Non-authenticated user layout
             <Header />
           )}
           
@@ -79,8 +103,8 @@ const App: React.FC = () => {
             <AppRoutes />
           </Box>
           
-          {/* Show Footer only for non-admin routes */}
-          {!isAdminRoute() && <Footer />}
+          {/* Show Footer only for non-authenticated and non-admin routes */}
+          {!isAuthenticated && !isAdminRoute() && <Footer />}
         </Box>
         
         <Notification />

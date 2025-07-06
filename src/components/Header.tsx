@@ -159,7 +159,8 @@ const Header: React.FC = () => {
   return (
     <>
       <AppBar position="static" sx={{ backgroundColor: 'primary.main' }}>
-        <Toolbar>
+        {/* Only show mobile menu button for non-authenticated users */}
+        {!isAuthenticated && (
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -169,98 +170,98 @@ const Header: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
+        )}
+        
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          WahLotto
+        </Typography>
+        
+        {/* Desktop Navigation */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+          {publicNavItems.map((item) => (
+            <Button
+              key={item.path}
+              color="inherit"
+              onClick={() => navigate(item.path)}
+              sx={{
+                backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {item.title}
+            </Button>
+          ))}
           
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
-            onClick={() => navigate('/')}
-          >
-            WahLotto
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-            {publicNavItems.map((item) => (
-              <Button
-                key={item.path}
+          {/* Development-only test notifications link */}
+          {process.env.NODE_ENV === 'development' && (
+            <Button
+              color="inherit"
+              onClick={() => navigate('/test-notifications')}
+              sx={{
+                backgroundColor: isActive('/test-notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              Test Notifications
+            </Button>
+          )}
+        </Box>
+        
+        {/* User Menu */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
+          {isAuthenticated ? (
+            <>
+              <Chip
+                label={getUserRoleDisplayName(user?.userRole || 3)}
+                color={getUserRoleColor(user?.userRole || 3) as any}
+                size="small"
+              />
+              <IconButton
                 color="inherit"
-                onClick={() => navigate(item.path)}
-                sx={{
-                  backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
+                onClick={(e) => setUserMenuAnchor(e.currentTarget)}
               >
-                {item.title}
-              </Button>
-            ))}
-            
-            {/* Development-only test notifications link */}
-            {process.env.NODE_ENV === 'development' && (
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                  {user?.firstName?.charAt(0) || 'U'}
+                </Avatar>
+              </IconButton>
+            </>
+          ) : (
+            <>
               <Button
                 color="inherit"
-                onClick={() => navigate('/test-notifications')}
-                sx={{
-                  backgroundColor: isActive('/test-notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
+                onClick={() => navigate('/login')}
+                sx={{ display: { xs: 'none', sm: 'block' } }}
               >
-                Test Notifications
+                Login
               </Button>
-            )}
-          </Box>
-          
-          {/* User Menu */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
-            {isAuthenticated ? (
-              <>
-                <Chip
-                  label={getUserRoleDisplayName(user?.userRole || 3)}
-                  color={getUserRoleColor(user?.userRole || 3) as any}
-                  size="small"
-                />
-                <IconButton
-                  color="inherit"
-                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
-                >
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                    {user?.firstName?.charAt(0) || 'U'}
-                  </Avatar>
-                </IconButton>
-              </>
-            ) : (
-              <>
-                <Button
-                  color="inherit"
-                  onClick={() => navigate('/login')}
-                  sx={{ display: { xs: 'none', sm: 'block' } }}
-                >
-                  Login
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => navigate('/signup')}
-                  sx={{ display: { xs: 'none', sm: 'block' } }}
-                >
-                  Sign Up
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={() => navigate('/agent-registration')}
-                  sx={{ display: { xs: 'none', sm: 'block' } }}
-                >
-                  Agent Signup
-                </Button>
-              </>
-            )}
-          </Box>
-        </Toolbar>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => navigate('/signup')}
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
+                Sign Up
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={() => navigate('/agent-registration')}
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
+                Agent Signup
+              </Button>
+            </>
+          )}
+        </Box>
       </AppBar>
 
       {/* User Menu Dropdown */}
@@ -304,8 +305,8 @@ const Header: React.FC = () => {
         </MenuItem>
       </Menu>
 
-      {/* Mobile Drawer */}
-      <Box component="nav">
+      {/* Only show mobile drawer for non-authenticated users */}
+      {!isAuthenticated && (
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -320,7 +321,7 @@ const Header: React.FC = () => {
         >
           {drawer}
         </Drawer>
-      </Box>
+      )}
     </>
   );
 };

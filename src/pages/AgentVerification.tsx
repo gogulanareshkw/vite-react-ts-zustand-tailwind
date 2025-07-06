@@ -1,86 +1,134 @@
-import React, { useState } from 'react';
-import { Container, Typography, Box, Card, CardContent, Button, TextField, Alert, CircularProgress } from '@mui/material';
+import React from 'react';
+import { Container, Typography, Box, Card, CardContent, Button, Alert, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { Email, Phone, Person, CheckCircle, Pending } from '@mui/icons-material';
 
 const AgentVerification: React.FC = () => {
   const navigate = useNavigate();
-  const { api, notification } = useStore();
-  const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { user, notification } = useStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    if (!otp || otp.length < 4) {
-      setError('Please enter the verification code sent to your email.');
-      return;
-    }
-    setLoading(true);
-    try {
-      await api.verifyEmail(otp);
-      setSuccess('Agent verification successful!');
-      notification.show('Agent verified successfully!', 'success');
-      setTimeout(() => navigate('/dashboard'), 1500);
-    } catch (e: any) {
-      setError(e?.response?.data?.message || 'Verification failed.');
-    } finally {
-      setLoading(false);
-    }
+  const handleContactSupport = () => {
+    notification.show('Please contact support at help.wahlotto@gmail.com', 'info');
   };
 
-  const handleResend = async () => {
-    setResending(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      await api.sendActivationMail();
-      setSuccess('Verification code resent to your email.');
-      notification.show('Verification code resent!', 'info');
-    } catch (e: any) {
-      setError(e?.response?.data?.message || 'Failed to resend code.');
-    } finally {
-      setResending(false);
-    }
+  const handleGoBack = () => {
+    navigate('/dashboard');
   };
+
+  if (!user) return null;
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Agent Verification
+          Profile Verification Status
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Enter the verification code sent to your email to activate your agent account.
+          Your agent account verification status
         </Typography>
       </Box>
-      <Card elevation={3}>
+
+      <Card elevation={3} sx={{ mb: 4 }}>
         <CardContent sx={{ p: 4 }}>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="Verification Code (OTP)"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-              fullWidth
-              required
-              inputProps={{ maxLength: 6 }}
-              sx={{ mb: 2 }}
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            {user.isAgentVerified ? (
+              <CheckCircle sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+            ) : (
+              <Pending sx={{ fontSize: 64, color: 'warning.main', mb: 2 }} />
+            )}
+            
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+              STATUS: {user.isAgentVerified ? 'Verified' : 'Not Verified'}
+            </Typography>
+            
+            <Chip 
+              label={user.isAgentVerified ? 'Agent Verified' : 'Pending Verification'} 
+              color={user.isAgentVerified ? 'success' : 'warning'} 
+              size="large"
+              sx={{ fontSize: '1.1rem', py: 1 }}
             />
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              <Button type="submit" variant="contained" color="success" size="large" disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Verify'}
-              </Button>
-              <Button variant="outlined" color="primary" onClick={handleResend} disabled={resending}>
-                {resending ? <CircularProgress size={20} /> : 'Resend Code'}
-              </Button>
+          </Box>
+
+          {!user.isAgentVerified && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                Your profile registration request is not verified yet.
+              </Typography>
+              <Typography variant="body2">
+                Please wait for approval from administrator. Make sure the details you have provided are correct. 
+                Our Admin will verify your email, phone number and other details.
+              </Typography>
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Email color="primary" />
+              <Typography variant="body1">
+                <strong>Email:</strong> {user.email}
+              </Typography>
+              <Chip 
+                label={user.isEmailVerified ? 'Verified' : 'Not Verified'} 
+                color={user.isEmailVerified ? 'success' : 'error'} 
+                size="small"
+              />
             </Box>
-          </form>
+            
+            {user.phone && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Phone color="primary" />
+                <Typography variant="body1">
+                  <strong>Phone:</strong> {user.phone}
+                </Typography>
+              </Box>
+            )}
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Person color="primary" />
+              <Typography variant="body1">
+                <strong>Name:</strong> {user.firstName} {user.lastName}
+              </Typography>
+            </Box>
+          </Box>
+
+          {!user.isAgentVerified && (
+            <Alert severity="warning" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                If you think your details are correct and still not approved by Admin, then please write an email to{' '}
+                <Button 
+                  variant="text" 
+                  color="primary" 
+                  onClick={handleContactSupport}
+                  sx={{ p: 0, minWidth: 'auto', textDecoration: 'underline' }}
+                >
+                  help.wahlotto@gmail.com
+                </Button>
+              </Typography>
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleGoBack}
+              size="large"
+            >
+              Go to Dashboard
+            </Button>
+            
+            {!user.isAgentVerified && (
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                onClick={handleContactSupport}
+                size="large"
+              >
+                Contact Support
+              </Button>
+            )}
+          </Box>
         </CardContent>
       </Card>
     </Container>

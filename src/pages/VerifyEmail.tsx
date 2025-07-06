@@ -30,7 +30,7 @@ const VerifyEmail: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const { user, isAuthenticated, addNotification, setLoading, notification } = useStore();
+  const { user, isAuthenticated, addNotification, setLoading, notification, setUser } = useStore();
 
   const [otp, setOtp] = useState('');
   const [showOtp, setShowOtp] = useState(false);
@@ -81,7 +81,32 @@ const VerifyEmail: React.FC = () => {
       
       if (response.success) {
         notification.show('Email verified successfully!', 'success');
-        navigate('/dashboard');
+        
+        // Update user data in store with the response data
+        if (response.data && user) {
+          const updatedUser = {
+            ...user,
+            isEmailVerified: response.data.isEmailVerified,
+            isAgentVerified: response.data.isAgentVerified,
+            availableAmount: response.data.availableAmount,
+            isChangedDefaultPassword: response.data.isChangedDefaultPassword,
+          };
+          
+          // Update store with new user data
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+        
+        // Navigate based on user verification status (same logic as webapp)
+        if (response.data?.isChangedDefaultPassword) {
+          if (response.data?.isAgentVerified) {
+            navigate('/dashboard'); // Main dashboard (profile in webapp)
+          } else {
+            navigate('/verify-agent'); // Agent verification needed
+          }
+        } else {
+          navigate('/change-password'); // Change default password needed
+        }
       }
     } catch (error: any) {
       // Error will be handled by API service and shown as snackbar

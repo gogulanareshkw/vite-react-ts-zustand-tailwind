@@ -48,6 +48,9 @@ import Feedbacks from '../pages/admin/Feedbacks';
 import MediaManagement from '../pages/admin/MediaManagement';
 import BankDetails from '../pages/admin/BankDetails';
 
+// Layout Components
+import UserPageWrapper from '../components/UserPageWrapper';
+
 // Placeholder Components
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -116,24 +119,145 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/change-password" element={<ChangePassword />} />
-      <Route path="/recharge" element={<RechargePage />} />
-      <Route path="/withdraw" element={<WithDrawPage />} />
-      <Route path="/bank-cards" element={<BankCards />} />
-      <Route path="/lottery-game" element={<LotteryGame />} />
-      <Route path="/results" element={<Results />} />
-      <Route path="/offers" element={<Offers />} />
-      <Route path="/exchange-rates" element={<ExchangeRates />} />
-      <Route path="/lottery-history" element={<LotteryHistory />} />
-      <Route path="/test-notifications" element={<TestNotifications />} />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Profile">
+              <Profile />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/change-password" 
+        element={
+          <ProtectedRoute requireEmailVerified={true}>
+            <UserPageWrapper title="Change Password">
+              <ChangePassword />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/recharge" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Recharge">
+              <RechargePage />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/withdraw" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Withdraw">
+              <WithDrawPage />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/bank-cards" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Bank Cards">
+              <BankCards />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/lottery-game" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Lottery Game">
+              <LotteryGame />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/results" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Results">
+              <Results />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/offers" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Offers">
+              <Offers />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/exchange-rates" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Exchange Rates">
+              <ExchangeRates />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/lottery-history" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Lottery History">
+              <LotteryHistory />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/verify-agent" 
+        element={
+          <ProtectedRoute requireEmailVerified={true}>
+            <UserPageWrapper title="Agent Verification">
+              <AgentVerification />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/transaction-info/:txnId" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Transaction Info">
+              <TransactionInfo />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/ticket-info/:ticketId" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Ticket Info">
+              <LotteryTicketInfo />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Admin Routes */}
       <Route 
         path="/admin/dashboard" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <AdminDashboard />
+            <UserPageWrapper>
+              <AdminDashboard />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -141,7 +265,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/users" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <UsersList />
+            <UserPageWrapper>
+              <UsersList />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -149,7 +275,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/offers" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <OffersManagement />
+            <UserPageWrapper>
+              <OffersManagement />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -157,7 +285,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/game-settings" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <GameSettings />
+            <UserPageWrapper>
+              <GameSettings />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -165,7 +295,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/application-logs" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <ApplicationLogs />
+            <UserPageWrapper>
+              <ApplicationLogs />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -173,7 +305,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/database-history" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <DatabaseHistory />
+            <UserPageWrapper>
+              <DatabaseHistory />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -181,7 +315,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/system-monitor" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <SystemMonitor />
+            <UserPageWrapper>
+              <SystemMonitor />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -189,7 +325,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/lottery-settings" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <LotterySettings />
+            <UserPageWrapper>
+              <LotterySettings />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -197,7 +335,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/search-transactions" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <SearchTransactions />
+            <UserPageWrapper>
+              <SearchTransactions />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -205,7 +345,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/application-agents" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <ApplicationAgents />
+            <UserPageWrapper>
+              <ApplicationAgents />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -213,7 +355,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/transaction-management" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <TransactionManagement />
+            <UserPageWrapper>
+              <TransactionManagement />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -221,7 +365,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/feedbacks" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <Feedbacks />
+            <UserPageWrapper>
+              <Feedbacks />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -229,7 +375,9 @@ const AppRoutes: React.FC = () => {
         path="/admin/media" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <MediaManagement />
+            <UserPageWrapper>
+              <MediaManagement />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
@@ -237,40 +385,120 @@ const AppRoutes: React.FC = () => {
         path="/admin/bank-details" 
         element={
           <ProtectedRoute allowedRoles={[4, 5]}>
-            <BankDetails />
+            <UserPageWrapper>
+              <BankDetails />
+            </UserPageWrapper>
           </ProtectedRoute>
         } 
       />
 
       {/* Placeholder Routes - Consolidated */}
-      <Route path="/agent-registration" element={<PlaceholderPage title="Agent Registration" />} />
-      <Route path="/verify-agent" element={<AgentVerification />} />
-      <Route path="/profile-settings" element={<PlaceholderPage title="Profile Settings" />} />
-      <Route path="/game-options" element={<PlaceholderPage title="Game Options" />} />
-      <Route path="/play-lottery/:lotteryGameType" element={<PlaceholderPage title="Play Lottery" />} />
-      <Route path="/buy-lottery-ticket" element={<PlaceholderPage title="Buy Lottery Ticket" />} />
-      <Route path="/transactions/:userId" element={<PlaceholderPage title="Transactions" />} />
-      <Route path="/referrals/:userId" element={<PlaceholderPage title="Referrals" />} />
-      <Route path="/wallet/:userId" element={<PlaceholderPage title="Wallet" />} />
-      <Route path="/transaction-info/:txnId" element={<TransactionInfo />} />
-      <Route path="/ticket-info/:ticketId" element={<LotteryTicketInfo />} />
-      <Route path="/lottery-results" element={<PlaceholderPage title="Lottery Results" />} />
+      <Route 
+        path="/agent-registration" 
+        element={
+          <ProtectedRoute requireEmailVerified={true}>
+            <UserPageWrapper title="Agent Registration">
+              <PlaceholderPage title="Agent Registration" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/profile-settings" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Profile Settings">
+              <PlaceholderPage title="Profile Settings" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/game-options" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Game Options">
+              <PlaceholderPage title="Game Options" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/play-lottery/:lotteryGameType" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Play Lottery">
+              <PlaceholderPage title="Play Lottery" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/buy-lottery-ticket" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Buy Lottery Ticket">
+              <PlaceholderPage title="Buy Lottery Ticket" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/transactions/:userId" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Transactions">
+              <PlaceholderPage title="Transactions" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/referrals/:userId" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Referrals">
+              <PlaceholderPage title="Referrals" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/wallet/:userId" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Wallet">
+              <PlaceholderPage title="Wallet" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/lottery-results" 
+        element={
+          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+            <UserPageWrapper title="Lottery Results">
+              <PlaceholderPage title="Lottery Results" />
+            </UserPageWrapper>
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Admin Placeholder Routes */}
-      <Route path="/admin/payment-transactions" element={<PlaceholderPage title="Payment Transactions" />} />
-      <Route path="/admin/filter-transactions" element={<PlaceholderPage title="Filter Transactions" />} />
-      <Route path="/admin/lottery-summary" element={<PlaceholderPage title="Lottery Summary" />} />
-      <Route path="/admin/lottery-plays" element={<PlaceholderPage title="Lottery Plays" />} />
-      <Route path="/admin/filter-mobile-data" element={<PlaceholderPage title="Filter Mobile Data" />} />
-      <Route path="/admin/update-tickets" element={<PlaceholderPage title="Update Tickets" />} />
-      <Route path="/admin/user-mobile-data/:userId" element={<PlaceholderPage title="User Mobile Data" />} />
-      <Route path="/admin/user-mobile-data-new/:userId" element={<PlaceholderPage title="User Mobile Data New" />} />
-      <Route path="/admin/mobile-users" element={<PlaceholderPage title="Mobile Users" />} />
-      <Route path="/admin/recharge-user" element={<PlaceholderPage title="Recharge User" />} />
-      <Route path="/admin/recharge-list/:userId" element={<PlaceholderPage title="Recharge List" />} />
+      <Route path="/admin/payment-transactions" element={<UserPageWrapper><PlaceholderPage title="Payment Transactions" /></UserPageWrapper>} />
+      <Route path="/admin/filter-transactions" element={<UserPageWrapper><PlaceholderPage title="Filter Transactions" /></UserPageWrapper>} />
+      <Route path="/admin/lottery-summary" element={<UserPageWrapper><PlaceholderPage title="Lottery Summary" /></UserPageWrapper>} />
+      <Route path="/admin/lottery-plays" element={<UserPageWrapper><PlaceholderPage title="Lottery Plays" /></UserPageWrapper>} />
+      <Route path="/admin/filter-mobile-data" element={<UserPageWrapper><PlaceholderPage title="Filter Mobile Data" /></UserPageWrapper>} />
+      <Route path="/admin/update-tickets" element={<UserPageWrapper><PlaceholderPage title="Update Tickets" /></UserPageWrapper>} />
+      <Route path="/admin/user-mobile-data/:userId" element={<UserPageWrapper><PlaceholderPage title="User Mobile Data" /></UserPageWrapper>} />
+      <Route path="/admin/user-mobile-data-new/:userId" element={<UserPageWrapper><PlaceholderPage title="User Mobile Data New" /></UserPageWrapper>} />
+      <Route path="/admin/mobile-users" element={<UserPageWrapper><PlaceholderPage title="Mobile Users" /></UserPageWrapper>} />
+      <Route path="/admin/recharge-user" element={<UserPageWrapper><PlaceholderPage title="Recharge User" /></UserPageWrapper>} />
+      <Route path="/admin/recharge-list/:userId" element={<UserPageWrapper><PlaceholderPage title="Recharge List" /></UserPageWrapper>} />
 
       {/* Test Notifications Route */}
-      <Route path="/test-notifications" element={<TestNotifications />} />
+      <Route path="/test-notifications" element={<UserPageWrapper><TestNotifications /></UserPageWrapper>} />
 
       {/* Catch all route */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -327,49 +327,41 @@ class ApiService {
   // Auth APIs
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await this.enhancedRequest<AuthResponse>('post', this.appendAppKey(API_ENDPOINTS.LOGIN), data);
-    this.showSuccessNotification('Login successful! Welcome back.');
     return response;
   }
 
   async signUp(data: SignUpRequest): Promise<AuthResponse> {
     const response = await this.enhancedRequest<AuthResponse>('post', this.appendAppKey(API_ENDPOINTS.SIGNUP), data);
-    this.showSuccessNotification('Account created successfully! Please check your email for verification.');
     return response;
   }
 
   async agentSignUp(data: AgentSignUpRequest): Promise<AuthResponse> {
     const response = await this.enhancedRequest<AuthResponse>('post', this.appendAppKey(API_ENDPOINTS.AGENT_SIGNUP), data);
-    this.showSuccessNotification('Agent registration submitted successfully! We will review your application.');
     return response;
   }
 
   async verifyEmail(OTP: string): Promise<ApiResponse<User>> {
     const response = await this.enhancedRequest<ApiResponse<User>>('post', API_ENDPOINTS.VERIFY_EMAIL, { OTP });
-    this.showSuccessNotification('Email verified successfully! Your account is now active.');
     return response;
   }
 
   async sendActivationMail(): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('get', API_ENDPOINTS.SEND_ACTIVATION_MAIL);
-    this.showSuccessNotification('Activation email sent successfully! Please check your inbox.');
     return response;
   }
 
   async forgotPassword(email: string): Promise<ApiResponse<{ userId: string }>> {
     const response = await this.enhancedRequest<ApiResponse<{ userId: string }>>('post', this.appendAppKey(API_ENDPOINTS.FORGOT_PASSWORD), { email });
-    this.showSuccessNotification('Password reset email sent! Please check your inbox.');
     return response;
   }
 
   async resetPassword(userId: string, OTP: string, newPassword: string): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('post', this.appendAppKey(API_ENDPOINTS.RESET_PASSWORD), { userId, OTP, newPassword });
-    this.showSuccessNotification('Password reset successfully! You can now log in with your new password.');
     return response;
   }
 
   async changePassword(currPassword: string, newPassword: string): Promise<ApiResponse<User>> {
     const response = await this.enhancedRequest<ApiResponse<User>>('post', API_ENDPOINTS.CHANGE_PASSWORD, { currPassword, newPassword });
-    this.showSuccessNotification('Password changed successfully!');
     return response;
   }
 
@@ -382,7 +374,6 @@ class ApiService {
     const response = await this.enhancedRequest<ApiResponse<User>>('put', API_ENDPOINTS.UPDATE_PROFILE, data);
     // Clear user cache
     this.clearCache('getUserInfo');
-    this.showSuccessNotification('Profile updated successfully!');
     return response;
   }
 
@@ -435,7 +426,6 @@ class ApiService {
   // Lottery Game Play APIs
   async playLotteryGame(data: PlayLotteryGameRequest): Promise<ApiResponse<LotteryGamePlay>> {
     const response = await this.enhancedRequest<ApiResponse<LotteryGamePlay>>('post', API_ENDPOINTS.PLAY_LOTTERY, data);
-    this.showSuccessNotification('Lottery ticket purchased successfully! Good luck!');
     return response;
   }
 
@@ -450,7 +440,6 @@ class ApiService {
   // Financial APIs
   async createRecharge(data: { amount: number; paymentMethod: string }): Promise<ApiResponse<Recharge>> {
     const response = await this.enhancedRequest<ApiResponse<Recharge>>('post', API_ENDPOINTS.CREATE_RECHARGE, data);
-    this.showSuccessNotification('Recharge request submitted successfully! We will process it shortly.');
     return response;
   }
 
@@ -464,7 +453,6 @@ class ApiService {
 
   async createWithdraw(data: { amount: number; bankCardId: string }): Promise<ApiResponse<Withdraw>> {
     const response = await this.enhancedRequest<ApiResponse<Withdraw>>('post', API_ENDPOINTS.CREATE_WITHDRAW, data);
-    this.showSuccessNotification('Withdrawal request submitted successfully! We will process it shortly.');
     return response;
   }
 
@@ -479,7 +467,6 @@ class ApiService {
   // Bank Card APIs
   async createBankCard(data: Partial<BankCard>): Promise<ApiResponse<BankCard>> {
     const response = await this.enhancedRequest<ApiResponse<BankCard>>('post', API_ENDPOINTS.CREATE_BANK_CARD, data);
-    this.showSuccessNotification('Bank card added successfully!');
     return response;
   }
 
@@ -492,7 +479,6 @@ class ApiService {
 
   async deleteBankCard(bankCardId: string): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('delete', `${API_ENDPOINTS.DELETE_BANK_CARD}/${bankCardId}`);
-    this.showSuccessNotification('Bank card removed successfully!');
     return response;
   }
 

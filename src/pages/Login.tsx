@@ -24,9 +24,6 @@ import {
   Email,
   Lock,
   Login as LoginIcon,
-  Google,
-  Facebook,
-  Apple,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
 import apiService from '../services/api';
@@ -45,7 +42,6 @@ const Login: React.FC = () => {
     setLoading, 
     addNotification,
     isAuthenticated,
-    login,
     notification
   } = useStore();
 
@@ -109,20 +105,38 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await login(formData);
+      const response = await apiService.login(formData);
       
       if (response.success) {
+        // Store authentication data
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        // Update store
+        setUser(response.user);
+        setToken(response.token);
+        setAuthenticated(true);
+        
         notification.show('Login successful!', 'success');
         
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
         
-        // Redirect based on user role
-        if (response.user?.userRole === 4 || response.user?.userRole === 5) {
-          navigate('/admin/dashboard');
+        // Redirect based on user verification status (same logic as webapp)
+        if (!response.user.isEmailVerified) {
+          navigate('/verify-email');
+        } else if (!response.user.isChangedDefaultPassword) {
+          navigate('/change-password');
+        } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
+          navigate('/verify-agent');
         } else {
-          navigate('/dashboard');
+          // Redirect based on user role
+          if (response.user?.userRole === 4 || response.user?.userRole === 5) {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
         }
       }
     } catch (error: any) {
@@ -136,13 +150,6 @@ const Login: React.FC = () => {
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleSocialLogin = (provider: string) => {
-    addNotification({
-      message: `${provider} login is not available yet. Please use email/password login.`,
-      type: 'info',
-    });
   };
 
   const handleForgotPassword = () => {
@@ -261,72 +268,6 @@ const Login: React.FC = () => {
               }}
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
-            </Button>
-          </Box>
-
-          {/* Divider */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Divider sx={{ flex: 1 }} />
-            <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
-              OR
-            </Typography>
-            <Divider sx={{ flex: 1 }} />
-          </Box>
-
-          {/* Social Login Buttons */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Google />}
-              onClick={() => handleSocialLogin('Google')}
-              sx={{ 
-                py: 1.5,
-                borderColor: '#db4437',
-                color: '#db4437',
-                '&:hover': {
-                  borderColor: '#c23321',
-                  backgroundColor: 'rgba(219, 68, 55, 0.04)',
-                },
-              }}
-            >
-              Continue with Google
-            </Button>
-
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Facebook />}
-              onClick={() => handleSocialLogin('Facebook')}
-              sx={{ 
-                py: 1.5,
-                borderColor: '#4267B2',
-                color: '#4267B2',
-                '&:hover': {
-                  borderColor: '#365899',
-                  backgroundColor: 'rgba(66, 103, 178, 0.04)',
-                },
-              }}
-            >
-              Continue with Facebook
-            </Button>
-
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<Apple />}
-              onClick={() => handleSocialLogin('Apple')}
-              sx={{ 
-                py: 1.5,
-                borderColor: '#000000',
-                color: '#000000',
-                '&:hover': {
-                  borderColor: '#333333',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              Continue with Apple
             </Button>
           </Box>
         </CardContent>

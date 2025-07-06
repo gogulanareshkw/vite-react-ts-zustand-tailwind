@@ -59,6 +59,24 @@ const UserNav: React.FC<UserNavProps> = ({ open, onClose }) => {
   const { user, logout } = useStore();
   const [userMenuAnchor, setUserMenuAnchor] = React.useState<null | HTMLElement>(null);
 
+  // Helper function to categorize navigation items
+  const getCategoryFromPath = (path: string) => {
+    if (path.includes('dashboard') || path.includes('profile')) {
+      return 'Account';
+    } else if (path.includes('wallet') || path.includes('recharge') || path.includes('withdraw') || path.includes('bank-cards')) {
+      return 'Financial';
+    } else if (path.includes('lottery') || path.includes('game')) {
+      return 'Gaming';
+    } else if (path.includes('offers') || path.includes('exchange-rates')) {
+      return 'Offers & Rates';
+    } else if (path.includes('agent') || path.includes('referrals') || path.includes('commission')) {
+      return 'Agent Features';
+    } else if (path.includes('staff') || path.includes('support') || path.includes('reports')) {
+      return 'Staff Features';
+    }
+    return 'Other';
+  };
+
   // Get navigation items based on user role
   const navigationItems = user ? getNavigationItems(user.userRole) : [];
   
@@ -80,23 +98,6 @@ const UserNav: React.FC<UserNavProps> = ({ open, onClose }) => {
   };
 
   const isActive = (path: string) => location.pathname === path;
-
-  const getCategoryFromPath = (path: string) => {
-    if (path.includes('dashboard') || path.includes('profile')) {
-      return 'Account';
-    } else if (path.includes('wallet') || path.includes('recharge') || path.includes('withdraw') || path.includes('bank-cards')) {
-      return 'Financial';
-    } else if (path.includes('lottery') || path.includes('game')) {
-      return 'Gaming';
-    } else if (path.includes('offers') || path.includes('exchange-rates')) {
-      return 'Offers & Rates';
-    } else if (path.includes('agent') || path.includes('referrals') || path.includes('commission')) {
-      return 'Agent Features';
-    } else if (path.includes('staff') || path.includes('support') || path.includes('reports')) {
-      return 'Staff Features';
-    }
-    return 'Other';
-  };
 
   const renderIcon = (iconName: string) => {
     const IconComponent = ICON_MAP[iconName as keyof typeof ICON_MAP];
