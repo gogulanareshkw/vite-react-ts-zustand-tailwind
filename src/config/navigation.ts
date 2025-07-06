@@ -139,11 +139,10 @@ export const NAVIGATION_CONFIG = {
     { title: 'Recharge Management', path: '/admin/recharge-management', icon: 'Payment' },
     { title: 'Withdrawal Management', path: '/admin/withdrawal-management', icon: 'Money' },
     
-    // Game Management
+    // Game Management (Admin can view but not play)
     { title: 'Lottery Settings', path: '/admin/lottery-settings', icon: 'Casino' },
     { title: 'Game Settings', path: '/admin/game-settings', icon: 'Settings' },
     { title: 'Lottery Results', path: '/admin/lottery-results', icon: 'Assessment' },
-    { title: 'Lottery Plays', path: '/admin/lottery-plays', icon: 'Gamepad' },
     
     // Content Management
     { title: 'Offers Management', path: '/admin/offers', icon: 'LocalOffer' },
@@ -270,6 +269,20 @@ export const getPublicNavigation = () => {
 
 // Helper function to check if user has access to a specific route
 export const hasRouteAccess = (userRole: number, route: string) => {
+  // Admin users cannot access lottery play and game history routes
+  if (userRole === USER_ROLES.ADMIN) {
+    const restrictedRoutes = [
+      '/lottery-game',
+      '/lottery-history',
+      '/admin/lottery-plays',
+      '/play-lottery',
+      '/game-history'
+    ];
+    if (restrictedRoutes.includes(route)) {
+      return false;
+    }
+  }
+
   const navigationItems = getNavigationItems(userRole);
   return navigationItems.some(item => item.path === route);
 };

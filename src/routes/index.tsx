@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { USER_ROLES } from '../config/navigation';
 
 // Existing Pages
 import Home from '../pages/Home';
@@ -172,7 +173,11 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/lottery-game" 
         element={
-          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+          <ProtectedRoute 
+            requireEmailVerified={true} 
+            requireAgentVerified={true}
+            allowedRoles={[USER_ROLES.USER, USER_ROLES.AGENT, USER_ROLES.STAFF, USER_ROLES.SUPER_ADMIN]}
+          >
             <UserPageWrapper title="Lottery Game">
               <LotteryGame />
             </UserPageWrapper>
@@ -212,7 +217,11 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/lottery-history" 
         element={
-          <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
+          <ProtectedRoute 
+            requireEmailVerified={true} 
+            requireAgentVerified={true}
+            allowedRoles={[USER_ROLES.USER, USER_ROLES.AGENT, USER_ROLES.STAFF, USER_ROLES.SUPER_ADMIN]}
+          >
             <UserPageWrapper title="Lottery History">
               <LotteryHistory />
             </UserPageWrapper>
@@ -254,7 +263,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/dashboard" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <AdminDashboard />
             </UserPageWrapper>
@@ -264,7 +273,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/users" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <UsersList />
             </UserPageWrapper>
@@ -274,7 +283,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/offers" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <OffersManagement />
             </UserPageWrapper>
@@ -284,7 +293,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/game-settings" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <GameSettings />
             </UserPageWrapper>
@@ -294,7 +303,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/application-logs" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <ApplicationLogs />
             </UserPageWrapper>
@@ -304,7 +313,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/database-history" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <DatabaseHistory />
             </UserPageWrapper>
@@ -314,7 +323,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/system-monitor" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <SystemMonitor />
             </UserPageWrapper>
@@ -324,7 +333,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/lottery-settings" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <LotterySettings />
             </UserPageWrapper>
@@ -334,7 +343,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/search-transactions" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <SearchTransactions />
             </UserPageWrapper>
@@ -344,7 +353,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/application-agents" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <ApplicationAgents />
             </UserPageWrapper>
@@ -354,7 +363,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/transaction-management" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <TransactionManagement />
             </UserPageWrapper>
@@ -364,7 +373,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/feedbacks" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <Feedbacks />
             </UserPageWrapper>
@@ -374,7 +383,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/media" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <MediaManagement />
             </UserPageWrapper>
@@ -384,7 +393,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/admin/bank-details" 
         element={
-          <ProtectedRoute allowedRoles={[4, 5]}>
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
             <UserPageWrapper>
               <BankDetails />
             </UserPageWrapper>

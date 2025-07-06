@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
 import AdminNav from './components/AdminNav';
+import { USER_ROLES } from './config/navigation';
 import type { User } from './types';
 
 const theme = createTheme({
@@ -60,7 +61,7 @@ const App: React.FC = () => {
   };
 
   const isAdminUser = () => {
-    return user && (user.userRole === 4 || user.userRole === 5);
+    return user && (user.userRole === USER_ROLES.ADMIN || user.userRole === USER_ROLES.SUPER_ADMIN);
   };
 
   const isUserRoute = () => {
