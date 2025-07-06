@@ -64,14 +64,6 @@ interface LotteryStore extends AppState {
 export const useStore = create<LotteryStore>()(
   persist(
     (set, get) => {
-      // Create notification callback
-      const notificationCallback = (message: string, type: 'success' | 'error' | 'warning' | 'info', duration = 5000) => {
-        get().addNotification({ message, type, duration });
-      };
-
-      // Set up API service with notification callback
-      apiService.setNotificationCallback(notificationCallback);
-
       return {
         // Initial State
         user: null,

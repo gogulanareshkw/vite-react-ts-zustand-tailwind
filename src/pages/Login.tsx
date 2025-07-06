@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -17,7 +17,6 @@ import {
   Divider,
   FormControlLabel,
   Checkbox,
-  Link as MuiLink,
 } from '@mui/material';
 import {
   Visibility,
@@ -29,7 +28,6 @@ import {
   Facebook,
   Apple,
 } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import apiService from '../services/api';
 import type { LoginRequest } from '../types';
@@ -46,7 +44,9 @@ const Login: React.FC = () => {
     setAuthenticated, 
     setLoading, 
     addNotification,
-    isAuthenticated 
+    isAuthenticated,
+    login,
+    notification
   } = useStore();
 
   const [formData, setFormData] = useState<LoginRequest>({
@@ -54,7 +54,8 @@ const Login: React.FC = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rememberMe, setRememberMe] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'error'>('idle');
 
@@ -65,11 +66,11 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [field]: event.target.value }));
+    // Clear validation error when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({ ...prev, [field]: '' }));
     }
     // Clear submit status when user starts typing
     if (submitStatus === 'error') {
@@ -78,73 +79,63 @@ const Login: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
+    const errors: Record<string, string> = {};
+    
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      errors.email = 'Please enter a valid email address';
     }
-
+    
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      errors.password = 'Password must be at least 6 characters';
     }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     setIsLoading(true);
     setSubmitStatus('idle');
     setLoading(true);
 
     try {
-      const response = await apiService.login(formData);
+      const response = await login(formData);
       
-      // Store authentication data
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      // Update store
-      setUser(response.user);
-      setToken(response.token);
-      setAuthenticated(true);
-      
-      // Show success notification
-      addNotification({
-        message: 'Login successful! Welcome back.',
-        type: 'success',
-      });
-
-      // Redirect based on user verification status
-      if (!response.user.isEmailVerified) {
-        navigate('/verify-email');
-      } else if (!response.user.isChangedDefaultPassword) {
-        navigate('/change-password');
-      } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
-        navigate('/verify-agent');
-      } else {
-        navigate('/dashboard');
+      if (response.success) {
+        notification.show('Login successful!', 'success');
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        }
+        
+        // Redirect based on user role
+        if (response.user?.userRole === 4 || response.user?.userRole === 5) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
-    } catch (error) {
-      setSubmitStatus('error');
-      const errorMessage = apiService.handleError(error);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+    } catch (error: any) {
+      // Error will be handled by API service and shown as snackbar
       console.error('Login error:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
     }
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -183,22 +174,15 @@ const Login: React.FC = () => {
 
       <Card elevation={4} sx={{ maxWidth: 500, mx: 'auto' }}>
         <CardContent sx={{ p: 4 }}>
-          {/* Error Message */}
-          {submitStatus === 'error' && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              Invalid email or password. Please try again.
-            </Alert>
-          )}
-
           {/* Login Form */}
           <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
             <TextField
               label="Email Address"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              error={!!errors.email}
-              helperText={errors.email}
+              onChange={handleInputChange('email')}
+              error={!!validationErrors.email}
+              helperText={validationErrors.email}
               fullWidth
               required
               sx={{ mb: 3 }}
@@ -215,9 +199,9 @@ const Login: React.FC = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              error={!!errors.password}
-              helperText={errors.password}
+              onChange={handleInputChange('password')}
+              error={!!validationErrors.password}
+              helperText={validationErrors.password}
               fullWidth
               required
               sx={{ mb: 2 }}
@@ -230,7 +214,7 @@ const Login: React.FC = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={handleTogglePasswordVisibility}
                       edge="end"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -244,20 +228,19 @@ const Login: React.FC = () => {
               <FormControlLabel
                 control={
                   <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     color="primary"
-                    disabled
                   />
                 }
                 label="Remember me"
               />
-              <MuiLink
-                component="button"
-                variant="body2"
-                onClick={handleForgotPassword}
-                sx={{ cursor: 'pointer' }}
+              <Link
+                to="/forgot-password"
+                style={{ cursor: 'pointer', color: theme.palette.primary.main, fontWeight: 'bold' }}
               >
                 Forgot password?
-              </MuiLink>
+              </Link>
             </Box>
 
             <Button

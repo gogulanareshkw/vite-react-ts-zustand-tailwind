@@ -95,6 +95,34 @@ const Header: React.FC = () => {
           </ListItem>
         ))}
         
+        {/* Development-only test notifications link */}
+        {process.env.NODE_ENV === 'development' && (
+          <ListItem disablePadding>
+            <ListItemButton
+              sx={{
+                textAlign: 'center',
+                backgroundColor: isActive('/test-notifications') ? 'primary.light' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                },
+              }}
+              onClick={() => navigate('/test-notifications')}
+            >
+              <ListItemIcon sx={{ color: isActive('/test-notifications') ? 'primary.main' : 'inherit' }}>
+                <Support />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Test Notifications"
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    fontWeight: isActive('/test-notifications') ? 'bold' : 'normal',
+                  },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+        
         {isAuthenticated && (
           <>
             <Divider />
@@ -168,6 +196,22 @@ const Header: React.FC = () => {
                 {item.title}
               </Button>
             ))}
+            
+            {/* Development-only test notifications link */}
+            {process.env.NODE_ENV === 'development' && (
+              <Button
+                color="inherit"
+                onClick={() => navigate('/test-notifications')}
+                sx={{
+                  backgroundColor: isActive('/test-notifications') ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                Test Notifications
+              </Button>
+            )}
           </Box>
           
           {/* User Menu */}

@@ -155,13 +155,9 @@ const WithDrawPage: React.FC = () => {
       } else {
         setError('Failed to create withdrawal request. Please try again.');
       }
-    } catch (error) {
-      const errorMessage = apiService.handleError(error);
-      setError(errorMessage);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+    } catch (error: any) {
+      // Error will be handled by API service and shown as snackbar automatically
+      console.error('Withdrawal error:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
@@ -201,12 +197,6 @@ const WithDrawPage: React.FC = () => {
               {success && (
                 <Alert severity="success" sx={{ mb: 3 }}>
                   Withdrawal request submitted successfully! You will receive the funds within 24-48 hours.
-                </Alert>
-              )}
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
                 </Alert>
               )}
 

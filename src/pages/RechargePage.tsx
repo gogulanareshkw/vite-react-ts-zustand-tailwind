@@ -172,12 +172,8 @@ const RechargePage: React.FC = () => {
       // Reload history
       await loadRechargeHistory();
     } catch (error: any) {
-      const errorMessage = apiService.handleError(error);
-      setError(errorMessage);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+      // Error will be handled by API service and shown as snackbar automatically
+      console.error('Recharge error:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
@@ -220,7 +216,7 @@ const RechargePage: React.FC = () => {
       <Grid container spacing={4}>
         {/* Recharge Form */}
         <Grid item xs={12} md={8}>
-          <Card elevation={4}>
+          <Card elevation={4} sx={{ maxWidth: 600, mx: 'auto' }}>
             <CardContent sx={{ p: 4 }}>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                 Recharge Amount
@@ -233,12 +229,6 @@ const RechargePage: React.FC = () => {
                   icon={<CheckCircle />}
                 >
                   Recharge request submitted successfully! You will receive a confirmation shortly.
-                </Alert>
-              )}
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
                 </Alert>
               )}
 

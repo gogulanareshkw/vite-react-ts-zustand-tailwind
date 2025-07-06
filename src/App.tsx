@@ -3,6 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { useStore } from './store/useStore';
+import apiService from './services/api';
 import AppRoutes from './routes';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -25,9 +26,16 @@ const theme = createTheme({
 });
 
 const App: React.FC = () => {
-  const { isAuthenticated, user, setUser, setToken, setAuthenticated } = useStore();
+  const { isAuthenticated, user, setUser, setToken, setAuthenticated, addNotification } = useStore();
 
   useEffect(() => {
+    // Set up API service notification callback
+    const notificationCallback = (message: string, type: 'success' | 'error' | 'warning' | 'info', duration = 5000) => {
+      addNotification({ message, type, duration });
+    };
+    
+    apiService.setNotificationCallback(notificationCallback);
+
     // Initialize app state from localStorage
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
@@ -44,7 +52,7 @@ const App: React.FC = () => {
         localStorage.removeItem('user');
       }
     }
-  }, [setUser, setToken, setAuthenticated]);
+  }, [setUser, setToken, setAuthenticated, addNotification]);
 
   const isAdminRoute = () => {
     const path = window.location.pathname;

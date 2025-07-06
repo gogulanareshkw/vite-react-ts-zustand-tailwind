@@ -1,128 +1,93 @@
 import React from 'react';
-import { Box, Button, Typography, Paper, Grid } from '@mui/material';
+import { Box, Button, Typography, Paper } from '@mui/material';
 import { useStore } from '../store/useStore';
 
 const TestNotifications: React.FC = () => {
-  const { notification, api } = useStore();
+  const { notification, addNotification, notifications } = useStore();
 
-  const testNotifications = () => {
-    // Test store notification system
-    notification.show('Test success message from store', 'success');
-    setTimeout(() => notification.show('Test error message from store', 'error'), 1000);
-    setTimeout(() => notification.show('Test warning message from store', 'warning'), 2000);
-    setTimeout(() => notification.show('Test info message from store', 'info'), 3000);
+  const testBasicNotification = () => {
+    console.log('Testing basic notification...');
+    addNotification({
+      message: 'This is a test notification',
+      type: 'success',
+      duration: 5000
+    });
   };
 
-  const testApiNotifications = () => {
-    // Test API notification system
-    (api as any).testSuccessNotification('Test success message from API');
-    setTimeout(() => (api as any).testErrorNotification('Test error message from API'), 1000);
-    setTimeout(() => (api as any).testWarningNotification('Test warning message from API'), 2000);
-    setTimeout(() => (api as any).testInfoNotification('Test info message from API'), 3000);
+  const testNotificationShow = () => {
+    console.log('Testing notification.show...');
+    notification.show('This is a test from notification.show', 'error');
   };
 
-  const testApiError = async () => {
-    try {
-      // This will trigger an API error that should show as a notification
-      await api.getUserInfo('invalid-user-id');
-    } catch (error) {
-      // Error should be automatically handled by the API service
-      console.log('API error caught:', error);
-    }
+  const testMultipleNotifications = () => {
+    console.log('Testing multiple notifications...');
+    addNotification({ message: 'First notification', type: 'success' });
+    setTimeout(() => addNotification({ message: 'Second notification', type: 'error' }), 1000);
+    setTimeout(() => addNotification({ message: 'Third notification', type: 'warning' }), 2000);
+    setTimeout(() => addNotification({ message: 'Fourth notification', type: 'info' }), 3000);
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         Notification System Test
       </Typography>
       
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        Testing the notification system to identify why notifications are not showing.
+      </Typography>
+
+      {/* Debug Info */}
+      <Paper sx={{ p: 2, mb: 3, bgcolor: 'grey.100' }}>
         <Typography variant="h6" gutterBottom>
-          Test Store Notifications
+          Debug Information
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          These notifications are triggered directly through the store's notification system.
+        <Typography variant="body2">
+          Current notifications count: {notifications.length}
         </Typography>
-        <Button 
-          variant="contained" 
-          onClick={testNotifications}
-          sx={{ mr: 2 }}
-        >
-          Test Store Notifications
-        </Button>
+        <Typography variant="body2">
+          Notifications: {JSON.stringify(notifications.map(n => ({ id: n.id, message: n.message, type: n.type })))}
+        </Typography>
       </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Test API Notifications
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          These notifications are triggered through the API service's notification system.
-        </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Button 
           variant="contained" 
-          onClick={testApiNotifications}
-          sx={{ mr: 2 }}
+          onClick={testBasicNotification}
+          fullWidth
         >
-          Test API Notifications
+          Test Basic Notification
         </Button>
-      </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Test API Error Handling
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          This will trigger an actual API error that should automatically show as a notification.
-        </Typography>
         <Button 
           variant="contained" 
-          color="error"
-          onClick={testApiError}
+          onClick={testNotificationShow}
+          fullWidth
         >
-          Test API Error
+          Test notification.show
         </Button>
-      </Paper>
 
-      <Paper sx={{ p: 3 }}>
+        <Button 
+          variant="contained" 
+          onClick={testMultipleNotifications}
+          fullWidth
+        >
+          Test Multiple Notifications
+        </Button>
+      </Box>
+
+      <Paper sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Notification Features
+          Instructions
         </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="primary">
-              ✅ Automatic Error Display
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              All API errors are automatically shown as snackbar notifications
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="primary">
-              ✅ Success Notifications
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Important operations show success confirmations
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="primary">
-              ✅ Auto-dismiss
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Notifications automatically disappear after a set duration
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="primary">
-              ✅ Manual Close
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Users can manually close notifications by clicking the X button
-            </Typography>
-          </Grid>
-        </Grid>
+        <Typography variant="body2" component="div">
+          <ol>
+            <li>Click the test buttons above</li>
+            <li>Check the browser console for debug messages</li>
+            <li>Look for notifications in the top-right corner</li>
+            <li>If notifications don't appear, check the debug info above</li>
+          </ol>
+        </Typography>
       </Paper>
     </Box>
   );

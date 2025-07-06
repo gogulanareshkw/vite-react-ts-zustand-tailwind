@@ -12,11 +12,15 @@ import {
   useTheme,
   useMediaQuery,
   InputAdornment,
+  IconButton,
 } from '@mui/material';
 import {
   Email,
   CheckCircle,
   Refresh,
+  Visibility,
+  VisibilityOff,
+  Security,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
 import apiService from '../services/api';
@@ -26,12 +30,12 @@ const VerifyEmail: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const { user, isAuthenticated, addNotification, setLoading } = useStore();
+  const { user, isAuthenticated, addNotification, setLoading, notification } = useStore();
 
   const [otp, setOtp] = useState('');
+  const [showOtp, setShowOtp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Redirect if not authenticated or already verified
   useEffect(() => {
@@ -44,14 +48,28 @@ const VerifyEmail: React.FC = () => {
 
   const handleOtpChange = (value: string) => {
     setOtp(value);
-    if (error) setError('');
+    if (validationErrors.otp) {
+      setValidationErrors(prev => ({ ...prev, otp: '' }));
+    }
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
     
     if (!otp.trim()) {
-      setError('Please enter the OTP');
+      errors.otp = 'Please enter the OTP';
+    } else if (otp.length !== 6) {
+      errors.otp = 'OTP must be 6 digits';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -61,30 +79,13 @@ const VerifyEmail: React.FC = () => {
     try {
       const response = await apiService.verifyEmail(otp);
       
-      if (response && response.success) {
-        addNotification({
-          message: 'Email verified successfully!',
-          type: 'success',
-        });
-
-        // Redirect based on user status
-        if (!response.isChangedDefaultPassword) {
-          navigate('/change-password');
-        } else if (!response.isAgentVerified && response.userRole === 4) {
-          navigate('/verify-agent');
-        } else {
-          navigate('/dashboard');
-        }
-      } else {
-        setError('Invalid OTP. Please try again.');
+      if (response.success) {
+        notification.show('Email verified successfully!', 'success');
+        navigate('/dashboard');
       }
-    } catch (error) {
-      const errorMessage = apiService.handleError(error);
-      setError(errorMessage);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+    } catch (error: any) {
+      // Error will be handled by API service and shown as snackbar
+      console.error('Email verification error:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
@@ -92,22 +93,21 @@ const VerifyEmail: React.FC = () => {
   };
 
   const handleResendOtp = async () => {
-    setIsResending(true);
-    
+    setIsLoading(true);
+    setLoading(true);
+
     try {
-      await apiService.sendActivationMail();
-      addNotification({
-        message: 'OTP sent to your email successfully!',
-        type: 'success',
-      });
-    } catch (error) {
-      const errorMessage = apiService.handleError(error);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+      const response = await apiService.sendActivationMail();
+      
+      if (response.success) {
+        notification.show('OTP sent successfully!', 'success');
+      }
+    } catch (error: any) {
+      // Error will be handled by API service and shown as snackbar
+      console.error('Resend OTP error:', error);
     } finally {
-      setIsResending(false);
+      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -145,24 +145,31 @@ const VerifyEmail: React.FC = () => {
             </Typography>
           </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleVerify} sx={{ mb: 4 }}>
+          <form onSubmit={handleVerifyOtp}>
             <TextField
-              label="Verification Code"
+              fullWidth
+              label="Enter OTP"
+              type={showOtp ? 'text' : 'password'}
               value={otp}
               onChange={(e) => handleOtpChange(e.target.value)}
-              fullWidth
+              error={!!validationErrors.otp}
+              helperText={validationErrors.otp}
               required
               sx={{ mb: 3 }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <CheckCircle color="action" />
+                    <Security color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowOtp(!showOtp)}
+                      edge="end"
+                    >
+                      {showOtp ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
                   </InputAdornment>
                 ),
               }}
@@ -186,20 +193,18 @@ const VerifyEmail: React.FC = () => {
             >
               {isLoading ? 'Verifying...' : 'Verify Email'}
             </Button>
-          </Box>
+          </form>
 
-          <Box sx={{ textAlign: 'center' }}>
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Didn't receive the code?
             </Typography>
             <Button
-              variant="outlined"
-              startIcon={<Refresh />}
+              variant="text"
               onClick={handleResendOtp}
-              disabled={isResending}
-              sx={{ mb: 2 }}
+              disabled={isLoading}
             >
-              {isResending ? 'Sending...' : 'Resend Code'}
+              Resend OTP
             </Button>
           </Box>
         </CardContent>

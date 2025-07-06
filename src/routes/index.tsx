@@ -126,6 +126,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/offers" element={<Offers />} />
       <Route path="/exchange-rates" element={<ExchangeRates />} />
       <Route path="/lottery-history" element={<LotteryHistory />} />
+      <Route path="/test-notifications" element={<TestNotifications />} />
 
       {/* Admin Routes */}
       <Route 

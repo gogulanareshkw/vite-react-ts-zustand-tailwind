@@ -199,18 +199,11 @@ const SignUp: React.FC = () => {
         }
       } else {
         setSubmitStatus('error');
-        addNotification({
-          message: 'Registration failed. Please try again.',
-          type: 'error',
-        });
+        // Error will be handled by API service and shown as snackbar automatically
       }
     } catch (error) {
       setSubmitStatus('error');
-      const errorMessage = apiService.handleError(error);
-      addNotification({
-        message: errorMessage,
-        type: 'error',
-      });
+      // Error will be handled by API service and shown as snackbar automatically
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
@@ -243,13 +236,6 @@ const SignUp: React.FC = () => {
 
       <Card elevation={4} sx={{ maxWidth: 500, mx: 'auto' }}>
         <CardContent sx={{ p: 4 }}>
-          {/* Error Message */}
-          {submitStatus === 'error' && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              Registration failed. Please check your information and try again.
-            </Alert>
-          )}
-
           {/* Sign Up Form */}
           <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
             <TextField
