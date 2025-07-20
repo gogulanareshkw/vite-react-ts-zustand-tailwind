@@ -22,8 +22,8 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: 'primary.main' }}>
-      <Toolbar>
+    <AppBar position="static" sx={{ backgroundColor: 'primary.main', width: '100%', minWidth: '100%' }}>
+      <Toolbar sx={{ width: '100%', minWidth: '100%', px: { xs: 1, sm: 2 } }}>
         <Typography
           variant="h6"
           component="div"

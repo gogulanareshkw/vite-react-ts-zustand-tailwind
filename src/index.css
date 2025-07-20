@@ -30,6 +30,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -74,4 +76,25 @@ button:focus-visible {
   margin: 0;
   padding: 0;
   text-align: left;
+  min-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure full width for small screens */
+@media (max-width: 400px) {
+  .MuiContainer-root {
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .MuiCard-root {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .MuiPaper-root {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }

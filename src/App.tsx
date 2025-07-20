@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { useStore } from './store/useStore';
@@ -26,8 +26,9 @@ const theme = createTheme({
   },
 });
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { isAuthenticated, user, setUser, setToken, setAuthenticated, addNotification } = useStore();
+  const location = useLocation();
 
   useEffect(() => {
     // Set up API service notification callback
@@ -55,6 +56,12 @@ const App: React.FC = () => {
     }
   }, [setUser, setToken, setAuthenticated, addNotification]);
 
+  // Check if footer should be shown (only on Home and More pages)
+  const shouldShowFooter = () => {
+    const path = location.pathname;
+    return path === '/' || path === '/more';
+  };
+
 
 
   const isUserRoute = () => {
@@ -74,24 +81,29 @@ const App: React.FC = () => {
   };
 
   return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%', minWidth: '100%' }}>
+      {/* Header - show for all pages */}
+      <Header />
+      
+      <Box component="main" sx={{ flexGrow: 1, pb: shouldShowFooter() ? { xs: 12, sm: 11 } : { xs: 7, sm: 6 } }}>
+        <AppRoutes />
+      </Box>
+      
+      {/* Footer - show only on Home and More pages */}
+      {shouldShowFooter() && <Footer />}
+      
+      {/* Bottom Navigation - show for all pages */}
+      <BottomNav />
+    </Box>
+  );
+};
+
+const App: React.FC = () => {
+  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {/* Header - show for all pages */}
-          <Header />
-          
-          <Box component="main" sx={{ flexGrow: 1, pb: { xs: 12, sm: 11 } }}>
-            <AppRoutes />
-          </Box>
-          
-          {/* Footer - show for all pages */}
-          <Footer />
-          
-          {/* Bottom Navigation - show for all pages */}
-          <BottomNav />
-        </Box>
-        
+        <AppContent />
         <Notification />
       </Router>
     </ThemeProvider>
