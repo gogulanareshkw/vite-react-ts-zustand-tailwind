@@ -15,14 +15,114 @@ import type { User } from './types';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#a78bfa', // Playful purple
+      dark: '#7c3aed',
+      light: '#ddd6fe',
+      contrastText: '#fff',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#f472b6', // Playful pink
+      dark: '#db2777',
+      light: '#fbcfe8',
+      contrastText: '#fff',
     },
+    accent: {
+      main: '#bef264', // Lime accent
+      contrastText: '#1e293b',
+    },
+    success: {
+      main: '#4ade80',
+    },
+    warning: {
+      main: '#fde047',
+      contrastText: '#1e293b',
+    },
+    error: {
+      main: '#fb7185',
+    },
+    info: {
+      main: '#38bdf8',
+    },
+    background: {
+      default: '#f9fafb',
+      paper: '#fff',
+    },
+    text: {
+      primary: '#1e293b',
+      secondary: '#64748b',
+    },
+    divider: '#e5e7eb',
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: 'Inter, Roboto, Helvetica, Arial, sans-serif',
+    fontSize: 17,
+    h1: { fontWeight: 700, fontSize: '2.3rem', lineHeight: 1.2 },
+    h2: { fontWeight: 600, fontSize: '2rem', lineHeight: 1.25 },
+    h3: { fontWeight: 600, fontSize: '1.6rem', lineHeight: 1.3 },
+    h4: { fontWeight: 600, fontSize: '1.3rem', lineHeight: 1.35 },
+    h5: { fontWeight: 500, fontSize: '1.1rem', lineHeight: 1.4 },
+    h6: { fontWeight: 500, fontSize: '1rem', lineHeight: 1.4 },
+    button: { fontWeight: 600, textTransform: 'none' },
+  },
+  shape: {
+    borderRadius: 16,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          fontWeight: 600,
+          textTransform: 'none',
+          boxShadow: 'none',
+          padding: '8px 18px',
+          '&:hover': {
+            boxShadow: '0 2px 8px rgba(167,139,250,0.10)',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: '0 2px 8px rgba(244,114,182,0.08)',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          // Remove border radius for AppBar (header)
+          borderRadius: ownerState.variant === 'elevation' && ownerState.component === 'header' ? 0 : 16,
+        }),
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 12,
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 1px 4px rgba(244,114,182,0.08)',
+          borderRadius: 0,
+        },
+      },
+    },
   },
 });
 
