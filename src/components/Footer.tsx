@@ -10,10 +10,11 @@ const Footer: React.FC = () => {
         color: 'white',
         borderTop: '1px solid',
         borderColor: 'grey.700',
-        mt: 'auto',
-        py: 3,
+        py: 2,
+        mb: { xs: 7, sm: 6 },
+        position: 'relative',
+        zIndex: 999,
       }}
-      className="mt-auto"
     >
       <Container maxWidth="lg">
         <Box

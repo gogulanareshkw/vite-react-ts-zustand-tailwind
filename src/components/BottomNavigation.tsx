@@ -79,6 +79,8 @@ const BottomNav: React.FC = () => {
         zIndex: 1000,
         borderTop: '1px solid',
         borderColor: 'divider',
+        width: '100%',
+        maxWidth: '100vw',
       }} 
       elevation={3}
     >

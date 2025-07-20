@@ -1,5 +1,5 @@
 import React from 'react';
-import UserLayout from './UserLayout';
+import { Typography, Box } from '@mui/material';
 
 interface UserPageWrapperProps {
   children: React.ReactNode;
@@ -8,9 +8,16 @@ interface UserPageWrapperProps {
 
 const UserPageWrapper: React.FC<UserPageWrapperProps> = ({ children, title }) => {
   return (
-    <UserLayout title={title}>
+    <>
+      {title && (
+        <Box sx={{ p: 2, pb: 1 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+            {title}
+          </Typography>
+        </Box>
+      )}
       {children}
-    </UserLayout>
+    </>
   );
 };
 

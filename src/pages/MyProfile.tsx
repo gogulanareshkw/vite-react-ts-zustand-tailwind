@@ -16,7 +16,7 @@ import {
   Settings,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
-import UserLayout from '../components/UserLayout';
+
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -45,8 +45,7 @@ const MyProfile: React.FC = () => {
   }
 
   return (
-    <UserLayout title="My Profile">
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -156,7 +155,6 @@ const MyProfile: React.FC = () => {
           </CardContent>
         </Card>
       </Container>
-    </UserLayout>
   );
 };
 

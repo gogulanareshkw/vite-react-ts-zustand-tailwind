@@ -353,7 +353,7 @@ const Home: React.FC = () => {
           onClick={handleScrollTop}
           sx={{
             position: 'fixed',
-            bottom: 20,
+            bottom: { xs: 80, sm: 70 },
             right: 20,
             bgcolor: 'primary.main',
             color: 'white',

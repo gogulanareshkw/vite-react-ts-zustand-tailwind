@@ -81,7 +81,7 @@ const App: React.FC = () => {
           {/* Header - show for all pages */}
           <Header />
           
-          <Box component="main" sx={{ flexGrow: 1, pb: 7 }}>
+          <Box component="main" sx={{ flexGrow: 1, pb: { xs: 12, sm: 11 } }}>
             <AppRoutes />
           </Box>
           
