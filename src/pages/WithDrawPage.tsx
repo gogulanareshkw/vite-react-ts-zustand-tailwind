@@ -382,9 +382,9 @@ const WithDrawPage: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/my-profile')}
         >
-          Back to Dashboard
+          Back to My Profile
         </Button>
       </Box>
     </Container>

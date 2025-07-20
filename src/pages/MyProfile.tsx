@@ -18,7 +18,7 @@ import {
 import { useStore } from '../store/useStore';
 import UserLayout from '../components/UserLayout';
 
-const Dashboard: React.FC = () => {
+const MyProfile: React.FC = () => {
   const navigate = useNavigate();
   const { 
     user, 
@@ -38,14 +38,14 @@ const Dashboard: React.FC = () => {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h4" textAlign="center">
-          Loading dashboard...
+          Loading profile...
         </Typography>
       </Container>
     );
   }
 
   return (
-    <UserLayout title="Dashboard">
+    <UserLayout title="My Profile">
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
             Welcome back, {getUserDisplayName()}!
           </Typography>
           <Typography variant="h6" color="text.secondary">
-            Your WahLotto Dashboard
+            Your WahLotto Profile
           </Typography>
         </Box>
 
@@ -160,4 +160,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default MyProfile; 

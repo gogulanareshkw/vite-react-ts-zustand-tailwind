@@ -58,7 +58,7 @@ const Login: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+              navigate('/my-profile');
     }
   }, [isAuthenticated, navigate]);
 
@@ -131,12 +131,8 @@ const Login: React.FC = () => {
         } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
           navigate('/verify-agent');
         } else {
-          // Redirect based on user role
-          if (response.user?.userRole === 4 || response.user?.userRole === 5) {
-            navigate('/admin/dashboard');
-          } else {
-            navigate('/dashboard');
-          }
+          // Redirect to my profile
+          navigate('/my-profile');
         }
       }
     } catch (error: any) {
@@ -157,7 +153,16 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <Container 
+      maxWidth="sm" 
+      sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        py: 4,
+      }}
+    >
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography 
           variant={isMobile ? "h3" : "h2"} 
@@ -281,45 +286,6 @@ const Login: React.FC = () => {
             Sign Up
           </Link>
         </Typography>
-      </Box>
-
-      {/* Security Notice */}
-      <Paper elevation={1} sx={{ p: 3, mt: 4, background: 'rgba(76, 175, 80, 0.1)', border: '1px solid #4caf50' }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'success.main' }}>
-          🔒 Secure Login
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Your account is protected with bank-level security. All login attempts are monitored 
-          and verified to ensure your account remains secure.
-        </Typography>
-      </Paper>
-
-      {/* Features Highlight */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2, mt: 4 }}>
-        <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            🎯 Quick Access
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Instant access to your account
-          </Typography>
-        </Paper>
-        <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            💰 Check Winnings
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            View your lottery results
-          </Typography>
-        </Paper>
-        <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            🎮 Play Games
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Buy tickets and play
-          </Typography>
-        </Paper>
       </Box>
     </Container>
   );

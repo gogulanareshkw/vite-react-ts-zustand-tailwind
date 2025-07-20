@@ -66,7 +66,7 @@ export const NAVIGATION_CONFIG = {
 
   // User Dashboard Navigation
   user: [
-    { title: 'Dashboard', path: '/dashboard', icon: 'Dashboard' },
+    { title: 'My Profile', path: '/dashboard', icon: 'Dashboard' },
     { title: 'Profile', path: '/profile', icon: 'AccountCircle' },
     { title: 'Wallet', path: '/wallet', icon: 'Wallet' },
     { title: 'Recharge', path: '/recharge', icon: 'Payment' },
@@ -82,7 +82,7 @@ export const NAVIGATION_CONFIG = {
 
   // Agent Navigation
   agent: [
-    { title: 'Dashboard', path: '/dashboard', icon: 'Dashboard' },
+    { title: 'My Profile', path: '/dashboard', icon: 'Dashboard' },
     { title: 'Profile', path: '/profile', icon: 'AccountCircle' },
     { title: 'Wallet', path: '/wallet', icon: 'Wallet' },
     { title: 'Recharge', path: '/recharge', icon: 'Payment' },
@@ -102,7 +102,7 @@ export const NAVIGATION_CONFIG = {
 
   // Staff Navigation
   staff: [
-    { title: 'Dashboard', path: '/dashboard', icon: 'Dashboard' },
+    { title: 'My Profile', path: '/dashboard', icon: 'Dashboard' },
     { title: 'Profile', path: '/profile', icon: 'AccountCircle' },
     { title: 'Wallet', path: '/wallet', icon: 'Wallet' },
     { title: 'Recharge', path: '/recharge', icon: 'Payment' },

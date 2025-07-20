@@ -67,7 +67,7 @@ const SignUp: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+              navigate('/my-profile');
     }
   }, [isAuthenticated, navigate]);
 
@@ -195,7 +195,7 @@ const SignUp: React.FC = () => {
         } else if (!response.user.isAgentVerified && response.user.userRole === 4) {
           navigate('/verify-agent');
         } else {
-          navigate('/dashboard');
+          navigate('/my-profile');
         }
       } else {
         setSubmitStatus('error');
@@ -212,7 +212,16 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <Container 
+      maxWidth="sm" 
+      sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        py: 4,
+      }}
+    >
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography 
           variant={isMobile ? "h3" : "h2"} 
@@ -420,44 +429,7 @@ const SignUp: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Benefits Section */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold', mb: 3 }}>
-          Why Choose WahLotto?
-        </Typography>
-        
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 3 }}>
-          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              Secure & Safe
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Bank-level security to protect your account and transactions
-            </Typography>
-          </Paper>
 
-          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              Instant Results
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Get your lottery results instantly with real-time updates
-            </Typography>
-          </Paper>
-
-          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-            <CheckCircle sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              Referral Rewards
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Earn bonuses by referring friends and family
-            </Typography>
-          </Paper>
-        </Box>
-      </Box>
     </Container>
   );
 };

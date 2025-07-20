@@ -42,7 +42,7 @@ const VerifyEmail: React.FC = () => {
     if (!isAuthenticated) {
       navigate('/login');
     } else if (user?.isEmailVerified) {
-      navigate('/dashboard');
+              navigate('/my-profile');
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -100,7 +100,7 @@ const VerifyEmail: React.FC = () => {
         // Navigate based on user verification status (same logic as webapp)
         if (response.isChangedDefaultPassword) {
           if (response.isAgentVerified) {
-            navigate('/dashboard'); // Main dashboard (profile in webapp)
+            navigate('/my-profile'); // Main MyProfile (profile in webapp)
           } else {
             navigate('/verify-agent'); // Agent verification needed
           }

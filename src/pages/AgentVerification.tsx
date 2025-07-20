@@ -13,7 +13,7 @@ const AgentVerification: React.FC = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/dashboard');
+            navigate('/my-profile');
   };
 
   if (!user) return null;
@@ -115,7 +115,7 @@ const AgentVerification: React.FC = () => {
               onClick={handleGoBack}
               size="large"
             >
-              Go to Dashboard
+              Go to My Profile
             </Button>
             
             {!user.isAgentVerified && (

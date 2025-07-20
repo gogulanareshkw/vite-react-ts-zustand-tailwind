@@ -65,10 +65,10 @@ const LotteryGameResults: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/my-profile')}
           sx={{ mb: 2 }}
         >
-          Back to Dashboard
+          Back to My Profile
         </Button>
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Lottery Game Results

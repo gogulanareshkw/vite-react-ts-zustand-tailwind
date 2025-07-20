@@ -98,7 +98,7 @@ src/
 │   └── ...
 ├── pages/              # Page components
 │   ├── Login.tsx       # Login page with API integration
-│   ├── Dashboard.tsx   # User dashboard
+│   ├── MyProfile.tsx   # User MyProfile
 │   └── ...
 ├── services/           # API and external services
 │   └── api.ts         # Centralized API service

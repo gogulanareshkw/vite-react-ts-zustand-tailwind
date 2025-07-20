@@ -8,10 +8,11 @@ import Home from '../pages/Home';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Help from '../pages/Help';
+import More from '../pages/More';
 import Login from '../pages/Login';
 import SignUp from '../pages/SignUp';
 import VerifyEmail from '../pages/VerifyEmail';
-import Dashboard from '../pages/Dashboard';
+import MyProfile from '../pages/MyProfile';
 import Profile from '../pages/Profile';
 import ChangePassword from '../pages/ChangePassword';
 import RechargePage from '../pages/RechargePage';
@@ -34,20 +35,7 @@ import LotteryTicketInfo from '../pages/LotteryTicketInfo';
 import TestNotifications from '../pages/TestNotifications';
 
 // Admin Pages
-import UsersList from '../pages/admin/UsersList';
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import OffersManagement from '../pages/admin/OffersManagement';
-import GameSettings from '../pages/admin/GameSettings';
-import ApplicationLogs from '../pages/admin/ApplicationLogs';
-import DatabaseHistory from '../pages/admin/DatabaseHistory';
-import SystemMonitor from '../pages/admin/SystemMonitor';
-import LotterySettings from '../pages/admin/LotterySettings';
-import SearchTransactions from '../pages/admin/SearchTransactions';
-import ApplicationAgents from '../pages/admin/ApplicationAgents';
-import TransactionManagement from '../pages/admin/TransactionManagement';
-import Feedbacks from '../pages/admin/Feedbacks';
-import MediaManagement from '../pages/admin/MediaManagement';
-import BankDetails from '../pages/admin/BankDetails';
+
 
 // Layout Components
 import UserPageWrapper from '../components/UserPageWrapper';
@@ -87,7 +75,7 @@ const ProtectedRoute: React.FC<{
   }
 
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.userRole)) {
-    return <Navigate to="/dashboard" replace />;
+            return <Navigate to="/my-profile" replace />;
   }
 
   return <>{children}</>;
@@ -101,6 +89,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/help" element={<Help />} />
+      <Route path="/more" element={<More />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
@@ -113,10 +102,10 @@ const AppRoutes: React.FC = () => {
 
       {/* Protected User Routes */}
       <Route 
-        path="/dashboard" 
+        path="/my-profile" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <Dashboard />
+            <MyProfile />
           </ProtectedRoute>
         } 
       />
@@ -259,147 +248,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
 
-      {/* Admin Routes */}
-      <Route 
-        path="/admin/dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <AdminDashboard />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/users" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <UsersList />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/offers" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <OffersManagement />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/game-settings" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <GameSettings />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/application-logs" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <ApplicationLogs />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/database-history" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <DatabaseHistory />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/system-monitor" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <SystemMonitor />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/lottery-settings" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <LotterySettings />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/search-transactions" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <SearchTransactions />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/application-agents" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <ApplicationAgents />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/transaction-management" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <TransactionManagement />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/feedbacks" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <Feedbacks />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/media" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <MediaManagement />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/bank-details" 
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}>
-            <UserPageWrapper>
-              <BankDetails />
-            </UserPageWrapper>
-          </ProtectedRoute>
-        } 
-      />
+
 
       {/* Placeholder Routes - Consolidated */}
       <Route 
@@ -493,18 +342,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
 
-      {/* Admin Placeholder Routes */}
-      <Route path="/admin/payment-transactions" element={<UserPageWrapper><PlaceholderPage title="Payment Transactions" /></UserPageWrapper>} />
-      <Route path="/admin/filter-transactions" element={<UserPageWrapper><PlaceholderPage title="Filter Transactions" /></UserPageWrapper>} />
-      <Route path="/admin/lottery-summary" element={<UserPageWrapper><PlaceholderPage title="Lottery Summary" /></UserPageWrapper>} />
-      <Route path="/admin/lottery-plays" element={<UserPageWrapper><PlaceholderPage title="Lottery Plays" /></UserPageWrapper>} />
-      <Route path="/admin/filter-mobile-data" element={<UserPageWrapper><PlaceholderPage title="Filter Mobile Data" /></UserPageWrapper>} />
-      <Route path="/admin/update-tickets" element={<UserPageWrapper><PlaceholderPage title="Update Tickets" /></UserPageWrapper>} />
-      <Route path="/admin/user-mobile-data/:userId" element={<UserPageWrapper><PlaceholderPage title="User Mobile Data" /></UserPageWrapper>} />
-      <Route path="/admin/user-mobile-data-new/:userId" element={<UserPageWrapper><PlaceholderPage title="User Mobile Data New" /></UserPageWrapper>} />
-      <Route path="/admin/mobile-users" element={<UserPageWrapper><PlaceholderPage title="Mobile Users" /></UserPageWrapper>} />
-      <Route path="/admin/recharge-user" element={<UserPageWrapper><PlaceholderPage title="Recharge User" /></UserPageWrapper>} />
-      <Route path="/admin/recharge-list/:userId" element={<UserPageWrapper><PlaceholderPage title="Recharge List" /></UserPageWrapper>} />
+
 
       {/* Test Notifications Route */}
       <Route path="/test-notifications" element={<UserPageWrapper><TestNotifications /></UserPageWrapper>} />

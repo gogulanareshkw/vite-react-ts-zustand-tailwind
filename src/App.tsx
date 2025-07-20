@@ -8,7 +8,7 @@ import AppRoutes from './routes';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
-import AdminNav from './components/AdminNav';
+import BottomNav from './components/BottomNavigation';
 import { USER_ROLES } from './config/navigation';
 import type { User } from './types';
 
@@ -55,18 +55,11 @@ const App: React.FC = () => {
     }
   }, [setUser, setToken, setAuthenticated, addNotification]);
 
-  const isAdminRoute = () => {
-    const path = window.location.pathname;
-    return path.startsWith('/admin');
-  };
 
-  const isAdminUser = () => {
-    return user && (user.userRole === USER_ROLES.ADMIN || user.userRole === USER_ROLES.SUPER_ADMIN);
-  };
 
   const isUserRoute = () => {
     const path = window.location.pathname;
-    return path.startsWith('/dashboard') || 
+    return path.startsWith('/my-profile') || 
            path.startsWith('/profile') || 
            path.startsWith('/recharge') || 
            path.startsWith('/withdraw') || 
@@ -85,27 +78,18 @@ const App: React.FC = () => {
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {/* Layout based on authentication and route type */}
-          {isAuthenticated ? (
-            // Authenticated user layout
-            isAdminRoute() && isAdminUser() ? (
-              // Admin layout
-              <AdminNav />
-            ) : (
-              // Regular user layout - no header, UserNav will be in individual pages
-              null
-            )
-          ) : (
-            // Non-authenticated user layout
-            <Header />
-          )}
+          {/* Header - show for all pages */}
+          <Header />
           
-          <Box component="main" sx={{ flexGrow: 1 }}>
+          <Box component="main" sx={{ flexGrow: 1, pb: 7 }}>
             <AppRoutes />
           </Box>
           
-          {/* Show Footer only for non-authenticated and non-admin routes */}
-          {!isAuthenticated && !isAdminRoute() && <Footer />}
+          {/* Footer - show for all pages */}
+          <Footer />
+          
+          {/* Bottom Navigation - show for all pages */}
+          <BottomNav />
         </Box>
         
         <Notification />
