@@ -40,6 +40,7 @@ const Login: React.FC = () => {
     setToken, 
     setAuthenticated, 
     setLoading, 
+    setGameSettings,
     addNotification,
     isAuthenticated,
     notification
@@ -121,6 +122,24 @@ const Login: React.FC = () => {
         
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
+        }
+        
+        // Fetch additional user data and game settings
+        try {
+          // Fetch user details
+          const userInfoResponse = await apiService.getUserInfo(response.user._id);
+          if (userInfoResponse.success && userInfoResponse.data) {
+            setUser(userInfoResponse.data);
+          }
+          
+          // Fetch game settings
+          const gameSettingsResponse = await apiService.getGameSettings();
+          if (gameSettingsResponse.success && gameSettingsResponse.data) {
+            setGameSettings(gameSettingsResponse.data);
+          }
+        } catch (error) {
+          console.error('Error fetching additional data:', error);
+          // Continue with login even if additional data fetch fails
         }
         
         // Redirect based on user verification status (same logic as webapp)

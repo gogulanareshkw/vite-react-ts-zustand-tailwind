@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Box,
@@ -15,6 +15,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  CircularProgress,
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -38,7 +39,36 @@ import { useStore } from '../store/useStore';
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useStore();
+  const { user, api, setUser, setGameSettings } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch user details and game settings when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?._id) {
+        setIsLoading(true);
+        try {
+          // Fetch updated user details
+          const userInfoResponse = await api.getUserInfo(user._id);
+          if (userInfoResponse.success && userInfoResponse.data) {
+            setUser(userInfoResponse.data);
+          }
+          
+          // Fetch game settings
+          const gameSettingsResponse = await api.getGameSettings();
+          if (gameSettingsResponse.success && gameSettingsResponse.data) {
+            setGameSettings(gameSettingsResponse.data);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user?._id, api, setUser, setGameSettings]);
 
   const quickActions = [
     { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
@@ -58,6 +88,13 @@ const MyProfile: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Loading Indicator */}
+      {isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <CircularProgress size={40} />
+        </Box>
+      )}
+      
       {/* Cover Photo Area */}
       <Box sx={{ 
         position: 'relative', 
