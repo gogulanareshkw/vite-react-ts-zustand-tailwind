@@ -290,56 +290,56 @@ const MyProfile: React.FC = () => {
         gap: 3,
         mb: 4
       }}>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/wallethistory')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/wallet/${user?.userId}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <AccountBalanceWallet sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Wallet History</Typography>
             <Typography variant="body2" color="text.secondary">View your wallet activity</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/transactions')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/transactions/${user?.userId}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <ReceiptLong sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Transactions</Typography>
             <Typography variant="body2" color="text.secondary">All your transactions</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/recharges')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/recharge')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <AddCard sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Recharges</Typography>
             <Typography variant="body2" color="text.secondary">Recharge history</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/withdraws')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/withdraw')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <MoneyOff sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Withdraws</Typography>
             <Typography variant="body2" color="text.secondary">Withdraw history</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/bankcards')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/bank-cards')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <CreditCard sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Bank Cards</Typography>
             <Typography variant="body2" color="text.secondary">Manage your bank cards</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/referrals')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/referrals/${user?.userId}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <GroupAdd sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Referrals</Typography>
             <Typography variant="body2" color="text.secondary">Your referrals</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/playhistory')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/lottery-history')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <History sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Play History</Typography>
             <Typography variant="body2" color="text.secondary">Your lottery play history</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profilesettings')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profile-settings')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <Settings sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Profile Settings</Typography>

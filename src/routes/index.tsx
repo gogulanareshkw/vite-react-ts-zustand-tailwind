@@ -33,6 +33,7 @@ import LotteryHistory from '../pages/LotteryHistory';
 import TransactionInfo from '../pages/TransactionInfo';
 import LotteryTicketInfo from '../pages/LotteryTicketInfo';
 import TestNotifications from '../pages/TestNotifications';
+import WalletHistory from '../pages/WalletHistory';
 
 // Admin Pages
 
@@ -325,8 +326,8 @@ const AppRoutes: React.FC = () => {
         path="/wallet/:userId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Wallet">
-              <PlaceholderPage title="Wallet" />
+            <UserPageWrapper title="Wallet History">
+              <WalletHistory />
             </UserPageWrapper>
           </ProtectedRoute>
         } 
