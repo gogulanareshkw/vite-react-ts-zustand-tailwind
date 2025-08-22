@@ -1,189 +1,203 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
   Box,
+  Card,
+  CardContent,
   List,
   ListItem,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
-  Paper,
 } from '@mui/material';
 import {
+  Home,
+  Person,
+  Search,
+  Casino,
+  Settings,
   Help,
-  ContactSupport,
-  Assessment,
-  TrendingUp,
-  School,
   Info,
-  Rule,
-  PersonAdd,
+  ContactSupport,
+  Security,
   Description,
-  ChevronRight,
+  Language,
+  Notifications,
+  AccountCircle,
+  Payment,
+  History,
+  Star,
+  Group,
+  EmojiEvents,
+  TrendingUp,
+  Support,
 } from '@mui/icons-material';
-import { useStore } from '../store/useStore';
+import { useNavigate } from 'react-router-dom';
 
 const More: React.FC = () => {
   const navigate = useNavigate();
 
-
-  const sections = [
-    {
-      title: 'Support & Information',
-      items: [
-        {
-          title: 'Help',
-          icon: <Help />,
-          path: '/help',
-          public: true,
-        },
-        {
-          title: 'Contact Us',
-          icon: <ContactSupport />,
-          path: '/contact',
-          public: true,
-        },
-        {
-          title: 'About Us',
-          icon: <Info />,
-          path: '/about',
-          public: true,
-        },
-        {
-          title: 'How to Play',
-          icon: <School />,
-          path: '/how-to-play',
-          public: true,
-        },
-        {
-          title: 'Rules',
-          icon: <Rule />,
-          path: '/rules',
-          public: true,
-        },
-        {
-          title: 'Terms & Conditions',
-          icon: <Description />,
-          path: '/terms',
-          public: true,
-        },
-      ],
-    },
-    {
-      title: 'Lottery & Games',
-      items: [
-        {
-          title: 'Lottery Results',
-          icon: <Assessment />,
-          path: '/results',
-          public: true,
-        },
-        {
-          title: 'Exchange Rates',
-          icon: <TrendingUp />,
-          path: '/exchange-rates',
-          public: true,
-        },
-        {
-          title: 'Agent SignUp',
-          icon: <PersonAdd />,
-          path: '/agent-registration',
-          public: true,
-        },
-      ],
-    },
-
-  ];
-
-  const renderSection = (section: any) => {
-    const filteredItems = section.items.filter((item: any) => 
-      item.public
-    );
-
-    if (filteredItems.length === 0) return null;
-
-    return (
-      <Box key={section.title} sx={{ mb: 4 }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 'bold', 
-            mb: 2, 
-            color: 'text.primary',
-            fontSize: '1.1rem',
-          }}
-        >
-          {section.title}
-        </Typography>
-        <Paper elevation={1} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-          <List sx={{ p: 0 }}>
-            {filteredItems.map((item: any, index: number) => (
-              <React.Fragment key={item.path}>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => navigate(item.path)}
-                    sx={{
-                      py: 2.5,
-                      px: 3,
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.title}
-                      primaryTypographyProps={{
-                        fontSize: '1rem',
-                        fontWeight: 500,
-                      }}
-                    />
-                    <ChevronRight sx={{ color: 'text.secondary' }} />
-                  </ListItemButton>
-                </ListItem>
-                {index < filteredItems.length - 1 && (
-                  <Divider sx={{ mx: 3 }} />
-                )}
-              </React.Fragment>
-            ))}
-          </List>
-        </Paper>
-      </Box>
-    );
-  };
-
   return (
-    <Container 
-      maxWidth="md" 
-      sx={{ 
-        py: 3, 
-        pb: 8,
-        px: { xs: 2, sm: 3, md: 4 },
-      }}
-    >
-      {/* Header */}
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4, fontWeight: 'bold' }}>
+        More Options
+      </Typography>
+
+      {/* Public Sections */}
       <Box sx={{ mb: 4 }}>
-        <Typography 
-          variant="h4" 
-          component="h1" 
-          sx={{ 
-            fontWeight: 'bold',
-            textAlign: { xs: 'left', md: 'center' },
-            mb: { xs: 2, md: 3 },
-          }}
-        >
-          More
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3, color: 'primary.main' }}>
+          General
         </Typography>
+        <Card elevation={2}>
+          <List>
+            <ListItem button onClick={() => navigate('/help')}>
+              <ListItemIcon>
+                <Help color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Help & Support" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/about')}>
+              <ListItemIcon>
+                <Info color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="About Us" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/contact')}>
+              <ListItemIcon>
+                <ContactSupport color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Contact Us" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/terms')}>
+              <ListItemIcon>
+                <Description color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Terms & Conditions" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/privacy')}>
+              <ListItemIcon>
+                <Security color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Privacy Policy" />
+            </ListItem>
+          </List>
+        </Card>
       </Box>
 
-      {/* Sections */}
-      <Box sx={{ width: '100%' }}>
-        {sections.map(renderSection)}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3, color: 'secondary.main' }}>
+          Account & Settings
+        </Typography>
+        <Card elevation={2}>
+          <List>
+            <ListItem button onClick={() => navigate('/my-profile')}>
+              <ListItemIcon>
+                <AccountCircle color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="My Profile" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/settings')}>
+              <ListItemIcon>
+                <Settings color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Settings" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/notifications')}>
+              <ListItemIcon>
+                <Notifications color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Notifications" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/payment-methods')}>
+              <ListItemIcon>
+                <Payment color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Payment Methods" />
+            </ListItem>
+          </List>
+        </Card>
+      </Box>
+
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3, color: 'success.main' }}>
+          Games & History
+        </Typography>
+        <Card elevation={2}>
+          <List>
+            <ListItem button onClick={() => navigate('/games')}>
+              <ListItemIcon>
+                <Casino color="success" />
+              </ListItemIcon>
+              <ListItemText primary="All Games" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/play-history')}>
+              <ListItemIcon>
+                <History color="success" />
+              </ListItemIcon>
+              <ListItemText primary="Play History" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/winners')}>
+              <ListItemIcon>
+                <EmojiEvents color="success" />
+              </ListItemIcon>
+              <ListItemText primary="Winners" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/leaderboard')}>
+              <ListItemIcon>
+                <TrendingUp color="success" />
+              </ListItemIcon>
+              <ListItemText primary="Leaderboard" />
+            </ListItem>
+          </List>
+        </Card>
+      </Box>
+
+      <Box>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3, color: 'info.main' }}>
+          Community & Support
+        </Typography>
+        <Card elevation={2}>
+          <List>
+            <ListItem button onClick={() => navigate('/referrals')}>
+              <ListItemIcon>
+                <Group color="info" />
+              </ListItemIcon>
+              <ListItemText primary="Referrals" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/feedback')}>
+              <ListItemIcon>
+                <Star color="info" />
+              </ListItemIcon>
+              <ListItemText primary="Feedback" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/support')}>
+              <ListItemIcon>
+                <Support color="info" />
+              </ListItemIcon>
+              <ListItemText primary="Customer Support" />
+            </ListItem>
+            <Divider />
+            <ListItem button onClick={() => navigate('/language')}>
+              <ListItemIcon>
+                <Language color="info" />
+              </ListItemIcon>
+              <ListItemText primary="Language Settings" />
+            </ListItem>
+          </List>
+        </Card>
       </Box>
     </Container>
   );

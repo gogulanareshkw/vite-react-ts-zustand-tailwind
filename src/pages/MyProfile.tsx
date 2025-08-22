@@ -1,160 +1,260 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import {
   Container,
-  Typography,
   Box,
+  Typography,
   Card,
   CardContent,
-  Avatar,
+  Grid,
   Chip,
+  Avatar,
+  Divider,
+  Button,
+  Paper,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
-  AccountBalance,
+  AccountBalanceWallet,
+  ReceiptLong,
+  AddCard,
+  MoneyOff,
+  CreditCard,
+  GroupAdd,
   History,
-  EmojiEvents,
   Settings,
+  Star,
+  ContentCopy,
+  Badge,
+  Email,
+  Phone,
+  Person,
+  Edit,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { 
-    user, 
-    isAuthenticated, 
-    getUserBalance,
-    getUserReferralCount,
-    getUserDisplayName
-  } = useStore();
+  const { user } = useStore();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
+  const quickActions = [
+    { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
+    { title: 'Transactions', icon: <ReceiptLong />, path: '/transactions' },
+    { title: 'Recharges', icon: <AddCard />, path: '/recharges' },
+    { title: 'Withdraws', icon: <MoneyOff />, path: '/withdraws' },
+    { title: 'Bank Cards', icon: <CreditCard />, path: '/bankcards' },
+    { title: 'Referrals', icon: <GroupAdd />, path: '/referrals' },
+    { title: 'Play History', icon: <History />, path: '/playhistory' },
+    { title: 'Profile Settings', icon: <Settings />, path: '/profilesettings' },
+  ];
 
-  if (!user) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" textAlign="center">
-          Loading profile...
-        </Typography>
-      </Container>
-    );
-  }
+  const formatDate = (date: string | Date | undefined) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Welcome back, {getUserDisplayName()}!
+      {/* Cover Photo Area */}
+      <Box sx={{ 
+        position: 'relative', 
+        height: { xs: 200, md: 300 }, 
+        borderRadius: 3, 
+        overflow: 'hidden',
+        mb: 8,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <Box>
+          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
+            Welcome to GulfLotto
           </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Your WahLotto Profile
+          <Typography variant="h6" sx={{ opacity: 0.9 }}>
+            Your trusted lottery platform
           </Typography>
         </Box>
+        
+        {/* Edit Cover Button */}
+        <Button
+          variant="outlined"
+          size="small"
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            color: 'white',
+            borderColor: 'rgba(255,255,255,0.5)',
+            '&:hover': {
+              borderColor: 'white',
+              bgcolor: 'rgba(255,255,255,0.1)',
+            }
+          }}
+        >
+          <Edit sx={{ mr: 1 }} />
+          Edit Cover
+        </Button>
+      </Box>
 
-        {/* User Info Card */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>
-                {user.firstName ? user.firstName[0].toUpperCase() : user.email[0].toUpperCase()}
-              </Avatar>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" gutterBottom>
-                  {getUserDisplayName()}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  User ID: {user.appId || user.userId}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Chip 
-                    label={user.isEmailVerified ? 'Email Verified' : 'Email Not Verified'} 
-                    color={user.isEmailVerified ? 'success' : 'warning'} 
-                    size="small" 
-                  />
-                  <Chip 
-                    label={`Balance: ₹${getUserBalance().toFixed(2)}`} 
-                    color="primary" 
-                    size="small" 
-                  />
-                  <Chip 
-                    label={`Referrals: ${getUserReferralCount()}`} 
-                    color="secondary" 
-                    size="small" 
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+      {/* Profile Picture Overlapping Cover */}
+      <Box sx={{ 
+        position: 'relative', 
+        mt: -12, 
+        mb: 4,
+        textAlign: 'center'
+      }}>
+        <Avatar
+          sx={{
+            width: { xs: 120, md: 150 },
+            height: { xs: 120, md: 150 },
+            fontSize: { xs: 48, md: 60 },
+            mx: 'auto',
+            border: '6px solid white',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            bgcolor: 'primary.main',
+          }}
+        >
+          {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+        </Avatar>
+        
+        {/* Email below profile picture */}
+        <Typography variant="h6" sx={{ mt: 2, mb: 1, color: 'text.secondary' }}>
+          {user?.email}
+        </Typography>
+        
+        {/* Name and phone in brackets */}
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 2 }}>
+          {user?.firstName || 'User'}{user?.phone ? ` (${user.phone})` : ''}
+        </Typography>
+        
+        {/* Edit Profile Button */}
+        <Button
+          variant="contained"
+          size="small"
+          sx={{
+            bgcolor: 'primary.main',
+            '&:hover': { bgcolor: 'primary.dark' },
+          }}
+        >
+          <Edit sx={{ mr: 1, fontSize: 18 }} />
+          Edit Profile
+        </Button>
+      </Box>
 
-        {/* Quick Actions */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
-          <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/lottery-game')}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-              <EmojiEvents sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Play Lottery
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Buy tickets and play games
-              </Typography>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/recharge')}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-              <AccountBalance sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Recharge
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Add money to your wallet
-              </Typography>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/lottery-history')}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-              <History sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Game History
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                View your game history
-              </Typography>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profile')}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-              <Settings sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Profile
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Manage your profile
-              </Typography>
-            </CardContent>
-          </Card>
+      {/* Hero Section - Old Style */}
+      <Box sx={{
+        bgcolor: 'linear-gradient(135deg, #f3e8ff 0%, #f0fdfa 100%)',
+        py: 5,
+        borderRadius: 4,
+        mb: 4,
+        boxShadow: 2,
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, flexWrap: 'wrap' }}>
+          <Chip icon={<GroupAdd />} label={`Referrals: ${user?.referralCount || 0}`} color="secondary" variant="outlined" />
+          <Chip icon={<Badge />} label={user?.isEmailVerified ? 'Verified' : 'Not Verified'} color={user?.isEmailVerified ? 'success' : 'warning'} variant="outlined" />
+          <Chip icon={<AccountBalanceWallet />} label={`฿${user?.availableAmount?.toFixed(2) || '0.00'}`} color="primary" variant="outlined" />
         </Box>
+        
+        {/* App ID & Joined Date */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 2, mt: 3 }}>
+          <Chip
+            label={`App ID: ${user?.appId}`}
+            color="info"
+            variant="outlined"
+            onDelete={() => navigator.clipboard.writeText(user?.appId || '')}
+            deleteIcon={<ContentCopy />}
+          />
+        </Box>
+      </Box>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardContent>
-            <Typography variant="h5" gutterBottom>
-              Recent Activity
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              No recent activity to display.
-            </Typography>
+      {/* Referral Link & How it works - Old Style */}
+      <Box sx={{ bgcolor: '#f7f7fa', borderRadius: 2, p: 3, mb: 3 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Referral Link</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          <Typography variant="body1" sx={{ bgcolor: 'white', p: 1, borderRadius: 1, border: '1px solid #ddd', flex: 1, minWidth: 280 }}>
+            {`localhost/signup?ref=${user?.appId}`}
+          </Typography>
+          <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(`localhost/signup?ref=${user?.appId}`)}>Copy</Button>
+        </Box>
+        <Typography variant="h6" fontWeight={700} sx={{ mt: 2, mb: 1, color: 'success.main' }}>How it works?</Typography>
+        <List dense>
+          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Share your unique referral code with friends.</ListItem>
+          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Ask your friends to download GulfLotto app or open website for signup.</ListItem>
+          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Earn rewards when your friends register with GulfLotto.</ListItem>
+        </List>
+      </Box>
+
+      {/* Quick Actions - Old Card Style */}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gap: 3,
+        mb: 4
+      }}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/wallethistory')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <AccountBalanceWallet sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Wallet History</Typography>
+            <Typography variant="body2" color="text.secondary">View your wallet activity</Typography>
           </CardContent>
         </Card>
-      </Container>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/transactions')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <ReceiptLong sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Transactions</Typography>
+            <Typography variant="body2" color="text.secondary">All your transactions</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/recharges')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <AddCard sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Recharges</Typography>
+            <Typography variant="body2" color="text.secondary">Recharge history</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/withdraws')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <MoneyOff sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Withdraws</Typography>
+            <Typography variant="body2" color="text.secondary">Withdraw history</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/bankcards')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <CreditCard sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Bank Cards</Typography>
+            <Typography variant="body2" color="text.secondary">Manage your bank cards</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/referrals')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <GroupAdd sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Referrals</Typography>
+            <Typography variant="body2" color="text.secondary">Your referrals</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/playhistory')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <History sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Play History</Typography>
+            <Typography variant="body2" color="text.secondary">Your lottery play history</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profilesettings')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <Settings sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Profile Settings</Typography>
+            <Typography variant="body2" color="text.secondary">Manage your profile settings</Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    </Container>
   );
 };
 

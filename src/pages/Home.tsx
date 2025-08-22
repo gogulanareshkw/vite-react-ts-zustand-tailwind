@@ -24,6 +24,7 @@ import {
   History,
   Public,
 } from '@mui/icons-material';
+import PageContainer from '../components/PageContainer';
 
 const Home: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -87,7 +88,7 @@ const Home: React.FC = () => {
   return (
     <Box sx={{ minHeight: '100vh' }}>
       {/* Hero Section with Image Slides */}
-      <Box sx={{ position: 'relative', height: { xs: '60vh', md: '70vh' }, overflow: 'hidden' }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', height: { xs: '60vh', md: '70vh' }, overflow: 'hidden' }}>
         {slides.map((slide, index) => (
           <Box
             key={slide.id}
@@ -107,49 +108,47 @@ const Home: React.FC = () => {
               justifyContent: 'center',
             }}
           >
-            <Container maxWidth="lg">
-              <Box sx={{ textAlign: 'center', color: 'white' }}>
-                <Typography 
-                  variant={isMobile ? "h3" : "h2"} 
-                  component="h1" 
-                  gutterBottom
-                  sx={{ 
-                    fontWeight: 'bold',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                    mb: 2
-                  }}
-                >
-                  {slide.title}
-                </Typography>
-                <Typography 
-                  variant={isMobile ? "h6" : "h5"} 
-                  sx={{ 
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                    mb: 4
-                  }}
-                >
-                  {slide.description}
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    background: slide.color,
-                    px: 4,
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  Play Now
-                </Button>
-              </Box>
-            </Container>
+            <Box sx={{ textAlign: 'center', color: 'white' }}>
+              <Typography 
+                variant={isMobile ? "h3" : "h2"} 
+                component="h1" 
+                gutterBottom
+                sx={{ 
+                  fontWeight: 'bold',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                  mb: 2
+                }}
+              >
+                {slide.title}
+              </Typography>
+              <Typography 
+                variant={isMobile ? "h6" : "h5"} 
+                sx={{ 
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                  mb: 4
+                }}
+              >
+                {slide.description}
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                sx={{
+                  background: slide.color,
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Play Now
+              </Button>
+            </Box>
           </Box>
         ))}
 
@@ -201,7 +200,7 @@ const Home: React.FC = () => {
             />
           ))}
         </Box>
-      </Box>
+      </Container>
 
       {/* Official Notice Section */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
