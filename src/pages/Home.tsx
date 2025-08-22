@@ -335,7 +335,7 @@ const Home: React.FC = () => {
               <Typography variant="body2">Active Players</Typography>
             </Box>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>฿50M</Typography>
+                              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>50M</Typography>
               <Typography variant="body2">Total Prizes</Typography>
             </Box>
             <Box>

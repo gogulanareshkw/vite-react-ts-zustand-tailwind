@@ -36,7 +36,7 @@ const ProfileSettings: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.getUserInfo(user._id);
+      const response = await api.getUserInfo(user.userId);
       if (response.data) {
         setProfileUser(response.data);
         setForm({

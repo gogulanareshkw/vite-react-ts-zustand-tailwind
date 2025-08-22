@@ -87,11 +87,11 @@ export const API_ENDPOINTS = {
   FORGOT_PASSWORD: '/user/public/forgotPassword',
   RESET_PASSWORD: '/user/public/resetPassword',
   CHANGE_PASSWORD: '/user/changePassword',
-  GET_USER_INFO: '/user/getUserInfo',
+
   UPDATE_PROFILE: '/user/updateProfile',
   
   // Game Settings
-  GAME_SETTINGS: '/gameSettings/getBasicGameSettings',
+  GAME_SETTINGS: '/gameSettings/public/basic',
   LOTTERY_SETTINGS: '/lotteryGameSetting/public',
   LOTTERY_PERMISSIONS: '/lotteryGamePermission/public',
   LOTTERY_BOARDS: '/lotteryGameBoard/public/all',

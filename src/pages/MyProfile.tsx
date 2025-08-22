@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import type { UserInfoResponse, GameSettingsResponse } from '../types';
 import {
   Container,
   Box,
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
   Avatar,
   Divider,
@@ -29,35 +29,31 @@ import {
   Star,
   ContentCopy,
   Badge,
-  Email,
-  Phone,
-  Person,
-  Edit,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { user, api, setUser, setGameSettings } = useStore();
+  const { user, gameSettings, api, setUser, setGameSettings } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch user details and game settings when component mounts
+  // Fetch user details and game settings when component mounts or user changes
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?._id) {
         setIsLoading(true);
         try {
           // Fetch updated user details
-          const userInfoResponse = await api.getUserInfo(user._id);
-          if (userInfoResponse.success && userInfoResponse.data) {
-            setUser(userInfoResponse.data);
+          const userInfoResponse = await api.getUserInfo(user.userId);
+          if (userInfoResponse.success && userInfoResponse.userInfo) {
+            setUser(userInfoResponse.userInfo);
           }
           
           // Fetch game settings
           const gameSettingsResponse = await api.getGameSettings();
-          if (gameSettingsResponse.success && gameSettingsResponse.data) {
-            setGameSettings(gameSettingsResponse.data);
+          if (gameSettingsResponse.success && gameSettingsResponse.gameSettings) {
+            setGameSettings(gameSettingsResponse.gameSettings);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -69,6 +65,63 @@ const MyProfile: React.FC = () => {
 
     fetchUserData();
   }, [user?._id, api, setUser, setGameSettings]);
+
+  // Always fetch data on component mount (for page refresh scenarios)
+  useEffect(() => {
+    const fetchDataOnMount = async (userId: string) => {
+      setIsLoading(true);
+      try {
+        console.log('Fetching data for user:', userId); // Debug log
+        // Always fetch fresh data on mount
+        const userInfoResponse = await api.getUserInfo(userId);
+        if (userInfoResponse.success && userInfoResponse.userInfo) {
+          setUser(userInfoResponse.userInfo);
+        }
+        
+        const gameSettingsResponse = await api.getGameSettings();
+        if (gameSettingsResponse.success && gameSettingsResponse.gameSettings) {
+          setGameSettings(gameSettingsResponse.gameSettings);
+        }
+      } catch (error) {
+        console.error('Error fetching data on mount:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Try to get userId from multiple sources
+    let userId = user?._id;
+    
+    // If not in store, try localStorage as fallback
+    if (!userId) {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          userId = parsedUser.userId;
+          console.log('Got userId from localStorage:', userId);
+        }
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+      }
+    }
+
+    if (userId) {
+      fetchDataOnMount(userId);
+    } else {
+      console.log('No userId available yet, waiting...');
+      // Set up a small delay to wait for Zustand persistence to load
+      const timer = setTimeout(() => {
+        const delayedUserId = user?._id;
+        if (delayedUserId) {
+          console.log('UserId now available:', delayedUserId);
+          fetchDataOnMount(delayedUserId);
+        }
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user?._id, api, setUser, setGameSettings]); // Add all dependencies
 
   const quickActions = [
     { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
@@ -118,25 +171,7 @@ const MyProfile: React.FC = () => {
           </Typography>
         </Box>
         
-        {/* Edit Cover Button */}
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            color: 'white',
-            borderColor: 'rgba(255,255,255,0.5)',
-            '&:hover': {
-              borderColor: 'white',
-              bgcolor: 'rgba(255,255,255,0.1)',
-            }
-          }}
-        >
-          <Edit sx={{ mr: 1 }} />
-          Edit Cover
-        </Button>
+
       </Box>
 
       {/* Profile Picture Overlapping Cover */}
@@ -165,23 +200,12 @@ const MyProfile: React.FC = () => {
           {user?.email}
         </Typography>
         
-        {/* Name and phone in brackets */}
+        {/* Phone in brackets */}
         <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 2 }}>
-          {user?.firstName || 'User'}{user?.phone ? ` (${user.phone})` : ''}
+          {user?.phone ? `(${user.phone})` : ''}
         </Typography>
         
-        {/* Edit Profile Button */}
-        <Button
-          variant="contained"
-          size="small"
-          sx={{
-            bgcolor: 'primary.main',
-            '&:hover': { bgcolor: 'primary.dark' },
-          }}
-        >
-          <Edit sx={{ mr: 1, fontSize: 18 }} />
-          Edit Profile
-        </Button>
+
       </Box>
 
       {/* Unified Middle Section Card */}
@@ -216,20 +240,21 @@ const MyProfile: React.FC = () => {
             />
             <Chip 
               icon={<AccountBalanceWallet />} 
-              label={`฿${user?.availableAmount?.toFixed(2) || '0.00'}`} 
+              label={`${user?.availableAmount?.toFixed(2) || '0.00'}`} 
               color="primary" 
               variant="outlined" 
               sx={{ fontSize: '1rem', py: 1 }}
             />
           </Box>
           
-          {/* App ID Section */}
+          {/* App ID & Status Section */}
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
             gap: 2, 
-            mb: 4 
+            mb: 4,
+            flexWrap: 'wrap'
           }}>
             <Chip
               label={`App ID: ${user?.appId}`}
@@ -237,6 +262,12 @@ const MyProfile: React.FC = () => {
               variant="outlined"
               onDelete={() => navigator.clipboard.writeText(user?.appId || '')}
               deleteIcon={<ContentCopy />}
+              sx={{ fontSize: '1rem', py: 1 }}
+            />
+            <Chip
+              label={user?.activeStatus ? 'Active' : 'Inactive'}
+              color={user?.activeStatus ? 'success' : 'error'}
+              variant="outlined"
               sx={{ fontSize: '1rem', py: 1 }}
             />
           </Box>
@@ -317,6 +348,8 @@ const MyProfile: React.FC = () => {
               </ListItem>
             </List>
           </Box>
+          
+
         </CardContent>
       </Card>
 

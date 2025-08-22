@@ -26,7 +26,9 @@ import type {
   Withdraw,
   BankCard,
   GameSetting,
-  PlayLotteryGameRequest
+  PlayLotteryGameRequest,
+  UserInfoResponse,
+  GameSettingsResponse
 } from '../types';
 
 // Extend axios config to include metadata
@@ -365,9 +367,9 @@ class ApiService {
     return response;
   }
 
-  async getUserInfo(userId?: string): Promise<ApiResponse<User>> {
-    const endpoint = userId ? `${API_ENDPOINTS.USER_BY_ID}/${userId}` : API_ENDPOINTS.GET_USER_INFO;
-    return this.enhancedRequest<ApiResponse<User>>('get', endpoint, undefined, { cache: true, ttl: CACHE_CONFIG.USER_INFO });
+  async getUserInfo(userId: string): Promise<UserInfoResponse> {
+    const endpoint = `${API_ENDPOINTS.USER_BY_ID}/${userId}`;
+    return this.enhancedRequest<UserInfoResponse>('get', endpoint, undefined, { cache: true, ttl: CACHE_CONFIG.USER_INFO });
   }
 
   async updateUserProfile(data: Partial<User>): Promise<ApiResponse<User>> {
@@ -378,8 +380,8 @@ class ApiService {
   }
 
   // Game Settings APIs with caching
-  async getGameSettings(): Promise<ApiResponse<GameSetting>> {
-    return this.enhancedRequest<ApiResponse<GameSetting>>('get', this.appendAppKey(API_ENDPOINTS.GAME_SETTINGS), undefined, { 
+  async getGameSettings(): Promise<GameSettingsResponse> {
+    return this.enhancedRequest<GameSettingsResponse>('get', this.appendAppKey(API_ENDPOINTS.GAME_SETTINGS), undefined, { 
       cache: true, 
       ttl: CACHE_CONFIG.GAME_SETTINGS
     });

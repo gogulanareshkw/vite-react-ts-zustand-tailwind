@@ -25,7 +25,7 @@ const Prizes: React.FC = () => {
   const prizeTiers = [
     {
       tier: '1st Prize',
-      amount: '฿6,000,000',
+              amount: '6,000,000',
       description: 'Match all 6 digits in exact order',
       color: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
       icon: <EmojiEvents sx={{ fontSize: 40, color: 'white' }} />,

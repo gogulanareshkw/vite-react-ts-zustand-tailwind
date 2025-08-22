@@ -127,7 +127,7 @@ const Login: React.FC = () => {
         // Fetch additional user data and game settings
         try {
           // Fetch user details
-          const userInfoResponse = await apiService.getUserInfo(response.user._id);
+          const userInfoResponse = await apiService.getUserInfo(response.user.userId);
           if (userInfoResponse.success && userInfoResponse.data) {
             setUser(userInfoResponse.data);
           }

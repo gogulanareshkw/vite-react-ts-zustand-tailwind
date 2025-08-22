@@ -167,7 +167,7 @@ const WalletHistory: React.FC = () => {
   };
 
   const formatAmount = (amount: number) => {
-    return `฿${amount.toFixed(2)}`;
+    return `${amount.toFixed(2)}`;
   };
 
   if (loading) {

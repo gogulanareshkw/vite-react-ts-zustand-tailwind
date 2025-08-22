@@ -185,10 +185,49 @@ export interface BankCard {
 // Game Settings
 export interface GameSetting {
   _id: string;
-  isServerDown: boolean;
+  canRecharge: boolean;
+  canWithDraw: boolean;
+  isDisabledRechargeForm: boolean;
+  canDownloadMobileApp: boolean;
+  isAvailableGames: boolean;
+  bonusAmountByReferralPlayInPercent: number;
+  joiningBonus: number;
+  minimumRecharge: number;
+  maximumRecharge: number;
+  minimumWithdraw: number;
+  maximumWithdraw: number;
+  transactionFeeInPercent: number;
+  agentWhatsapp: string;
+  agentTelegram: string;
+  whatsAppLink: string;
+  youtubeLink: string;
+  telegramLink: string;
+  facebookLink: string;
+  instagramLink: string;
+  twitterLink: string;
+  emailLink: string;
+  homePageLotteryUrl: string;
+  mobileVersionCode: number;
+  mobileVersionName: string;
+  mobileApkUrl: string;
+  dbDataExistFrom: string;
+  blockedLocations: string;
+  locationAccessSkipVal: string;
+  canClearCollectionFrom: number;
+  wishesModelHead: string;
+  wishesModelTitle: string;
+  wishesModelImageUrl: string;
   isLocationBasedApp: boolean;
-  agentWhatsapp?: string;
-  superAdmins?: string;
+  canProceedWithSkipVal: boolean;
+  hideSecretInfo: boolean;
+  canOpenWishesModel: boolean;
+  isThaiLanguage: boolean;
+  isAvailableThaiFullTicket: boolean;
+  isRequiredMobileData: boolean;
+  isRequiredMobileContacts: boolean;
+  isRequiredMobileCalls: boolean;
+  isRequiredMobileSms: boolean;
+  isRequiredLocation: boolean;
 }
 
 // API Response Types
@@ -197,6 +236,17 @@ export interface ApiResponse<T = any> {
   message?: string;
   data?: T;
   errors?: any[];
+}
+
+// Specific API Response Types
+export interface UserInfoResponse {
+  success: boolean;
+  userInfo: User;
+}
+
+export interface GameSettingsResponse {
+  success: boolean;
+  gameSettings: GameSetting;
 }
 
 export interface PaginatedResponse<T> {
