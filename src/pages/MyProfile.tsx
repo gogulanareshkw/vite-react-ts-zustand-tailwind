@@ -360,14 +360,14 @@ const MyProfile: React.FC = () => {
         gap: 3,
         mb: 4
       }}>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/wallet/${user?.userId}`)}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/wallet/${user?._id}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <AccountBalanceWallet sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Wallet History</Typography>
             <Typography variant="body2" color="text.secondary">View your wallet activity</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/transactions/${user?.userId}`)}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/transactions/${user?._id}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <ReceiptLong sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Transactions</Typography>
@@ -395,7 +395,7 @@ const MyProfile: React.FC = () => {
             <Typography variant="body2" color="text.secondary">Manage your bank cards</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/referrals/${user?.userId}`)}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/referrals/${user?._id}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <GroupAdd sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Referrals</Typography>

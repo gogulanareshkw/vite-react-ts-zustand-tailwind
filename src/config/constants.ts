@@ -165,6 +165,7 @@ export const API_ENDPOINTS = {
   USER_WALLET_HISTORY: '/wallet/getUserWalletHistory',
   USER_TRANSACTIONS_HISTORY: '/transaction/getUserTransactionsHistory',
   MY_REFERRALS_HISTORY: '/referral/getMyReferralsHistory',
+  DB_WALLET_HISTORY: '/db/walletHistory',
 } as const;
 
 // Cache Configuration

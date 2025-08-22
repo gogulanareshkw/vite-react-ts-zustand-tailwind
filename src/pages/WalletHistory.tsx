@@ -19,26 +19,34 @@ import {
   CircularProgress,
   Alert,
   Divider,
-  Grid,
+  Pagination,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   AccountBalanceWallet,
   Download,
   FilterList,
-  TrendingUp,
-  TrendingDown,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
 import { useParams } from 'react-router-dom';
 
 interface WalletTransaction {
   _id: string;
-  amount: number;
-  createdDate: string;
+  fieldName: string;
+  fieldValue: string;
+  collectionName: string;
+  updateType: string;
+  updatedFor: string;
+  updatedBy: string;
   description: string;
-  type: 'credit' | 'debit';
-  isBonus?: boolean;
+  createdDateTime: string;
+  __v: number;
 }
+
+
 
 const WalletHistory: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -49,73 +57,46 @@ const WalletHistory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showOnlyBonus, setShowOnlyBonus] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
+    console.log('useEffect triggered:', { userId, currentPage, pageSize, showOnlyBonus }); // Debug log
     if (userId) {
       fetchWalletHistory();
     }
-  }, [userId]);
+  }, [userId, currentPage, pageSize, showOnlyBonus]);
 
-  useEffect(() => {
-    if (showOnlyBonus) {
-      setFilteredTransactions(transactions.filter(tx => tx.isBonus));
-    } else {
-      setFilteredTransactions(transactions);
-    }
-  }, [showOnlyBonus, transactions]);
+
 
   const fetchWalletHistory = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Mock data for now - replace with actual API call
-      const mockTransactions: WalletTransaction[] = [
-        {
-          _id: '1',
-          amount: 100.00,
-          createdDate: '2024-01-15T10:30:00Z',
-          description: 'Recharge from Bank Card',
-          type: 'credit',
-          isBonus: false,
-        },
-        {
-          _id: '2',
-          amount: 25.00,
-          createdDate: '2024-01-14T15:45:00Z',
-          description: 'Referral Bonus',
-          type: 'credit',
-          isBonus: true,
-        },
-        {
-          _id: '3',
-          amount: 50.00,
-          createdDate: '2024-01-13T09:20:00Z',
-          description: 'Lottery Game Purchase',
-          type: 'debit',
-          isBonus: false,
-        },
-        {
-          _id: '4',
-          amount: 15.00,
-          createdDate: '2024-01-12T14:15:00Z',
-          description: 'Welcome Bonus',
-          type: 'credit',
-          isBonus: true,
-        },
-        {
-          _id: '5',
-          amount: 75.00,
-          createdDate: '2024-01-11T11:30:00Z',
-          description: 'Agent Commission',
-          type: 'credit',
-          isBonus: false,
-        },
-      ];
-
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
+      const typeParam = showOnlyBonus ? 'bonus' : '';
+      console.log('Fetching wallet history:', { currentPage, pageSize, typeParam }); // Debug log
+      
+      const response = await api.getDBWalletHistory(currentPage, pageSize, typeParam);
+      
+      console.log('API Response:', response); // Debug log
+      
+      setTransactions(response.walletHistory || []);
+      setFilteredTransactions(response.walletHistory || []);
+      setTotalPages(response.totalPages || 1);
+      setTotalCount(response.totalCount || 0);
+      
+      console.log('State updated:', { 
+        transactionsCount: response.walletHistory?.length || 0,
+        totalPages: response.totalPages || 1,
+        totalCount: response.totalCount || 0
+      }); // Debug log
     } catch (err: any) {
+      console.error('Error fetching wallet history:', err); // Debug log
       setError(err?.message || 'Failed to fetch wallet history');
       notification.show('Failed to fetch wallet history', 'error');
     } finally {
@@ -130,9 +111,9 @@ const WalletHistory: React.FC = () => {
       // Create CSV content
       const csvContent = [
         ['Amount', 'Created Date', 'Description'],
-        ...filteredTransactions.map(tx => [
-          tx.amount.toFixed(2),
-          new Date(tx.createdDate).toLocaleDateString(),
+        ...transactions.map(tx => [
+          tx.fieldValue,
+          new Date(tx.createdDateTime).toLocaleDateString(),
           tx.description
         ])
       ].map(row => row.join(',')).join('\n');
@@ -157,6 +138,7 @@ const WalletHistory: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -166,8 +148,16 @@ const WalletHistory: React.FC = () => {
     });
   };
 
-  const formatAmount = (amount: number) => {
-    return `${amount.toFixed(2)}`;
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    console.log('Page changed to:', page); // Debug log
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (event: any) => {
+    const newPageSize = event.target.value;
+    console.log('Page size changed to:', newPageSize); // Debug log
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   if (loading) {
@@ -205,28 +195,25 @@ const WalletHistory: React.FC = () => {
       {/* Available Balance Card */}
       <Card sx={{ mb: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
         <CardContent sx={{ p: 4 }}>
-          <Grid container alignItems="center" spacing={3}>
-            <Grid item>
-              <AccountBalanceWallet sx={{ fontSize: 60, opacity: 0.9 }} />
-            </Grid>
-            <Grid item xs>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <AccountBalanceWallet sx={{ fontSize: 60, opacity: 0.9 }} />
+            <Box>
               <Typography variant="h6" sx={{ opacity: 0.9, mb: 1 }}>
                 Available Balance
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                {formatAmount(user?.availableAmount || 0)}
+                {user?.availableAmount?.toFixed(2) || '0.00'}
               </Typography>
-            </Grid>
-
-          </Grid>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
       {/* Controls Section */}
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{ p: 3 }}>
-          <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-            <Grid item>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -244,94 +231,119 @@ const WalletHistory: React.FC = () => {
                   </Box>
                 }
               />
-            </Grid>
-            <Grid item>
-              <Button
+            </Box>
+            
+                          <Button
                 variant="contained"
                 startIcon={downloading ? <CircularProgress size={20} /> : <Download />}
                 onClick={handleDownload}
-                disabled={downloading || filteredTransactions.length === 0}
+                disabled={downloading || transactions.length === 0}
                 sx={{ minWidth: 150 }}
               >
-                {downloading ? 'Downloading...' : 'Download CSV'}
-              </Button>
-            </Grid>
-          </Grid>
+              {downloading ? 'Downloading...' : 'Download CSV'}
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Pagination Controls - Above Table */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Rows per page:
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 80 }}>
+                <Select
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  sx={{ height: 40 }}
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Page {currentPage} of {totalPages} ({totalCount} total)
+              </Typography>
+              <Pagination
+                count={Math.max(totalPages, 1)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="small"
+                showFirstButton
+                showLastButton
+                disabled={totalPages <= 1}
+              />
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
       {/* Transactions Table */}
       <Card>
         <CardContent sx={{ p: 0 }}>
-          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Transaction History
-              {showOnlyBonus && (
-                <Chip
-                  label="Bonus Only"
-                  color="secondary"
-                  size="small"
-                  sx={{ ml: 2 }}
-                />
-              )}
-            </Typography>
-          </Box>
-          
-          {filteredTransactions.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body1" color="text.secondary">
-                {showOnlyBonus ? 'No bonus transactions found' : 'No transactions found'}
-              </Typography>
-            </Box>
-          ) : (
-            <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'background.default' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Amount</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Created Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Created Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {transactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No transactions found
+                      </Typography>
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredTransactions.map((transaction) => (
+                ) : (
+                  transactions.map((transaction) => (
                     <TableRow key={transaction._id} hover>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {transaction.type === 'credit' ? (
-                            <TrendingUp color="success" fontSize="small" />
-                          ) : (
-                            <TrendingDown color="error" fontSize="small" />
-                          )}
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              fontWeight: 'bold',
-                              color: transaction.type === 'credit' ? 'success.main' : 'error.main'
-                            }}
-                          >
-                            {transaction.type === 'credit' ? '+' : '-'}{formatAmount(transaction.amount)}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {formatDate(transaction.createdDate)}
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: 'bold',
+                            color: transaction.fieldValue.startsWith('+') ? 'success.main' : 'error.main'
+                          }}
+                        >
+                          {transaction.fieldValue}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ maxWidth: 300 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {formatDate(transaction.createdDateTime)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
                           {transaction.description}
                         </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </CardContent>
       </Card>
+
+
+
+
     </Container>
   );
 };

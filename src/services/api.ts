@@ -772,6 +772,20 @@ class ApiService {
     );
   }
 
+  async getDBWalletHistory(pageNumber = 1, pageSize = 10, type = ""): Promise<{ walletHistory: any[]; totalCount: number; totalPages: number }> {
+    const params = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+      ...(type && { type })
+    });
+    
+    return this.enhancedRequest<{ walletHistory: any[]; totalCount: number; totalPages: number }>('get', 
+      `${API_ENDPOINTS.DB_WALLET_HISTORY}?${params.toString()}`,
+      undefined,
+      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+    );
+  }
+
   // Transaction History APIs
   async getUserTransactionsHistory(pageNumber = 1, pageSize = 10, filters?: any): Promise<{ transactions: any[]; totalCount: number; totalPages: number }> {
     const params = new URLSearchParams({
