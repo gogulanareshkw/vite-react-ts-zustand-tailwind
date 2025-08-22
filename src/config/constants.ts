@@ -106,8 +106,8 @@ export const API_ENDPOINTS = {
   USER_RECHARGES: '/recharge/getUserRechargeHistory',
   CREATE_WITHDRAW: '/withdraw/createWithdraw',
   USER_WITHDRAWALS: '/withdraw/getUserWithdrawHistory',
-  CREATE_BANK_CARD: '/bankCard/createBankCard',
-  USER_BANK_CARDS: '/bankCard/getUserBankCards',
+  CREATE_BANK_CARD: '/bankCard',
+  USER_BANK_CARDS: '/bankCard',
   DELETE_BANK_CARD: '/bankCard/deleteBankCard',
   
   // Admin

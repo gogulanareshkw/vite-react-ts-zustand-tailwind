@@ -151,10 +151,10 @@ const AppRoutes: React.FC = () => {
         } 
       />
       <Route 
-        path="/bank-cards" 
+        path="/bank-cards/:userId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Bank Cards">
+            <UserPageWrapper>
               <BankCards />
             </UserPageWrapper>
           </ProtectedRoute>

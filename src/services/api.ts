@@ -484,6 +484,11 @@ class ApiService {
     return response;
   }
 
+  async setDefaultBankCard(bankCardId: string): Promise<ApiResponse> {
+    const response = await this.enhancedRequest<ApiResponse>('put', `/bankCard/${bankCardId}`, {});
+    return response;
+  }
+
   // Admin APIs
   async getAllUsers(pageNumber = 1, pageSize = 10): Promise<PaginatedResponse<User>> {
     return this.enhancedRequest<PaginatedResponse<User>>('get', 

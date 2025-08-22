@@ -371,7 +371,7 @@ const WithDrawPage: React.FC = () => {
           <Button onClick={() => setShowAddCardDialog(false)}>Cancel</Button>
           <Button onClick={() => {
             setShowAddCardDialog(false);
-            navigate('/bank-cards');
+            navigate(`/bank-cards/${user?._id}`);
           }} variant="contained">
             Go to Bank Cards
           </Button>

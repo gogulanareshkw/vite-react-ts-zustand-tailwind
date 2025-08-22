@@ -16,13 +16,19 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useStore } from '../store/useStore';
+import { useParams } from 'react-router-dom';
 import type { BankCard } from '../types';
 
 const BankCards: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
   const {
     userBankCards,
     setUserBankCards,
@@ -33,86 +39,217 @@ const BankCards: React.FC = () => {
   } = useStore();
 
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Partial<BankCard>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<string>('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState<string>('');
+  const [form, setForm] = useState<{
+    type: 'UPI' | 'BANK' | '';
+    upiId: string;
+    phoneNumber: string;
+    accountNumber: string;
+    accountHolderName: string;
+    ifscCode: string;
+  }>({
+    type: '',
+    upiId: '',
+    phoneNumber: '',
+    accountNumber: '',
+    accountHolderName: '',
+    ifscCode: '',
+  });
+
   const [loading, setLocalLoading] = useState(false);
 
   // Fetch cards on mount
   useEffect(() => {
     const fetchCards = async () => {
+      console.log('BankCards: Fetching bank cards...'); // Debug log
       setLoading(true);
-      setError(null);
       try {
         const res = await api.getUserBankCards();
-        if (res.success && res.data) {
-          setUserBankCards(res.data);
+        console.log('BankCards: API response:', res); // Debug log
+        if (res.success && res.bankCards) {
+          setUserBankCards(res.bankCards);
         } else {
-          setError(res.message || 'Failed to fetch bank cards');
+          notification.show(res.message || 'Failed to fetch bank cards', 'error');
         }
       } catch (e: any) {
-        setError(e?.response?.data?.message || 'Failed to fetch bank cards');
+        console.error('BankCards: API error:', e); // Debug log
+        notification.show(e?.response?.data?.message || 'Failed to fetch bank cards', 'error');
       } finally {
         setLoading(false);
       }
     };
     fetchCards();
-    // eslint-disable-next-line
-  }, []);
+  }, [api, setUserBankCards, setLoading, notification]);
 
   const handleOpen = () => {
-    setForm({});
-    setError(null);
+    setIsEditing(false);
+    setEditingCardId('');
+    setForm({
+      type: '',
+      upiId: '',
+      phoneNumber: '',
+      accountNumber: '',
+      accountHolderName: '',
+      ifscCode: '',
+    });
     setOpen(true);
   };
+
+  const handleEdit = (card: any) => {
+    setIsEditing(true);
+    setEditingCardId(card._id);
+    setForm({
+      type: card.type,
+      upiId: card.upiId || '',
+      phoneNumber: card.phoneNumber || '',
+      accountNumber: card.accountNumber || '',
+      accountHolderName: card.accountHolderName || '',
+      ifscCode: card.ifscCode || '',
+    });
+    setOpen(true);
+  };
+  
   const handleClose = () => {
     setOpen(false);
-    setForm({});
-    setError(null);
+    setIsEditing(false);
+    setEditingCardId('');
+    setForm({
+      type: '',
+      upiId: '',
+      phoneNumber: '',
+      accountNumber: '',
+      accountHolderName: '',
+      ifscCode: '',
+    });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name as string]: value });
   };
 
   const handleAdd = async () => {
     setLocalLoading(true);
-    setError(null);
     try {
-      // Basic validation
-      if (!form.cardType || !form.cardNumber || !form.cardHolderName || !form.bankName || !form.accountNumber) {
-        setError('Please fill all required fields.');
+      // Basic validation based on type
+      if (!form.type) {
+        notification.show('Please select a type.', 'error');
         setLocalLoading(false);
         return;
       }
-      const res = await api.createBankCard(form);
+
+      if (form.type === 'UPI') {
+        if (!form.upiId || !form.phoneNumber) {
+          notification.show('Please fill all required fields for UPI.', 'error');
+          setLocalLoading(false);
+          return;
+        }
+      } else if (form.type === 'BANK') {
+        if (!form.accountNumber || !form.accountHolderName || !form.ifscCode || !form.phoneNumber) {
+          notification.show('Please fill all required fields for Bank.', 'error');
+          setLocalLoading(false);
+          return;
+        }
+      }
+
+      // Prepare payload based on type
+      let payload;
+      if (form.type === 'UPI') {
+        payload = {
+          upiId: form.upiId,
+          phoneNumber: form.phoneNumber,
+          type: 'UPI'
+        };
+      } else {
+        payload = {
+          accountNumber: form.accountNumber,
+          accountHolderName: form.accountHolderName,
+          ifscCode: form.ifscCode,
+          phoneNumber: form.phoneNumber,
+          type: 'BANK'
+        };
+      }
+
+      let res;
+      if (isEditing) {
+        // Add bankCardId for edit operation
+        payload = { ...payload, bankCardId: editingCardId };
+        res = await api.enhancedRequest('put', '/bankCard', payload);
+      } else {
+        res = await api.createBankCard(payload as any);
+      }
+
       if (res.success && res.data) {
-        setUserBankCards([res.data, ...userBankCards]);
-        notification.show('Bank card added successfully', 'success');
+        if (isEditing) {
+          // Update existing card in the list
+          setUserBankCards(userBankCards.map(card => 
+            card._id === editingCardId ? res.data : card
+          ));
+          notification.show('Bank details updated successfully', 'success');
+        } else {
+          // Add new card to the list
+          setUserBankCards([res.data, ...userBankCards]);
+          notification.show('Bank details added successfully', 'success');
+        }
         handleClose();
       } else {
-        setError(res.message || 'Failed to add card');
+        notification.show(res.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
       }
     } catch (e: any) {
-      setError(e?.response?.data?.message || 'Failed to add card');
+      notification.show(e?.response?.data?.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
     } finally {
       setLocalLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this card?')) return;
+  const handleDeleteClick = (id: string) => {
+    setCardToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     setLoading(true);
-    setError(null);
     try {
-      const res = await api.deleteBankCard(id);
+      const res = await api.enhancedRequest('delete', `/bankCard/${cardToDelete}`);
       if (res.success) {
-        setUserBankCards(userBankCards.filter((c) => c._id !== id));
-        notification.show('Bank card deleted', 'success');
+        setUserBankCards(userBankCards.filter((c) => c._id !== cardToDelete));
+        notification.show('Bank card deleted successfully', 'success');
       } else {
-        setError(res.message || 'Failed to delete card');
+        notification.show(res.message || 'Failed to delete card', 'error');
       }
     } catch (e: any) {
-      setError(e?.response?.data?.message || 'Failed to delete card');
+      notification.show(e?.response?.data?.message || 'Failed to delete card', 'error');
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
+      setCardToDelete('');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setCardToDelete('');
+  };
+
+  const handleSetDefault = async (id: string) => {
+    setLoading(true);
+    try {
+      const res = await api.setDefaultBankCard(id);
+      if (res.success) {
+        // Update the local state to reflect the change
+        setUserBankCards(userBankCards.map(card => ({
+          ...card,
+          isActive: card._id === id
+        })));
+        notification.show('Default bank card updated', 'success');
+      } else {
+        notification.show(res.message || 'Failed to set default card', 'error');
+      }
+    } catch (e: any) {
+      notification.show(e?.response?.data?.message || 'Failed to set default card', 'error');
     } finally {
       setLoading(false);
     }
@@ -127,97 +264,246 @@ const BankCards: React.FC = () => {
         </Button>
       </Box>
       {isLoading && <Box display="flex" justifyContent="center" my={4}><CircularProgress /></Box>}
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
         {userBankCards.length === 0 && !isLoading && (
-          <Grid item xs={12}>
-            <Typography color="text.secondary">No bank cards found. Add your first card.</Typography>
-          </Grid>
+          <Box sx={{ gridColumn: '1 / -1' }}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h6" color="text.secondary">
+                  No bank cards found
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Add your first bank card to get started
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
         )}
         {userBankCards.map((card) => (
-          <Grid item xs={12} sm={6} md={4} key={card._id}>
-            <Card>
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">{card.cardType} ({card.bankName})</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  **** **** **** {card.cardNumber.slice(-4)}
+          <Card 
+            key={card._id} 
+            sx={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: 2,
+              position: 'relative',
+              overflow: 'hidden',
+              aspectRatio: '1.6',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%)',
+                pointerEvents: 'none'
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box 
+                    sx={{ 
+                      width: 20, 
+                      height: 20, 
+                      border: '2px solid white', 
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: 'rgba(255,255,255,0.1)'
+                      }
+                    }}
+                    onClick={() => handleSetDefault(card._id)}
+                  >
+                    {card.isActive ? '✓' : ''}
+                  </Box>
+
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  {card.type === 'UPI' ? 'UPI' : 'BANK'}
                 </Typography>
-                <Typography variant="body2">Holder: {card.cardHolderName}</Typography>
-                <Typography variant="body2">Account: ****{card.accountNumber.slice(-4)}</Typography>
-                {card.isDefault && <Typography color="primary" fontWeight="bold">Default</Typography>}
-              </CardContent>
-              <CardActions>
-                <IconButton color="error" onClick={() => handleDelete(card._id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
-          </Grid>
+              </Box>
+
+              {/* Main Content */}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {card.type === 'UPI' ? (
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-all' }}>
+                    {card.upiId}
+                  </Typography>
+                ) : (
+                  <>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      {card.accountNumber}
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 1, opacity: 0.9 }}>
+                      {card.accountHolderName}
+                    </Typography>
+                    <Typography variant="body1" sx={{ opacity: 0.8 }}>
+                      IFSC : {card.ifscCode}
+                    </Typography>
+                  </>
+                )}
+              </Box>
+
+              {/* Footer */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 16, height: 16, bgcolor: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                    📞
+                  </Box>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    {card.phoneNumber}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEdit(card)}
+                    sx={{ 
+                      color: 'white', 
+                      bgcolor: 'rgba(255,255,255,0.1)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                    }}
+                  >
+                    ✏️
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeleteClick(card._id)}
+                    sx={{ 
+                      color: 'white', 
+                      bgcolor: 'rgba(255,255,255,0.1)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                    }}
+                  >
+                    🗑️
+                  </IconButton>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
-      {/* Add Card Dialog */}
+      </Box>
+      {/* Add Bank Details Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Bank Card</DialogTitle>
+        <DialogTitle>{isEditing ? 'Edit Bank Details' : 'Add New Bank Details'}</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <TextField
-              label="Card Type"
-              name="cardType"
-              value={form.cardType || ''}
-              onChange={handleChange}
-              required
-              placeholder="Visa, MasterCard, etc."
-            />
-            <TextField
-              label="Card Number"
-              name="cardNumber"
-              value={form.cardNumber || ''}
-              onChange={handleChange}
-              required
-              inputProps={{ maxLength: 16 }}
-              placeholder="1234 5678 9012 3456"
-            />
-            <TextField
-              label="Card Holder Name"
-              name="cardHolderName"
-              value={form.cardHolderName || ''}
-              onChange={handleChange}
-              required
-            />
-            <TextField
-              label="Bank Name"
-              name="bankName"
-              value={form.bankName || ''}
-              onChange={handleChange}
-              required
-            />
-            <TextField
-              label="Account Number"
-              name="accountNumber"
-              value={form.accountNumber || ''}
-              onChange={handleChange}
-              required
-              inputProps={{ maxLength: 20 }}
-            />
-            <TextField
-              label="IFSC Code"
-              name="ifscCode"
-              value={form.ifscCode || ''}
-              onChange={handleChange}
-              placeholder="(optional)"
-            />
-            {error && <Alert severity="error">{error}</Alert>}
+            <FormControl fullWidth>
+              <InputLabel>Type</InputLabel>
+              <Select
+                name="type"
+                value={form.type}
+                label="Type"
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="UPI">UPI</MenuItem>
+                <MenuItem value="BANK">Bank</MenuItem>
+              </Select>
+            </FormControl>
+
+            {form.type === 'UPI' && (
+              <>
+                <TextField
+                  label="UPI ID"
+                  name="upiId"
+                  value={form.upiId}
+                  onChange={handleChange}
+                  required
+                  placeholder="UPI ID"
+                />
+                <TextField
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="Phone Number"
+                />
+              </>
+            )}
+
+            {form.type === 'BANK' && (
+              <>
+                <TextField
+                  label="Account Number"
+                  name="accountNumber"
+                  value={form.accountNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="Account Number"
+                />
+                <TextField
+                  label="Account Holder Name"
+                  name="accountHolderName"
+                  value={form.accountHolderName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Account Holder Name"
+                />
+                <TextField
+                  label="IFSC Code"
+                  name="ifscCode"
+                  value={form.ifscCode}
+                  onChange={handleChange}
+                  required
+                  placeholder="IFSC Code"
+                />
+                <TextField
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="Phone Number"
+                />
+              </>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>Cancel</Button>
-          <Button onClick={handleAdd} variant="contained" disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : 'Add Card'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
-  );
-};
+          <Button onClick={handleClose} disabled={loading} sx={{ color: 'orange' }}>Cancel</Button>
+                      <Button onClick={handleAdd} variant="contained" disabled={loading} sx={{ bgcolor: 'darkgreen' }}>
+              {loading ? <CircularProgress size={24} /> : (isEditing ? 'Update' : 'Save')}
+            </Button>
+                  </DialogActions>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ color: 'error.main', fontWeight: 'bold' }}>
+            Delete Bank Card
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              Are you sure you want to delete this bank card? This action cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} disabled={loading} sx={{ color: 'text.secondary' }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDeleteConfirm} 
+              variant="contained" 
+              disabled={loading} 
+              sx={{ bgcolor: 'error.main', '&:hover': { bgcolor: 'error.dark' } }}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    );
+  };
 
 export default BankCards; 

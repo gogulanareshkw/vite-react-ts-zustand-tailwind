@@ -41,11 +41,12 @@ const MyProfile: React.FC = () => {
   // Fetch user details and game settings when component mounts or user changes
   useEffect(() => {
     const fetchUserData = async () => {
-      if (user?._id) {
+      const userId = user?.userId || user?._id;
+      if (userId) {
         setIsLoading(true);
         try {
           // Fetch updated user details
-          const userInfoResponse = await api.getUserInfo(user.userId);
+          const userInfoResponse = await api.getUserInfo(userId);
           if (userInfoResponse.success && userInfoResponse.userInfo) {
             setUser(userInfoResponse.userInfo);
           }
@@ -64,7 +65,7 @@ const MyProfile: React.FC = () => {
     };
 
     fetchUserData();
-  }, [user?._id, api, setUser, setGameSettings]);
+  }, [user?.userId, user?._id, api, setUser, setGameSettings]);
 
   // Always fetch data on component mount (for page refresh scenarios)
   useEffect(() => {
@@ -90,7 +91,7 @@ const MyProfile: React.FC = () => {
     };
 
     // Try to get userId from multiple sources
-    let userId = user?._id;
+    let userId = user?.userId || user?._id;
     
     // If not in store, try localStorage as fallback
     if (!userId) {
@@ -98,7 +99,7 @@ const MyProfile: React.FC = () => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
-          userId = parsedUser.userId;
+          userId = parsedUser.userId || parsedUser._id;
           console.log('Got userId from localStorage:', userId);
         }
       } catch (error) {
@@ -112,7 +113,7 @@ const MyProfile: React.FC = () => {
       console.log('No userId available yet, waiting...');
       // Set up a small delay to wait for Zustand persistence to load
       const timer = setTimeout(() => {
-        const delayedUserId = user?._id;
+        const delayedUserId = user?.userId || user?._id;
         if (delayedUserId) {
           console.log('UserId now available:', delayedUserId);
           fetchDataOnMount(delayedUserId);
@@ -121,7 +122,7 @@ const MyProfile: React.FC = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [user?._id, api, setUser, setGameSettings]); // Add all dependencies
+  }, [user?.userId, user?._id, api, setUser, setGameSettings]); // Add all dependencies
 
   const quickActions = [
     { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
@@ -388,7 +389,7 @@ const MyProfile: React.FC = () => {
             <Typography variant="body2" color="text.secondary">Withdraw history</Typography>
           </CardContent>
         </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/bank-cards')}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/bank-cards/${user?._id}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <CreditCard sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Bank Cards</Typography>
