@@ -147,48 +147,141 @@ const MyProfile: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Hero Section - Old Style */}
-      <Box sx={{
-        bgcolor: 'linear-gradient(135deg, #f3e8ff 0%, #f0fdfa 100%)',
-        py: 5,
-        borderRadius: 4,
-        mb: 4,
-        boxShadow: 2,
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, flexWrap: 'wrap' }}>
-          <Chip icon={<GroupAdd />} label={`Referrals: ${user?.referralCount || 0}`} color="secondary" variant="outlined" />
-          <Chip icon={<Badge />} label={user?.isEmailVerified ? 'Verified' : 'Not Verified'} color={user?.isEmailVerified ? 'success' : 'warning'} variant="outlined" />
-          <Chip icon={<AccountBalanceWallet />} label={`฿${user?.availableAmount?.toFixed(2) || '0.00'}`} color="primary" variant="outlined" />
-        </Box>
-        
-        {/* App ID & Joined Date */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 2, mt: 3 }}>
-          <Chip
-            label={`App ID: ${user?.appId}`}
-            color="info"
-            variant="outlined"
-            onDelete={() => navigator.clipboard.writeText(user?.appId || '')}
-            deleteIcon={<ContentCopy />}
-          />
-        </Box>
-      </Box>
-
-      {/* Referral Link & How it works - Old Style */}
-      <Box sx={{ bgcolor: '#f7f7fa', borderRadius: 2, p: 3, mb: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Referral Link</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-          <Typography variant="body1" sx={{ bgcolor: 'white', p: 1, borderRadius: 1, border: '1px solid #ddd', flex: 1, minWidth: 280 }}>
-            {`localhost/signup?ref=${user?.appId}`}
+      {/* Unified Middle Section Card */}
+      <Card sx={{ mb: 4, boxShadow: 3 }}>
+        <CardContent sx={{ p: 4 }}>
+          {/* Header */}
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, textAlign: 'center', color: 'primary.main' }}>
+            Account Overview & Referrals
           </Typography>
-          <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(`localhost/signup?ref=${user?.appId}`)}>Copy</Button>
-        </Box>
-        <Typography variant="h6" fontWeight={700} sx={{ mt: 2, mb: 1, color: 'success.main' }}>How it works?</Typography>
-        <List dense>
-          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Share your unique referral code with friends.</ListItem>
-          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Ask your friends to download GulfLotto app or open website for signup.</ListItem>
-          <ListItem><ListItemIcon><Star color="primary" /></ListItemIcon>Earn rewards when your friends register with GulfLotto.</ListItem>
-        </List>
-      </Box>
+          
+          {/* Stats Row */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 2, 
+            mb: 4, 
+            flexWrap: 'wrap' 
+          }}>
+            <Chip 
+              icon={<GroupAdd />} 
+              label={`Referrals: ${user?.referralCount || 0}`} 
+              color="secondary" 
+              variant="outlined" 
+              sx={{ fontSize: '1rem', py: 1 }}
+            />
+            <Chip 
+              icon={<Badge />} 
+              label={user?.isEmailVerified ? 'Verified' : 'Not Verified'} 
+              color={user?.isEmailVerified ? 'success' : 'warning'} 
+              variant="outlined" 
+              sx={{ fontSize: '1rem', py: 1 }}
+            />
+            <Chip 
+              icon={<AccountBalanceWallet />} 
+              label={`฿${user?.availableAmount?.toFixed(2) || '0.00'}`} 
+              color="primary" 
+              variant="outlined" 
+              sx={{ fontSize: '1rem', py: 1 }}
+            />
+          </Box>
+          
+          {/* App ID Section */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            gap: 2, 
+            mb: 4 
+          }}>
+            <Chip
+              label={`App ID: ${user?.appId}`}
+              color="info"
+              variant="outlined"
+              onDelete={() => navigator.clipboard.writeText(user?.appId || '')}
+              deleteIcon={<ContentCopy />}
+              sx={{ fontSize: '1rem', py: 1 }}
+            />
+          </Box>
+          
+          <Divider sx={{ my: 3 }} />
+          
+          {/* Referral Link Section */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: 'text.primary' }}>
+              Your Referral Link
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 2, 
+              mb: 3, 
+              flexWrap: 'wrap' 
+            }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  bgcolor: 'background.paper', 
+                  p: 2, 
+                  borderRadius: 2, 
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                  flex: 1, 
+                  minWidth: 280,
+                  fontFamily: 'monospace',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {`localhost/signup?ref=${user?.appId}`}
+              </Typography>
+              <Button 
+                size="medium" 
+                variant="contained" 
+                onClick={() => navigator.clipboard.writeText(`localhost/signup?ref=${user?.appId}`)}
+                sx={{ minWidth: 100 }}
+              >
+                Copy Link
+              </Button>
+            </Box>
+          </Box>
+          
+          {/* How it works Section */}
+          <Box>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: 'success.main' }}>
+              How Referrals Work
+            </Typography>
+            <List dense>
+              <ListItem sx={{ py: 1 }}>
+                <ListItemIcon>
+                  <Star color="primary" />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Share your unique referral code with friends and family"
+                  primaryTypographyProps={{ variant: 'body2' }}
+                />
+              </ListItem>
+              <ListItem sx={{ py: 1 }}>
+                <ListItemIcon>
+                  <Star color="primary" />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Ask your friends to download GulfLotto app or visit the website for signup"
+                  primaryTypographyProps={{ variant: 'body2' }}
+                />
+              </ListItem>
+              <ListItem sx={{ py: 1 }}>
+                <ListItemIcon>
+                  <Star color="primary" />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Earn exciting rewards when your friends register with GulfLotto"
+                  primaryTypographyProps={{ variant: 'body2' }}
+                />
+              </ListItem>
+            </List>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions - Old Card Style */}
       <Box sx={{
