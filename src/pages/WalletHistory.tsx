@@ -217,17 +217,7 @@ const WalletHistory: React.FC = () => {
                 {formatAmount(user?.availableAmount || 0)}
               </Typography>
             </Grid>
-            <Grid item>
-              <Chip
-                label={`${filteredTransactions.length} Transactions`}
-                sx={{ 
-                  bgcolor: 'rgba(255,255,255,0.2)', 
-                  color: 'white',
-                  fontSize: '1rem',
-                  py: 1
-                }}
-              />
-            </Grid>
+
           </Grid>
         </CardContent>
       </Card>

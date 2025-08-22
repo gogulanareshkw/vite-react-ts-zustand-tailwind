@@ -326,7 +326,7 @@ const AppRoutes: React.FC = () => {
         path="/wallet/:userId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Wallet History">
+            <UserPageWrapper>
               <WalletHistory />
             </UserPageWrapper>
           </ProtectedRoute>
