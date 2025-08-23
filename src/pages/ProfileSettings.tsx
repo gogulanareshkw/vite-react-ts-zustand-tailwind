@@ -19,8 +19,7 @@ import { AccountCircle, Visibility, VisibilityOff } from '@mui/icons-material';
 
 const GENDERS = [
   { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
+  { value: 'female', label: 'Female' }
 ];
 
 interface ChangePasswordForm {
@@ -42,12 +41,14 @@ interface UserProfileData {
 const ProfileSettings: React.FC = () => {
   const { api, notification, user: currentUser } = useStore();
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    gender: '',
-    email: ''
+    firstName: currentUser?.firstName || '',
+    lastName: currentUser?.lastName || '',
+    phone: currentUser?.phone || '',
+    gender: currentUser?.gender?.toLowerCase() || '',
+    email: currentUser?.email || ''
   });
+  const [initialForm, setInitialForm] = useState(form);
+  const [isDirty, setIsDirty] = useState(false);
   
   const [passwordForm, setPasswordForm] = useState<ChangePasswordForm>({
     currentPassword: '',
@@ -59,43 +60,32 @@ const ProfileSettings: React.FC = () => {
   });
   
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    if (currentUser?._id) {
-      fetchProfile();
+    if (currentUser) {
+      const userData = {
+        firstName: currentUser.firstName || '',
+        lastName: currentUser.lastName || '',
+        phone: currentUser.phone || '',
+        gender: currentUser.gender?.toLowerCase() || '',
+        email: currentUser.email || ''
+      };
+      setForm(userData);
+      setInitialForm(userData);
     }
-    // eslint-disable-next-line
-  }, [currentUser?._id]);
+  }, [currentUser]);
 
-  const fetchProfile = async () => {
-    if (!currentUser?._id) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.getUserInfo(currentUser._id);
-      if (response) {
-        setForm({
-          firstName: (response as any).firstName || '',
-          lastName: (response as any).lastName || '',
-          phone: (response as any).phone || '',
-          gender: (response as any).gender || '',
-          email: (response as any).email || ''
-        });
-      } else {
-        setError('Failed to load profile.');
-      }
-    } catch (e: any) {
-      setError(e?.response?.data?.message || 'Failed to load profile.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const hasChanged = 
+      form.firstName.trim() !== initialForm.firstName.trim() ||
+      form.lastName.trim() !== initialForm.lastName.trim() ||
+      form.phone.trim() !== initialForm.phone.trim() ||
+      form.gender !== initialForm.gender;
+    setIsDirty(hasChanged);
+  }, [form, initialForm]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     const { name, value } = e.target;
@@ -108,7 +98,6 @@ const ProfileSettings: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    setSuccess(null);
 
     try {
       const profileData: UserProfileData = {
@@ -121,13 +110,15 @@ const ProfileSettings: React.FC = () => {
       const response = await api.updateUserProfile(profileData);
 
       if (response.success) {
-        setSuccess('Profile updated successfully!');
+        notification.show('Profile updated successfully!', 'success');
         // Update the user in the store
         if (currentUser) {
-          useStore.getState().setUser({
+          const updatedUser = {
             ...currentUser,
             ...profileData
-          });
+          };
+          useStore.getState().setUser(updatedUser);
+          setInitialForm(form);
         }
       } else {
         setError(response.message || 'Failed to update profile');
@@ -143,7 +134,6 @@ const ProfileSettings: React.FC = () => {
     e.preventDefault();
     setChangingPassword(true);
     setError(null);
-    setSuccess(null);
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setError('New password and confirm password do not match');
@@ -156,7 +146,6 @@ const ProfileSettings: React.FC = () => {
         passwordForm.currentPassword,
         passwordForm.newPassword
       );
-      setSuccess('Password changed successfully!');
       notification.show('Password changed successfully!', 'success');
       setPasswordForm({
         currentPassword: '',
@@ -213,7 +202,7 @@ const ProfileSettings: React.FC = () => {
       
       <Card elevation={3}>
         <CardContent>
-          {loading ? (
+          {false ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
             </Box>
@@ -284,7 +273,6 @@ const ProfileSettings: React.FC = () => {
               </div>
               
               {error && <Alert severity="error" sx={{ mt: 2, mb: 2 }}>{error}</Alert>}
-              {success && <Alert severity="success" sx={{ mt: 2, mb: 2 }}>{success}</Alert>}
               
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                 <Button
@@ -292,7 +280,7 @@ const ProfileSettings: React.FC = () => {
                   variant="contained"
                   color="primary"
                   size="large"
-                  disabled={saving}
+                  disabled={saving || !isDirty}
                   sx={{ minWidth: 150 }}
                 >
                   {saving ? <CircularProgress size={24} /> : 'Save Changes'}
@@ -377,7 +365,6 @@ const ProfileSettings: React.FC = () => {
               </div>
               
               {error && <Alert severity="error" sx={{ mt: 2, mb: 2 }}>{error}</Alert>}
-              {success && <Alert severity="success" sx={{ mt: 2, mb: 2 }}>{success}</Alert>}
               
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                 <Button

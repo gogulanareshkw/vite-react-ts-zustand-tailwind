@@ -305,7 +305,7 @@ class ApiService {
   }
 
   async updateUserProfile(data: Partial<User>): Promise<ApiResponse<User>> {
-    const response = await this.enhancedRequest<ApiResponse<User>>('put', API_ENDPOINTS.UPDATE_PROFILE, data);
+    const response = await this.enhancedRequest<ApiResponse<User>>('post', API_ENDPOINTS.UPDATE_PROFILE, data);
     return response;
   }
 
