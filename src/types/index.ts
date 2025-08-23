@@ -182,6 +182,20 @@ export interface BankCard {
   createdDateTime: string;
 }
 
+// Extended Bank Card interface for the component usage
+export interface ExtendedBankCard {
+  _id: string;
+  userId?: string;
+  type: 'UPI' | 'BANK';
+  upiId?: string;
+  phoneNumber: string;
+  accountNumber?: string;
+  accountHolderName?: string;
+  ifscCode?: string;
+  isActive?: boolean;
+  createdDateTime?: string;
+}
+
 // Game Settings
 export interface GameSetting {
   _id: string;
@@ -238,6 +252,14 @@ export interface ApiResponse<T = any> {
   errors?: any[];
 }
 
+// Bank Cards API Response
+export interface BankCardsResponse {
+  success: boolean;
+  message?: string;
+  bankCards?: ExtendedBankCard[];
+  errors?: any[];
+}
+
 // Specific API Response Types
 export interface UserInfoResponse {
   success: boolean;
@@ -276,7 +298,7 @@ export interface AppState {
   userGameHistory: LotteryGamePlay[];
   userRecharges: Recharge[];
   userWithdrawals: Withdraw[];
-  userBankCards: BankCard[];
+  userBankCards: ExtendedBankCard[];
   
   // UI State
   notifications: Notification[];

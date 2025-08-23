@@ -4,7 +4,6 @@ import {
   API_URL, 
   APP_KEY, 
   API_ENDPOINTS, 
-  CACHE_CONFIG, 
   RETRY_CONFIG, 
   POLLING_CONFIG,
   ENV_CONFIG 
@@ -39,13 +38,6 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   };
 }
 
-// Cache interface
-interface CacheItem {
-  data: any;
-  timestamp: number;
-  ttl: number;
-}
-
 // Retry configuration
 interface RetryConfig {
   retries: number;
@@ -55,7 +47,6 @@ interface RetryConfig {
 
 class ApiService {
   private api: AxiosInstance;
-  private cache: Map<string, CacheItem> = new Map();
   private defaultRetryConfig: RetryConfig = {
     retries: RETRY_CONFIG.DEFAULT_RETRIES,
     retryDelay: RETRY_CONFIG.DEFAULT_DELAY,
@@ -172,45 +163,6 @@ class ApiService {
     }
   }
 
-  // Cache management
-  private getCacheKey(url: string, params?: any): string {
-    const paramString = params ? JSON.stringify(params) : '';
-    return `${url}${paramString}`;
-  }
-
-  private getFromCache(key: string): any | null {
-    const item = this.cache.get(key);
-    if (!item) return null;
-    
-    const now = Date.now();
-    if (now - item.timestamp > item.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-    
-    return item.data;
-  }
-
-  private setCache(key: string, data: any, ttl: number = 5 * 60 * 1000): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl
-    });
-  }
-
-  private clearCache(pattern?: string): void {
-    if (pattern) {
-      for (const key of this.cache.keys()) {
-        if (key.includes(pattern)) {
-          this.cache.delete(key);
-        }
-      }
-    } else {
-      this.cache.clear();
-    }
-  }
-
   // Retry logic
   private async retryRequest<T>(
     requestFn: () => Promise<T>,
@@ -237,37 +189,16 @@ class ApiService {
     throw lastError;
   }
 
-  // Enhanced request method with caching and retry
+  // Enhanced request method
   private async enhancedRequest<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     url: string,
     data?: any,
     options: {
-      cache?: boolean;
-      ttl?: number;
-      retry?: Partial<RetryConfig>;
       params?: any;
     } = {}
   ): Promise<T> {
-    const cacheKey = options.cache ? this.getCacheKey(url, options.params) : null;
-    
-    // Try cache first for GET requests
-    if (method === 'get' && options.cache && cacheKey) {
-      const cachedData = this.getFromCache(cacheKey);
-      if (cachedData) {
-        return cachedData;
-      }
-    }
-
-    const requestFn = () => this.api[method](url, data, { params: options.params });
-    
-    const response = await this.retryRequest(requestFn, options.retry);
-    
-    // Cache successful GET responses
-    if (method === 'get' && options.cache && cacheKey && response.data) {
-      this.setCache(cacheKey, response.data, options.ttl);
-    }
-    
+    const response = await this.api[method](url, data, { params: options.params });
     return response.data;
   }
 
@@ -367,52 +298,36 @@ class ApiService {
     return response;
   }
 
+  // User APIs
   async getUserInfo(userId: string): Promise<UserInfoResponse> {
     const endpoint = `${API_ENDPOINTS.USER_BY_ID}/${userId}`;
-    return this.enhancedRequest<UserInfoResponse>('get', endpoint, undefined, { cache: true, ttl: CACHE_CONFIG.USER_INFO });
+    return this.enhancedRequest<UserInfoResponse>('get', endpoint);
   }
 
   async updateUserProfile(data: Partial<User>): Promise<ApiResponse<User>> {
     const response = await this.enhancedRequest<ApiResponse<User>>('put', API_ENDPOINTS.UPDATE_PROFILE, data);
-    // Clear user cache
-    this.clearCache('getUserInfo');
     return response;
   }
 
-  // Game Settings APIs with caching
+  // Game Settings APIs
   async getGameSettings(): Promise<GameSettingsResponse> {
-    return this.enhancedRequest<GameSettingsResponse>('get', this.appendAppKey(API_ENDPOINTS.GAME_SETTINGS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.GAME_SETTINGS
-    });
+    return this.enhancedRequest<GameSettingsResponse>('get', this.appendAppKey(API_ENDPOINTS.GAME_SETTINGS));
   }
 
   async getLotteryGameSettings(): Promise<ApiResponse<LotteryGameSetting[]>> {
-    return this.enhancedRequest<ApiResponse<LotteryGameSetting[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_SETTINGS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.LOTTERY_SETTINGS
-    });
+    return this.enhancedRequest<ApiResponse<LotteryGameSetting[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_SETTINGS));
   }
 
   async getLotteryGamePermissions(): Promise<ApiResponse<LotteryGamePermission[]>> {
-    return this.enhancedRequest<ApiResponse<LotteryGamePermission[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_PERMISSIONS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.LOTTERY_SETTINGS
-    });
+    return this.enhancedRequest<ApiResponse<LotteryGamePermission[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_PERMISSIONS));
   }
 
   async getLotteryGameBoards(): Promise<ApiResponse<LotteryGameBoard[]>> {
-    return this.enhancedRequest<ApiResponse<LotteryGameBoard[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_BOARDS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.LOTTERY_SETTINGS
-    });
+    return this.enhancedRequest<ApiResponse<LotteryGameBoard[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_BOARDS));
   }
 
   async getLotteryGameResults(lotteryGameType: number): Promise<ApiResponse<LotteryGameResult[]>> {
-    return this.enhancedRequest<ApiResponse<LotteryGameResult[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_RESULTS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.LOTTERY_RESULTS
-    });
+    return this.enhancedRequest<ApiResponse<LotteryGameResult[]>>('get', this.appendAppKey(API_ENDPOINTS.LOTTERY_RESULTS));
   }
 
   // Real-time lottery results polling
@@ -425,44 +340,39 @@ class ApiService {
     );
   }
 
-  // Lottery Game Play APIs
+  // Game Play APIs
   async playLotteryGame(data: PlayLotteryGameRequest): Promise<ApiResponse<LotteryGamePlay>> {
     const response = await this.enhancedRequest<ApiResponse<LotteryGamePlay>>('post', API_ENDPOINTS.PLAY_LOTTERY, data);
     return response;
   }
 
-  async getUserGameHistory(lotteryGameType: number, pageNumber = 1, pageSize = 10): Promise<PaginatedResponse<LotteryGamePlay>> {
-    return this.enhancedRequest<PaginatedResponse<LotteryGamePlay>>('get', 
-      `${API_ENDPOINTS.GAME_HISTORY}/${lotteryGameType}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+  async getGameHistory(lotteryGameType: number, pageNumber = 1, pageSize = 10): Promise<PaginatedResponse<LotteryGamePlay>> {
+    return this.enhancedRequest<PaginatedResponse<LotteryGamePlay>>('get',
+      `${API_ENDPOINTS.GAME_HISTORY}/${lotteryGameType}?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
   }
 
-  // Financial APIs
-  async createRecharge(data: { amount: number; paymentMethod: string }): Promise<ApiResponse<Recharge>> {
+  // Recharge APIs
+  async createRecharge(data: Partial<Recharge>): Promise<ApiResponse<Recharge>> {
     const response = await this.enhancedRequest<ApiResponse<Recharge>>('post', API_ENDPOINTS.CREATE_RECHARGE, data);
     return response;
   }
 
   async getUserRecharges(pageNumber = 1, pageSize = 10): Promise<PaginatedResponse<Recharge>> {
-    return this.enhancedRequest<PaginatedResponse<Recharge>>('get', 
-      `${API_ENDPOINTS.USER_RECHARGES}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+    return this.enhancedRequest<PaginatedResponse<Recharge>>('get',
+      `${API_ENDPOINTS.USER_RECHARGES}?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
   }
 
-  async createWithdraw(data: { amount: number; bankCardId: string }): Promise<ApiResponse<Withdraw>> {
+  // Withdraw APIs
+  async createWithdraw(data: Partial<Withdraw>): Promise<ApiResponse<Withdraw>> {
     const response = await this.enhancedRequest<ApiResponse<Withdraw>>('post', API_ENDPOINTS.CREATE_WITHDRAW, data);
     return response;
   }
 
   async getUserWithdrawals(pageNumber = 1, pageSize = 10): Promise<PaginatedResponse<Withdraw>> {
-    return this.enhancedRequest<PaginatedResponse<Withdraw>>('get', 
-      `${API_ENDPOINTS.USER_WITHDRAWALS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+    return this.enhancedRequest<PaginatedResponse<Withdraw>>('get',
+      `${API_ENDPOINTS.USER_WITHDRAWALS}?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
   }
 
@@ -473,14 +383,16 @@ class ApiService {
   }
 
   async getUserBankCards(): Promise<ApiResponse<BankCard[]>> {
-    return this.enhancedRequest<ApiResponse<BankCard[]>>('get', API_ENDPOINTS.USER_BANK_CARDS, undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.MEDIA
-    });
+    return this.enhancedRequest<ApiResponse<BankCard[]>>('get', API_ENDPOINTS.USER_BANK_CARDS);
   }
 
   async deleteBankCard(bankCardId: string): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('delete', `${API_ENDPOINTS.DELETE_BANK_CARD}/${bankCardId}`);
+    return response;
+  }
+
+  async updateBankCard(bankCardId: string, data: Partial<BankCard>): Promise<ApiResponse<BankCard>> {
+    const response = await this.enhancedRequest<ApiResponse<BankCard>>('put', `${API_ENDPOINTS.UPDATE_BANK_CARD}/${bankCardId}`, data);
     return response;
   }
 
@@ -494,39 +406,35 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<User>>('get', 
       `${API_ENDPOINTS.ALL_USERS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.USER_INFO }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   async getUserById(userId: string): Promise<ApiResponse<User>> {
-    return this.enhancedRequest<ApiResponse<User>>('get', `${API_ENDPOINTS.USER_BY_ID}/${userId}`, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<User>>('get', `${API_ENDPOINTS.USER_BY_ID}/${userId}`, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async updateUserStatus(userId: string, status: boolean): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.UPDATE_USER_STATUS}/${userId}`, { status });
     // Clear user cache
-    this.clearCache(`user/${userId}`);
     return response;
   }
 
   async blockUserByAdmin(userId: string, blocked: boolean): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.BLOCK_USER}/${userId}`, { blocked });
     // Clear user cache
-    this.clearCache(`user/${userId}`);
     return response;
   }
 
   async deductUserMoney(userId: string, amount: number): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.DEDUCT_USER_MONEY}/${userId}`, { amount });
     // Clear user cache
-    this.clearCache(`user/${userId}`);
     return response;
   }
 
   async rechargeUserMoney(userId: string, amount: number): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.RECHARGE_USER_MONEY}/${userId}`, { amount });
     // Clear user cache
-    this.clearCache(`user/${userId}`);
     return response;
   }
 
@@ -535,18 +443,17 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<any>>('get', 
       `${API_ENDPOINTS.ALL_TRANSACTIONS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   async getTransactionById(transactionId: string): Promise<ApiResponse<any>> {
-    return this.enhancedRequest<ApiResponse<any>>('get', `${API_ENDPOINTS.TRANSACTION_BY_ID}/${transactionId}`, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any>>('get', `${API_ENDPOINTS.TRANSACTION_BY_ID}/${transactionId}`, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async updateTransactionStatus(transactionId: string, status: string): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.UPDATE_TRANSACTION_STATUS}/${transactionId}`, { status });
     // Clear transaction cache
-    this.clearCache(`transaction/${transactionId}`);
     return response;
   }
 
@@ -555,12 +462,12 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<LotteryGamePlay>>('get', 
       `${API_ENDPOINTS.ALL_LOTTERY_PLAYS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   async getLotteryPlayById(playId: string): Promise<ApiResponse<LotteryGamePlay>> {
-    return this.enhancedRequest<ApiResponse<LotteryGamePlay>>('get', `${API_ENDPOINTS.LOTTERY_PLAY_BY_ID}/${playId}`, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<LotteryGamePlay>>('get', `${API_ENDPOINTS.LOTTERY_PLAY_BY_ID}/${playId}`, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Feedback APIs
@@ -571,39 +478,27 @@ class ApiService {
   }
 
   async getAllFeedbacks(): Promise<ApiResponse<any[]>> {
-    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_FEEDBACKS, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_FEEDBACKS, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Offers and Help APIs
   async getAllOffers(): Promise<ApiResponse<any[]>> {
-    return this.enhancedRequest<ApiResponse<any[]>>('get', this.appendAppKey(API_ENDPOINTS.ALL_OFFERS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.OFFERS
-    });
+    return this.enhancedRequest<ApiResponse<any[]>>('get', this.appendAppKey(API_ENDPOINTS.ALL_OFFERS), undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async getAllHelpLinks(): Promise<ApiResponse<any[]>> {
-    return this.enhancedRequest<ApiResponse<any[]>>('get', this.appendAppKey(API_ENDPOINTS.ALL_HELP_LINKS), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.HELP_LINKS
-    });
+    return this.enhancedRequest<ApiResponse<any[]>>('get', this.appendAppKey(API_ENDPOINTS.ALL_HELP_LINKS), undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Media APIs
-  async uploadMedia(file: File): Promise<ApiResponse<{ url: string }>> {
-    const formData = new FormData();
-    formData.append('media', file);
-    
-    const response = await this.enhancedRequest<ApiResponse<{ url: string }>>('post', API_ENDPOINTS.UPLOAD_MEDIA, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      cache: false
-    });
+  async uploadMedia(formData: FormData): Promise<ApiResponse<{ url: string }>> {
+    const response = await this.enhancedRequest<ApiResponse<{ url: string }>>('post', API_ENDPOINTS.UPLOAD_MEDIA, formData);
     this.showSuccessNotification('Media uploaded successfully!');
     return response;
   }
 
   async getAllMedia(): Promise<ApiResponse<any[]>> {
-    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_MEDIA, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_MEDIA, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async deleteMedia(mediaId: string): Promise<ApiResponse> {
@@ -623,14 +518,13 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<any>>('get', 
       `${API_ENDPOINTS.ALL_APPLICATION_AGENTS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   async updateApplicationAgentStatus(agentId: string, status: string): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.UPDATE_AGENT_STATUS}/${agentId}`, { status });
     // Clear agents cache
-    this.clearCache('getAllApplicationAgents');
     return response;
   }
 
@@ -640,40 +534,34 @@ class ApiService {
   }
 
   async getUserMobileData(): Promise<ApiResponse<any>> {
-    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.USER_MOBILE_DATA, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.USER_MOBILE_DATA, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async getAllMobileDataUsers(): Promise<ApiResponse<any[]>> {
-    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_MOBILE_DATA_USERS, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any[]>>('get', API_ENDPOINTS.ALL_MOBILE_DATA_USERS, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Exchange Rates API
   async getExchangeRates(): Promise<ApiResponse<any>> {
-    return this.enhancedRequest<ApiResponse<any>>('get', this.appendAppKey(API_ENDPOINTS.EXCHANGE_RATES), undefined, { 
-      cache: true, 
-      ttl: CACHE_CONFIG.EXCHANGE_RATES
-    });
+    return this.enhancedRequest<ApiResponse<any>>('get', this.appendAppKey(API_ENDPOINTS.EXCHANGE_RATES), undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Game Settings Management APIs
   async updateGameSettings(data: Partial<GameSetting>): Promise<ApiResponse<GameSetting>> {
     const response = await this.enhancedRequest<ApiResponse<GameSetting>>('put', API_ENDPOINTS.UPDATE_GAME_SETTINGS, data);
     // Clear game settings cache
-    this.clearCache('getGameSettings');
     return response;
   }
 
   async updateLotteryGameSetting(settingId: string, data: Partial<LotteryGameSetting>): Promise<ApiResponse<LotteryGameSetting>> {
     const response = await this.enhancedRequest<ApiResponse<LotteryGameSetting>>('put', `${API_ENDPOINTS.UPDATE_LOTTERY_SETTING}/${settingId}`, data);
     // Clear lottery settings cache
-    this.clearCache('getLotteryGameSettings');
     return response;
   }
 
   async updateLotteryGamePermission(permissionId: string, data: Partial<LotteryGamePermission>): Promise<ApiResponse<LotteryGamePermission>> {
     const response = await this.enhancedRequest<ApiResponse<LotteryGamePermission>>('put', `${API_ENDPOINTS.UPDATE_LOTTERY_PERMISSION}/${permissionId}`, data);
     // Clear permissions cache
-    this.clearCache('getLotteryGamePermissions');
     return response;
   }
 
@@ -682,14 +570,13 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<any>>('get', 
       `${API_ENDPOINTS.APPLICATION_LOGS}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   async deleteApplicationLogs(): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('delete', API_ENDPOINTS.DELETE_APPLICATION_LOGS);
     // Clear logs cache
-    this.clearCache('getApplicationLogs');
     return response;
   }
 
@@ -697,11 +584,7 @@ class ApiService {
     return this.enhancedRequest<PaginatedResponse<any>>('get', 
       `${API_ENDPOINTS.DATABASE_HISTORY}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       undefined,
-      { 
-        cache: true, 
-        ttl: CACHE_CONFIG.TRANSACTIONS,
-        params: filters
-      }
+      { params: { retry: { retries: 0, retryDelay: 0 }, params: filters } }
     );
   }
 
@@ -712,7 +595,6 @@ class ApiService {
       endDate
     });
     // Clear database history cache
-    this.clearCache('getDatabaseHistory');
     return response;
   }
 
@@ -720,7 +602,7 @@ class ApiService {
     return this.enhancedRequest<ApiResponse<{ collectionCount: number }>>('get', 
       `${API_ENDPOINTS.COLLECTION_COUNT}?collectionType=${collectionType}&startDate=${startDate}&endDate=${endDate}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.MEDIA }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
@@ -728,24 +610,22 @@ class ApiService {
   async initializeLotterySettings(lotteryGameType: number): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('post', `${API_ENDPOINTS.INITIALIZE_LOTTERY_SETTINGS}/${lotteryGameType}`);
     // Clear lottery settings cache
-    this.clearCache('getLotteryGameSettings');
     return response;
   }
 
   async initializeLotteryPermissions(lotteryGameType: number): Promise<ApiResponse> {
     const response = await this.enhancedRequest<ApiResponse>('post', `${API_ENDPOINTS.INITIALIZE_LOTTERY_PERMISSIONS}/${lotteryGameType}`);
     // Clear permissions cache
-    this.clearCache('getLotteryGamePermissions');
     return response;
   }
 
   // System Status APIs
   async getSystemStatus(): Promise<ApiResponse<any>> {
-    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.SYSTEM_STATUS, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.SYSTEM_STATUS, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   async getCronJobs(): Promise<ApiResponse<any>> {
-    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.CRON_JOBS, undefined, { cache: true });
+    return this.enhancedRequest<ApiResponse<any>>('get', API_ENDPOINTS.CRON_JOBS, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Wallet History APIs
@@ -759,7 +639,7 @@ class ApiService {
     return this.enhancedRequest<{ walletHistory: any[]; totalCount: number; totalPages: number }>('get', 
       `${API_ENDPOINTS.WALLET_HISTORY}?${params.toString()}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
@@ -773,7 +653,7 @@ class ApiService {
     return this.enhancedRequest<{ walletHistory: any[]; totalCount: number; totalPages: number }>('get', 
       `${API_ENDPOINTS.USER_WALLET_HISTORY}/${userId}?${params.toString()}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
@@ -787,7 +667,7 @@ class ApiService {
     return this.enhancedRequest<{ walletHistory: any[]; totalCount: number; totalPages: number }>('get', 
       `${API_ENDPOINTS.DB_WALLET_HISTORY}?${params.toString()}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
@@ -802,13 +682,13 @@ class ApiService {
     return this.enhancedRequest<{ transactions: any[]; totalCount: number; totalPages: number }>('get', 
       `${API_ENDPOINTS.USER_TRANSACTIONS_HISTORY}?${params.toString()}`,
       undefined,
-      { cache: true, ttl: CACHE_CONFIG.TRANSACTIONS }
+      { params: { retry: { retries: 0, retryDelay: 0 } } }
     );
   }
 
   // Referral APIs
   async getMyReferralsHistory(): Promise<any[]> {
-    return this.enhancedRequest<any[]>('get', API_ENDPOINTS.MY_REFERRALS_HISTORY, undefined, { cache: true, ttl: CACHE_CONFIG.MEDIA });
+    return this.enhancedRequest<any[]>('get', API_ENDPOINTS.MY_REFERRALS_HISTORY, undefined, { params: { retry: { retries: 0, retryDelay: 0 } } });
   }
 
   // Enhanced error handling
@@ -882,8 +762,6 @@ class ApiService {
     url: string,
     data?: any,
     options: {
-      cache?: boolean;
-      ttl?: number;
       retry?: Partial<RetryConfig>;
       params?: any;
       showSuccessNotification?: boolean;
@@ -904,18 +782,6 @@ class ApiService {
       // Error notification is handled by the response interceptor
       throw error;
     }
-  }
-
-  // Cache management methods
-  clearAllCache(): void {
-    this.cache.clear();
-  }
-
-  getCacheStats(): { size: number; keys: string[] } {
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys())
-    };
   }
 
   // Stop all polling

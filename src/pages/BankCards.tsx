@@ -25,7 +25,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useStore } from '../store/useStore';
 import { useParams } from 'react-router-dom';
-import type { BankCard } from '../types';
+import { usePageData } from '../hooks/usePageData';
+import type { ExtendedBankCard, BankCardsResponse } from '../types';
 
 const BankCards: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -33,8 +34,6 @@ const BankCards: React.FC = () => {
     userBankCards,
     setUserBankCards,
     api,
-    isLoading,
-    setLoading,
     notification,
   } = useStore();
 
@@ -61,28 +60,20 @@ const BankCards: React.FC = () => {
 
   const [loading, setLocalLoading] = useState(false);
 
-  // Fetch cards on mount
-  useEffect(() => {
-    const fetchCards = async () => {
-      console.log('BankCards: Fetching bank cards...'); // Debug log
-      setLoading(true);
-      try {
-        const res = await api.getUserBankCards();
-        console.log('BankCards: API response:', res); // Debug log
-        if (res.success && res.bankCards) {
-          setUserBankCards(res.bankCards);
-        } else {
-          notification.show(res.message || 'Failed to fetch bank cards', 'error');
-        }
-      } catch (e: any) {
-        console.error('BankCards: API error:', e); // Debug log
-        notification.show(e?.response?.data?.message || 'Failed to fetch bank cards', 'error');
-      } finally {
-        setLoading(false);
+  // Use the custom hook for data fetching - always fetch on page visit
+  const { isLoading: isPageLoading, refreshData } = usePageData({
+    pageName: 'BankCards',
+    fetchFunction: async () => {
+      const res = await api.getUserBankCards() as BankCardsResponse;
+      console.log('BankCards: API response:', res);
+      if (res.success && res.bankCards) {
+        setUserBankCards(res.bankCards);
+      } else {
+        notification.show(res.message || 'Failed to fetch bank cards', 'error');
       }
-    };
-    fetchCards();
-  }, [api, setUserBankCards, setLoading, notification]);
+    },
+    dependencies: [] // Empty array - only run once on mount, but will run on every page visit
+  });
 
   const handleOpen = () => {
     setIsEditing(false);
@@ -98,7 +89,7 @@ const BankCards: React.FC = () => {
     setOpen(true);
   };
 
-  const handleEdit = (card: any) => {
+  const handleEdit = (card: ExtendedBankCard) => {
     setIsEditing(true);
     setEditingCardId(card._id);
     setForm({
@@ -175,30 +166,29 @@ const BankCards: React.FC = () => {
 
       let res;
       if (isEditing) {
-        // Add bankCardId for edit operation
-        payload = { ...payload, bankCardId: editingCardId };
-        res = await api.enhancedRequest('put', '/bankCard', payload);
+        // Update existing bank card
+        res = await api.updateBankCard(editingCardId, payload as any);
       } else {
         res = await api.createBankCard(payload as any);
       }
 
-      if (res.success && res.data) {
+      console.log('API Response:', res); // Debug log
+
+      if (res.success) {
         if (isEditing) {
-          // Update existing card in the list
-          setUserBankCards(userBankCards.map(card => 
-            card._id === editingCardId ? res.data : card
-          ));
           notification.show('Bank details updated successfully', 'success');
         } else {
-          // Add new card to the list
-          setUserBankCards([res.data, ...userBankCards]);
           notification.show('Bank details added successfully', 'success');
         }
+        // Always close the modal on success
         handleClose();
+        // Refresh data to show the latest information
+        await refreshData();
       } else {
         notification.show(res.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
       }
     } catch (e: any) {
+      console.error('Error in handleAdd:', e); // Debug log
       notification.show(e?.response?.data?.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
     } finally {
       setLocalLoading(false);
@@ -211,19 +201,18 @@ const BankCards: React.FC = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    setLoading(true);
     try {
-      const res = await api.enhancedRequest('delete', `/bankCard/${cardToDelete}`);
+      const res = await api.deleteBankCard(cardToDelete);
       if (res.success) {
-        setUserBankCards(userBankCards.filter((c) => c._id !== cardToDelete));
         notification.show('Bank card deleted successfully', 'success');
+        // Refresh data to show the latest information
+        await refreshData();
       } else {
         notification.show(res.message || 'Failed to delete card', 'error');
       }
     } catch (e: any) {
       notification.show(e?.response?.data?.message || 'Failed to delete card', 'error');
     } finally {
-      setLoading(false);
       setDeleteDialogOpen(false);
       setCardToDelete('');
     }
@@ -235,23 +224,17 @@ const BankCards: React.FC = () => {
   };
 
   const handleSetDefault = async (id: string) => {
-    setLoading(true);
     try {
       const res = await api.setDefaultBankCard(id);
       if (res.success) {
-        // Update the local state to reflect the change
-        setUserBankCards(userBankCards.map(card => ({
-          ...card,
-          isActive: card._id === id
-        })));
         notification.show('Default bank card updated', 'success');
+        // Refresh data to show the latest information
+        await refreshData();
       } else {
         notification.show(res.message || 'Failed to set default card', 'error');
       }
     } catch (e: any) {
       notification.show(e?.response?.data?.message || 'Failed to set default card', 'error');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -263,9 +246,9 @@ const BankCards: React.FC = () => {
           Add Card
         </Button>
       </Box>
-      {isLoading && <Box display="flex" justifyContent="center" my={4}><CircularProgress /></Box>}
+      {/* isLoading && <Box display="flex" justifyContent="center" my={4}><CircularProgress /></Box> */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
-        {userBankCards.length === 0 && !isLoading && (
+        {userBankCards.length === 0 && !isPageLoading && (
           <Box sx={{ gridColumn: '1 / -1' }}>
             <Card>
               <CardContent sx={{ textAlign: 'center', py: 4 }}>
@@ -307,14 +290,14 @@ const BankCards: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box 
                     sx={{ 
-                      width: 20, 
-                      height: 20, 
+                      width: 32, 
+                      height: 32, 
                       border: '2px solid white', 
                       borderRadius: 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '12px',
+                      fontSize: '16px',
                       fontWeight: 'bold',
                       cursor: 'pointer',
                       '&:hover': {

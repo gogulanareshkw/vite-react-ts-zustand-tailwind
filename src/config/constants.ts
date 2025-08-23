@@ -76,6 +76,20 @@ export const ENV_CONFIG = {
   isStaging: window.location.hostname.includes('staging'),
 } as const;
 
+// Retry Configuration
+export const RETRY_CONFIG = {
+  DEFAULT_RETRIES: 3,
+  DEFAULT_DELAY: 1000,
+  MAX_DELAY: 10000,
+} as const;
+
+// Polling Configuration
+export const POLLING_CONFIG = {
+  LOTTERY_RESULTS: 30000,  // 30 seconds
+  SYSTEM_STATUS: 60000,    // 1 minute
+  USER_BALANCE: 30000,     // 30 seconds
+} as const;
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth
@@ -108,7 +122,8 @@ export const API_ENDPOINTS = {
   USER_WITHDRAWALS: '/withdraw/getUserWithdrawHistory',
   CREATE_BANK_CARD: '/bankCard',
   USER_BANK_CARDS: '/bankCard',
-  DELETE_BANK_CARD: '/bankCard/deleteBankCard',
+  UPDATE_BANK_CARD: '/bankCard',
+  DELETE_BANK_CARD: '/bankCard',
   
   // Admin
   ALL_USERS: '/user/getAllUsers',
@@ -166,32 +181,4 @@ export const API_ENDPOINTS = {
   USER_TRANSACTIONS_HISTORY: '/transaction/getUserTransactionsHistory',
   MY_REFERRALS_HISTORY: '/referral/getMyReferralsHistory',
   DB_WALLET_HISTORY: '/db/walletHistory',
-} as const;
-
-// Cache Configuration
-export const CACHE_CONFIG = {
-  // Cache TTL in milliseconds
-  USER_INFO: 2 * 60 * 1000,        // 2 minutes
-  GAME_SETTINGS: 10 * 60 * 1000,   // 10 minutes
-  LOTTERY_SETTINGS: 5 * 60 * 1000, // 5 minutes
-  LOTTERY_RESULTS: 1 * 60 * 1000,  // 1 minute
-  EXCHANGE_RATES: 30 * 60 * 1000,  // 30 minutes
-  OFFERS: 10 * 60 * 1000,          // 10 minutes
-  HELP_LINKS: 30 * 60 * 1000,      // 30 minutes
-  TRANSACTIONS: 2 * 60 * 1000,     // 2 minutes
-  MEDIA: 5 * 60 * 1000,            // 5 minutes
-} as const;
-
-// Retry Configuration
-export const RETRY_CONFIG = {
-  DEFAULT_RETRIES: 3,
-  DEFAULT_DELAY: 1000,
-  MAX_DELAY: 10000,
-} as const;
-
-// Polling Configuration
-export const POLLING_CONFIG = {
-  LOTTERY_RESULTS: 30000,  // 30 seconds
-  SYSTEM_STATUS: 60000,    // 1 minute
-  USER_BALANCE: 30000,     // 30 seconds
 } as const; 

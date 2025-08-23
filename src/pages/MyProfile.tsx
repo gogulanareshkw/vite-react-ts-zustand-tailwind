@@ -35,94 +35,50 @@ import { useStore } from '../store/useStore';
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { user, gameSettings, api, setUser, setGameSettings } = useStore();
+  const { 
+    user, 
+    gameSettings, 
+    api, 
+    setUser, 
+    setGameSettings
+  } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch user details and game settings when component mounts or user changes
+  // Single useEffect for data fetching - always fetch on page visit
   useEffect(() => {
     const fetchUserData = async () => {
       const userId = user?.userId || user?._id;
-      if (userId) {
-        setIsLoading(true);
-        try {
-          // Fetch updated user details
-          const userInfoResponse = await api.getUserInfo(userId);
-          if (userInfoResponse.success && userInfoResponse.userInfo) {
-            setUser(userInfoResponse.userInfo);
-          }
-          
-          // Fetch game settings
-          const gameSettingsResponse = await api.getGameSettings();
-          if (gameSettingsResponse.success && gameSettingsResponse.gameSettings) {
-            setGameSettings(gameSettingsResponse.gameSettings);
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
+      if (!userId) return;
 
-    fetchUserData();
-  }, [user?.userId, user?._id, api, setUser, setGameSettings]);
-
-  // Always fetch data on component mount (for page refresh scenarios)
-  useEffect(() => {
-    const fetchDataOnMount = async (userId: string) => {
       setIsLoading(true);
       try {
-        console.log('Fetching data for user:', userId); // Debug log
-        // Always fetch fresh data on mount
-        const userInfoResponse = await api.getUserInfo(userId);
+        console.log('Fetching MyProfile data for user:', userId);
+        
+        // Fetch user info and game settings in parallel
+        const [userInfoResponse, gameSettingsResponse] = await Promise.all([
+          api.getUserInfo(userId),
+          api.getGameSettings()
+        ]);
+
+        // Update user info
         if (userInfoResponse.success && userInfoResponse.userInfo) {
           setUser(userInfoResponse.userInfo);
         }
         
-        const gameSettingsResponse = await api.getGameSettings();
+        // Update game settings
         if (gameSettingsResponse.success && gameSettingsResponse.gameSettings) {
           setGameSettings(gameSettingsResponse.gameSettings);
         }
+        
       } catch (error) {
-        console.error('Error fetching data on mount:', error);
+        console.error('Error fetching MyProfile data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Try to get userId from multiple sources
-    let userId = user?.userId || user?._id;
-    
-    // If not in store, try localStorage as fallback
-    if (!userId) {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          userId = parsedUser.userId || parsedUser._id;
-          console.log('Got userId from localStorage:', userId);
-        }
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-      }
-    }
-
-    if (userId) {
-      fetchDataOnMount(userId);
-    } else {
-      console.log('No userId available yet, waiting...');
-      // Set up a small delay to wait for Zustand persistence to load
-      const timer = setTimeout(() => {
-        const delayedUserId = user?.userId || user?._id;
-        if (delayedUserId) {
-          console.log('UserId now available:', delayedUserId);
-          fetchDataOnMount(delayedUserId);
-        }
-      }, 200);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [user?.userId, user?._id, api, setUser, setGameSettings]); // Add all dependencies
+    fetchUserData();
+  }, [user?.userId, user?._id]); // Only depend on user ID changes, not on functions
 
   const quickActions = [
     { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
@@ -422,4 +378,4 @@ const MyProfile: React.FC = () => {
   );
 };
 
-export default MyProfile; 
+export default MyProfile;

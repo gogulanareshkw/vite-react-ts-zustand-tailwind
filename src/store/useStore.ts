@@ -11,7 +11,7 @@ import type {
   LotteryGamePlay, 
   Recharge, 
   Withdraw, 
-  BankCard, 
+  ExtendedBankCard, 
   Notification, 
   ModalState 
 } from '../types';
@@ -38,7 +38,7 @@ interface LotteryStore extends AppState {
   setUserGameHistory: (history: LotteryGamePlay[]) => void;
   setUserRecharges: (recharges: Recharge[]) => void;
   setUserWithdrawals: (withdrawals: Withdraw[]) => void;
-  setUserBankCards: (cards: BankCard[]) => void;
+  setUserBankCards: (cards: ExtendedBankCard[]) => void;
   
   // UI Actions
   addNotification: (notification: Omit<Notification, 'id'>) => void;
