@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
   Typography, 
@@ -39,7 +40,8 @@ interface UserProfileData {
 }
 
 const ProfileSettings: React.FC = () => {
-  const { api, notification, user: currentUser } = useStore();
+  const { api, notification, user: currentUser, logout } = useStore();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: currentUser?.firstName || '',
     lastName: currentUser?.lastName || '',
@@ -147,6 +149,8 @@ const ProfileSettings: React.FC = () => {
         passwordForm.newPassword
       );
       notification.show('Password changed successfully!', 'success');
+      logout();
+      navigate('/login');
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
