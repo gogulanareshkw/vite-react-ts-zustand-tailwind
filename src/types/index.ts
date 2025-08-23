@@ -17,6 +17,7 @@ export interface User {
   allowedSpecialDiscount: boolean;
   availableAmount?: number;
   referralCount?: number;
+  referredBy?: string;
   address?: Address;
   createdDateTime: string;
   updatedDateTime: string;

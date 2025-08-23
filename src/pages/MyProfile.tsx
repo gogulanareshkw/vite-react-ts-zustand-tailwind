@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import type { UserInfoResponse, GameSettingsResponse } from '../types';
 import {
   Container,
   Box,
@@ -16,6 +15,8 @@ import {
   ListItemIcon,
   ListItemText,
   CircularProgress,
+  Grid,
+  IconButton,
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -28,19 +29,29 @@ import {
   Settings,
   Star,
   ContentCopy,
-  Badge,
+  Event,
+  PersonAdd,
+  Fingerprint,
+  VerifiedUser,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 const MyProfile: React.FC = () => {
   const navigate = useNavigate();
   const { 
     user, 
-    gameSettings, 
     api, 
-    setUser, 
-    setGameSettings
+    setUser
   } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,18 +68,12 @@ const MyProfile: React.FC = () => {
       const userId = user?.userId || user?._id;
       if (!userId) return;
       
-      const [userInfoRes, gameSettingsRes] = await Promise.all([
-        api.getUserInfo(userId),
-        api.getGameSettings()
-      ]);
+      const userInfoRes = await api.getUserInfo(userId);
 
       if (userInfoRes.success && userInfoRes.userInfo) {
         setUser(userInfoRes.userInfo);
       }
 
-      if (gameSettingsRes.success && gameSettingsRes.gameSettings) {
-        setGameSettings(gameSettingsRes.gameSettings);
-      }
     } catch (error: any) {
       // notification.show(error?.response?.data?.message || 'Failed to fetch profile data', 'error');
     } finally {
@@ -76,21 +81,6 @@ const MyProfile: React.FC = () => {
     }
   };
 
-  const quickActions = [
-    { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },
-    { title: 'Transactions', icon: <ReceiptLong />, path: '/transactions' },
-    { title: 'Recharges', icon: <AddCard />, path: '/recharges' },
-    { title: 'Withdraws', icon: <MoneyOff />, path: '/withdraws' },
-    { title: 'Bank Cards', icon: <CreditCard />, path: '/bankcards' },
-    { title: 'Referrals', icon: <GroupAdd />, path: '/referrals' },
-    { title: 'Play History', icon: <History />, path: '/playhistory' },
-    { title: 'Profile Settings', icon: <Settings />, path: '/profilesettings' },
-  ];
-
-  const formatDate = (date: string | Date | undefined) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -165,65 +155,63 @@ const MyProfile: React.FC = () => {
       <Card sx={{ mb: 4, boxShadow: 3 }}>
         <CardContent sx={{ p: 4 }}>
           {/* Header */}
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, textAlign: 'center', color: 'primary.main' }}>
-            Account Overview & Referrals
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center', color: 'primary.main' }}>
+            Account Overview
           </Typography>
-          
-          {/* Stats Row */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: 2, 
-            mb: 4, 
-            flexWrap: 'wrap' 
-          }}>
-            <Chip 
-              icon={<GroupAdd />} 
-              label={`Referrals: ${user?.referralCount || 0}`} 
-              color="secondary" 
-              variant="outlined" 
-              sx={{ fontSize: '1rem', py: 1 }}
-            />
-            <Chip 
-              icon={<Badge />} 
-              label={user?.isEmailVerified ? 'Verified' : 'Not Verified'} 
-              color={user?.isEmailVerified ? 'success' : 'warning'} 
-              variant="outlined" 
-              sx={{ fontSize: '1rem', py: 1 }}
-            />
-            <Chip 
-              icon={<AccountBalanceWallet />} 
-              label={`${user?.availableAmount?.toFixed(2) || '0.00'}`} 
-              color="primary" 
-              variant="outlined" 
-              sx={{ fontSize: '1rem', py: 1 }}
-            />
-          </Box>
-          
-          {/* App ID & Status Section */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            gap: 2, 
-            mb: 4,
-            flexWrap: 'wrap'
-          }}>
-            <Chip
-              label={`App ID: ${user?.appId}`}
-              color="info"
-              variant="outlined"
-              onDelete={() => navigator.clipboard.writeText(user?.appId || '')}
-              deleteIcon={<ContentCopy />}
-              sx={{ fontSize: '1rem', py: 1 }}
-            />
-            <Chip
-              label={user?.activeStatus ? 'Active' : 'Inactive'}
-              color={user?.activeStatus ? 'success' : 'error'}
-              variant="outlined"
-              sx={{ fontSize: '1rem', py: 1 }}
-            />
-          </Box>
+          <Grid container spacing={3} alignItems="stretch" justifyContent="center">
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <AccountBalanceWallet color="primary" sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{`$${user?.availableAmount?.toFixed(2) || '0.00'}`}</Typography>
+                <Typography variant="body2" color="text.secondary">Available Balance</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <GroupAdd color="secondary" sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{user?.referralCount || 0}</Typography>
+                <Typography variant="body2" color="text.secondary">Referrals</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <Event color="info" sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  {user?.createdDateTime ? formatDate(user.createdDateTime) : 'N/A'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">Joined On</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <Fingerprint color="success" sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {user?.appId}
+                  <IconButton size="small" onClick={() => navigator.clipboard.writeText(user?.appId || '')} sx={{ ml: 1 }}>
+                    <ContentCopy fontSize="small" />
+                  </IconButton>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">App ID</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <PersonAdd color="warning" sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{user?.referredBy || 'N/A'}</Typography>
+                <Typography variant="body2" color="text.secondary">Referred By</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <VerifiedUser color="action" sx={{ fontSize: 40, mb: 1 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
+                  <Chip label={user?.isEmailVerified ? 'Verified' : 'Not Verified'} color={user?.isEmailVerified ? 'success' : 'warning'} size="small" />
+                  <Chip label={user?.activeStatus ? 'Active' : 'Inactive'} color={user?.activeStatus ? 'success' : 'error'} size="small" />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Status</Typography>
+              </Paper>
+            </Grid>
+          </Grid>
           
           <Divider sx={{ my: 3 }} />
           

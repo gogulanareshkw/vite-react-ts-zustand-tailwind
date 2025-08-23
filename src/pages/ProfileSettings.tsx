@@ -177,14 +177,14 @@ const ProfileSettings: React.FC = () => {
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 2 }}>
         <Avatar sx={{ width: 60, height: 60, bgcolor: 'primary.main' }}>
-          {currentUser?.firstName?.[0] || <AccountCircle fontSize="large" />}
+          {currentUser?.email?.[0]?.toUpperCase() || <AccountCircle fontSize="large" />}
         </Avatar>
         <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-            {currentUser?.firstName} {currentUser?.lastName}
+          <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+            {currentUser?.email}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            {currentUser?.email}
+            App ID: {currentUser?.appId}
           </Typography>
         </Box>
       </Box>
