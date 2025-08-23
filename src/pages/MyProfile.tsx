@@ -301,11 +301,25 @@ const MyProfile: React.FC = () => {
         gap: 3,
         mb: 4
       }}>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profile-settings')}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <Settings sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Profile Settings</Typography>
+            <Typography variant="body2" color="text.secondary">Manage your profile settings</Typography>
+          </CardContent>
+        </Card>
         <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/wallet/${user?._id}`)}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <AccountBalanceWallet sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Wallet History</Typography>
             <Typography variant="body2" color="text.secondary">View your wallet activity</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/bank-cards/${user?._id}`)}>
+          <CardContent sx={{ textAlign: 'center', py: 3 }}>
+            <CreditCard sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>Bank Cards</Typography>
+            <Typography variant="body2" color="text.secondary">Manage your bank cards</Typography>
           </CardContent>
         </Card>
         <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/transactions/${user?._id}`)}>
@@ -318,22 +332,15 @@ const MyProfile: React.FC = () => {
         <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/recharge')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <AddCard sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>Recharges</Typography>
-            <Typography variant="body2" color="text.secondary">Recharge history</Typography>
+            <Typography variant="h6" gutterBottom>Recharge</Typography>
+            <Typography variant="body2" color="text.secondary">Recharge Wallet</Typography>
           </CardContent>
         </Card>
         <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/withdraw')}>
           <CardContent sx={{ textAlign: 'center', py: 3 }}>
             <MoneyOff sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>Withdraws</Typography>
-            <Typography variant="body2" color="text.secondary">Withdraw history</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/bank-cards/${user?._id}`)}>
-          <CardContent sx={{ textAlign: 'center', py: 3 }}>
-            <CreditCard sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>Bank Cards</Typography>
-            <Typography variant="body2" color="text.secondary">Manage your bank cards</Typography>
+            <Typography variant="h6" gutterBottom>Withdraw</Typography>
+            <Typography variant="body2" color="text.secondary">Withdraw Money</Typography>
           </CardContent>
         </Card>
         <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate(`/referrals/${user?._id}`)}>
@@ -348,13 +355,6 @@ const MyProfile: React.FC = () => {
             <History sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>Play History</Typography>
             <Typography variant="body2" color="text.secondary">Your lottery play history</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => navigate('/profile-settings')}>
-          <CardContent sx={{ textAlign: 'center', py: 3 }}>
-            <Settings sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>Profile Settings</Typography>
-            <Typography variant="body2" color="text.secondary">Manage your profile settings</Typography>
           </CardContent>
         </Card>
       </Box>

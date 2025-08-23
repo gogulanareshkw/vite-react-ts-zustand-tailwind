@@ -155,6 +155,7 @@ export interface Recharge {
   paymentMethod: string;
   status: string;
   transactionId?: string;
+  mobileNumber?: string;
   createdDateTime: string;
   user?: User;
 }

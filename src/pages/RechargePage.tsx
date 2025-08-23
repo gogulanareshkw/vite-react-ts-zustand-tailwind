@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -9,13 +9,7 @@ import {
   TextField,
   Button,
   Alert,
-  Grid,
   Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,37 +20,20 @@ import {
   AccountBalance,
   CreditCard,
   Payment,
-  Receipt,
   CheckCircle,
-  Error,
-  Info,
-  TrendingUp,
-  Security,
-  Speed,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
 import apiService from '../services/api';
 
-interface RechargeHistory {
-  _id: string;
-  amount: number;
-  paymentMethod: string;
-  status: string;
-  createdAt: string;
-  transactionId?: string;
-}
-
 const RechargePage: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, setLoading, user } = useStore();
+  const { addNotification, setLoading } = useStore();
 
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [rechargeHistory, setRechargeHistory] = useState<RechargeHistory[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const paymentMethods = [
@@ -88,21 +65,11 @@ const RechargePage: React.FC = () => {
 
   const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
 
-  useEffect(() => {
-    loadRechargeHistory();
-  }, []);
-
-  const loadRechargeHistory = async () => {
-    try {
-      const response = await apiService.getUserRecharges(1, 10);
-      setRechargeHistory(response.data || []);
-    } catch (error) {
-      console.error('Failed to load recharge history:', error);
-    }
-  };
-
   const handleAmountChange = (value: string) => {
     setAmount(value);
+    if (!value) {
+      setPaymentMethod('');
+    }
     if (error) setError('');
     if (success) setSuccess(false);
   };
@@ -169,27 +136,12 @@ const RechargePage: React.FC = () => {
       setAmount('');
       setPaymentMethod('');
       
-      // Reload history
-      await loadRechargeHistory();
     } catch (error: any) {
       // Error will be handled by API service and shown as snackbar automatically
       console.error('Recharge error:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'failed':
-        return 'error';
-      default:
-        return 'default';
     }
   };
 
@@ -213,10 +165,10 @@ const RechargePage: React.FC = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={4}>
+      <Box>
         {/* Recharge Form */}
-        <Grid item xs={12} md={8}>
-          <Card elevation={4} sx={{ maxWidth: 600, mx: 'auto' }}>
+        <Box>
+          <Card elevation={4}>
             <CardContent sx={{ p: 4 }}>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                 Recharge Amount
@@ -264,44 +216,47 @@ const RechargePage: React.FC = () => {
                 sx={{ mb: 4 }}
               />
 
-              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Select Payment Method
-              </Typography>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-                {paymentMethods.map((method) => (
-                  <Card
-                    key={method.id}
-                    variant="outlined"
-                    sx={{
-                      cursor: 'pointer',
-                      border: paymentMethod === method.id ? 2 : 1,
-                      borderColor: paymentMethod === method.id ? 'primary.main' : 'divider',
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                      },
-                    }}
-                    onClick={() => setPaymentMethod(method.id)}
-                  >
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {method.icon}
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                            {method.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {method.description}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Min: ₹{method.minAmount} | Max: ₹{method.maxAmount}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
+              {amount && parseFloat(amount) > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                    Select Payment Method
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
+                    {paymentMethods.map((method) => (
+                      <Card
+                        key={method.id}
+                        variant="outlined"
+                        sx={{
+                          cursor: 'pointer',
+                          border: paymentMethod === method.id ? 2 : 1,
+                          borderColor: paymentMethod === method.id ? 'primary.main' : 'divider',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                          },
+                        }}
+                        onClick={() => setPaymentMethod(method.id)}
+                      >
+                        <CardContent sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {method.icon}
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                {method.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {method.description}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Min: ₹{method.minAmount} | Max: ₹{method.maxAmount}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                </>
+              )}
 
               <Button
                 variant="contained"
@@ -322,94 +277,9 @@ const RechargePage: React.FC = () => {
               </Button>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        {/* Account Info and History */}
-        <Grid item xs={12} md={4}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Account Balance */}
-            <Card elevation={4}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Account Balance
-                </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                  ₹{user?.availableAmount?.toFixed(2) || '0.00'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Available for playing games
-                </Typography>
-              </CardContent>
-            </Card>
-
-            {/* Recharge History */}
-            <Card elevation={4}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Recent Recharges
-                  </Typography>
-                  <Button
-                    size="small"
-                    onClick={() => setShowHistory(!showHistory)}
-                  >
-                    {showHistory ? 'Hide' : 'Show'}
-                  </Button>
-                </Box>
-                
-                {showHistory && (
-                  <List sx={{ p: 0 }}>
-                    {rechargeHistory.slice(0, 5).map((recharge) => (
-                      <ListItem key={recharge._id} sx={{ px: 0, py: 1 }}>
-                        <ListItemIcon>
-                          <Receipt color="action" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={`₹${recharge.amount}`}
-                          secondary={new Date(recharge.createdAt).toLocaleDateString()}
-                        />
-                        <Chip
-                          label={recharge.status}
-                          color={getStatusColor(recharge.status) as any}
-                          size="small"
-                        />
-                      </ListItem>
-                    ))}
-                    {rechargeHistory.length === 0 && (
-                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                        No recharge history
-                      </Typography>
-                    )}
-                  </List>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Benefits */}
-            <Card elevation={4}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Why Recharge?
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Security sx={{ fontSize: 20, color: 'success.main' }} />
-                    <Typography variant="body2">Secure payments</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Speed sx={{ fontSize: 20, color: 'primary.main' }} />
-                    <Typography variant="body2">Instant processing</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <TrendingUp sx={{ fontSize: 20, color: 'secondary.main' }} />
-                    <Typography variant="body2">Multiple payment options</Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
-        </Grid>
-      </Grid>
+      </Box>
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
