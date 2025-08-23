@@ -14,6 +14,7 @@ import SignUp from '../pages/SignUp';
 import VerifyEmail from '../pages/VerifyEmail';
 import MyProfile from '../pages/MyProfile';
 import Profile from '../pages/Profile';
+import ProfileSettings from '../pages/ProfileSettings';
 import ChangePassword from '../pages/ChangePassword';
 import RechargePage from '../pages/RechargePage';
 import WithDrawPage from '../pages/WithDrawPage';
@@ -114,7 +115,7 @@ const AppRoutes: React.FC = () => {
         path="/profile" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Profile">
+            <UserPageWrapper>
               <Profile />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -124,7 +125,7 @@ const AppRoutes: React.FC = () => {
         path="/change-password" 
         element={
           <ProtectedRoute requireEmailVerified={true}>
-            <UserPageWrapper title="Change Password">
+            <UserPageWrapper>
               <ChangePassword />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -134,7 +135,7 @@ const AppRoutes: React.FC = () => {
         path="/recharge" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Recharge">
+            <UserPageWrapper>
               <RechargePage />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -144,7 +145,7 @@ const AppRoutes: React.FC = () => {
         path="/withdraw" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Withdraw">
+            <UserPageWrapper>
               <WithDrawPage />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -168,7 +169,7 @@ const AppRoutes: React.FC = () => {
             requireAgentVerified={true}
             allowedRoles={[USER_ROLES.USER, USER_ROLES.AGENT, USER_ROLES.STAFF, USER_ROLES.SUPER_ADMIN]}
           >
-            <UserPageWrapper title="Lottery Game">
+            <UserPageWrapper>
               <LotteryGame />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -178,7 +179,7 @@ const AppRoutes: React.FC = () => {
         path="/results" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Results">
+            <UserPageWrapper>
               <Results />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -188,7 +189,7 @@ const AppRoutes: React.FC = () => {
         path="/offers" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Offers">
+            <UserPageWrapper>
               <Offers />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -198,7 +199,7 @@ const AppRoutes: React.FC = () => {
         path="/exchange-rates" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Exchange Rates">
+            <UserPageWrapper>
               <ExchangeRates />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -212,7 +213,7 @@ const AppRoutes: React.FC = () => {
             requireAgentVerified={true}
             allowedRoles={[USER_ROLES.USER, USER_ROLES.AGENT, USER_ROLES.STAFF, USER_ROLES.SUPER_ADMIN]}
           >
-            <UserPageWrapper title="Lottery History">
+            <UserPageWrapper>
               <LotteryHistory />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -222,7 +223,7 @@ const AppRoutes: React.FC = () => {
         path="/verify-agent" 
         element={
           <ProtectedRoute requireEmailVerified={true}>
-            <UserPageWrapper title="Agent Verification">
+            <UserPageWrapper>
               <AgentVerification />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -232,7 +233,7 @@ const AppRoutes: React.FC = () => {
         path="/transaction-info/:txnId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Transaction Info">
+            <UserPageWrapper>
               <TransactionInfo />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -242,7 +243,7 @@ const AppRoutes: React.FC = () => {
         path="/ticket-info/:ticketId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Ticket Info">
+            <UserPageWrapper>
               <LotteryTicketInfo />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -256,7 +257,7 @@ const AppRoutes: React.FC = () => {
         path="/agent-registration" 
         element={
           <ProtectedRoute requireEmailVerified={true}>
-            <UserPageWrapper title="Agent Registration">
+            <UserPageWrapper>
               <PlaceholderPage title="Agent Registration" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -266,8 +267,8 @@ const AppRoutes: React.FC = () => {
         path="/profile-settings" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Profile Settings">
-              <PlaceholderPage title="Profile Settings" />
+            <UserPageWrapper>
+              <ProfileSettings />
             </UserPageWrapper>
           </ProtectedRoute>
         } 
@@ -276,7 +277,7 @@ const AppRoutes: React.FC = () => {
         path="/game-options" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Game Options">
+            <UserPageWrapper>
               <PlaceholderPage title="Game Options" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -286,7 +287,7 @@ const AppRoutes: React.FC = () => {
         path="/play-lottery/:lotteryGameType" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Play Lottery">
+            <UserPageWrapper>
               <PlaceholderPage title="Play Lottery" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -296,7 +297,7 @@ const AppRoutes: React.FC = () => {
         path="/buy-lottery-ticket" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Buy Lottery Ticket">
+            <UserPageWrapper>
               <PlaceholderPage title="Buy Lottery Ticket" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -306,7 +307,7 @@ const AppRoutes: React.FC = () => {
         path="/transactions/:userId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Transactions">
+            <UserPageWrapper>
               <PlaceholderPage title="Transactions" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -316,7 +317,7 @@ const AppRoutes: React.FC = () => {
         path="/referrals/:userId" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Referrals">
+            <UserPageWrapper>
               <PlaceholderPage title="Referrals" />
             </UserPageWrapper>
           </ProtectedRoute>
@@ -336,7 +337,7 @@ const AppRoutes: React.FC = () => {
         path="/lottery-results" 
         element={
           <ProtectedRoute requireEmailVerified={true} requireAgentVerified={true}>
-            <UserPageWrapper title="Lottery Results">
+            <UserPageWrapper>
               <PlaceholderPage title="Lottery Results" />
             </UserPageWrapper>
           </ProtectedRoute>
