@@ -124,6 +124,7 @@ export const API_ENDPOINTS = {
   USER_BANK_CARDS: '/bankCard',
   UPDATE_BANK_CARD: '/bankCard',
   DELETE_BANK_CARD: '/bankCard',
+  MAKE_BANK_CARD_ACTIVE: '/bankCard',
   
   // Admin
   ALL_USERS: '/user/getAllUsers',

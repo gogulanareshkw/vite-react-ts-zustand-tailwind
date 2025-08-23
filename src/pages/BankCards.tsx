@@ -150,17 +150,17 @@ const BankCards: React.FC = () => {
       let payload;
       if (form.type === 'UPI') {
         payload = {
+          type: form.type,
           upiId: form.upiId,
-          phoneNumber: form.phoneNumber,
-          type: 'UPI'
+          phoneNumber: form.phoneNumber
         };
       } else {
         payload = {
+          type: form.type,
           accountNumber: form.accountNumber,
           accountHolderName: form.accountHolderName,
           ifscCode: form.ifscCode,
-          phoneNumber: form.phoneNumber,
-          type: 'BANK'
+          phoneNumber: form.phoneNumber
         };
       }
 

@@ -397,7 +397,7 @@ class ApiService {
   }
 
   async setDefaultBankCard(bankCardId: string): Promise<ApiResponse> {
-    const response = await this.enhancedRequest<ApiResponse>('put', `/bankCard/${bankCardId}`, {});
+    const response = await this.enhancedRequest<ApiResponse>('put', `${API_ENDPOINTS.MAKE_BANK_CARD_ACTIVE}/${bankCardId}/active`, {});
     return response;
   }
 
