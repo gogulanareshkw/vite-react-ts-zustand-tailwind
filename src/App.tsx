@@ -144,13 +144,10 @@ const AppContent: React.FC = () => {
     
     if (token && userStr) {
       try {
-        const user: User = JSON.parse(userStr);
-        setUser(user);
-        setToken(token);
-        setAuthenticated(true);
+        const userData = JSON.parse(userStr);
+        setUser(userData);
       } catch (error) {
-        console.error('Failed to parse user data from localStorage:', error);
-        localStorage.removeItem('token');
+        // Failed to parse user data from localStorage
         localStorage.removeItem('user');
       }
     }

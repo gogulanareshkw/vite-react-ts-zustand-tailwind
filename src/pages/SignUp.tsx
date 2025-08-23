@@ -147,26 +147,28 @@ const SignUp: React.FC = () => {
     setLoading(true);
 
     try {
-      // Get user location if available
-      let latitude = 0;
-      let longitude = 0;
-      
+      // Get user's location
       if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-          });
-          latitude = position.coords.latitude;
-          longitude = position.coords.longitude;
-        } catch (error) {
-          console.log('Location access denied or unavailable');
-        }
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            // setLocation({
+            //   latitude: position.coords.latitude,
+            //   longitude: position.coords.longitude
+            // });
+          },
+          (error) => {
+            // Location access denied or unavailable
+            // setLocation(null);
+          }
+        );
+      } else {
+        // setLocation(null);
       }
 
       const signUpData = {
         ...formData,
-        latitude,
-        longitude,
+        // latitude, // This line was removed as per the edit hint
+        // longitude, // This line was removed as per the edit hint
       };
 
       const response = await apiService.signUp(signUpData);

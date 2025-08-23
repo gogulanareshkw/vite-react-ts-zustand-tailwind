@@ -4,9 +4,7 @@ import {
   Typography,
   Card,
   CardContent,
-  CardActions,
   Button,
-  Grid,
   Box,
   IconButton,
   Dialog,
@@ -15,21 +13,17 @@ import {
   DialogActions,
   TextField,
   CircularProgress,
-  Alert,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useStore } from '../store/useStore';
-import { useParams } from 'react-router-dom';
 import { usePageData } from '../hooks/usePageData';
 import type { ExtendedBankCard, BankCardsResponse } from '../types';
 
 const BankCards: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
   const {
     userBankCards,
     setUserBankCards,
@@ -65,7 +59,6 @@ const BankCards: React.FC = () => {
     pageName: 'BankCards',
     fetchFunction: async () => {
       const res = await api.getUserBankCards() as BankCardsResponse;
-      console.log('BankCards: API response:', res);
       if (res.success && res.bankCards) {
         setUserBankCards(res.bankCards);
       } else {
@@ -172,8 +165,6 @@ const BankCards: React.FC = () => {
         res = await api.createBankCard(payload as any);
       }
 
-      console.log('API Response:', res); // Debug log
-
       if (res.success) {
         if (isEditing) {
           notification.show('Bank details updated successfully', 'success');
@@ -188,7 +179,6 @@ const BankCards: React.FC = () => {
         notification.show(res.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
       }
     } catch (e: any) {
-      console.error('Error in handleAdd:', e); // Debug log
       notification.show(e?.response?.data?.message || `Failed to ${isEditing ? 'update' : 'add'} bank details`, 'error');
     } finally {
       setLocalLoading(false);

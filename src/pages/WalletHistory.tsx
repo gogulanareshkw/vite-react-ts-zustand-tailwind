@@ -64,41 +64,33 @@ const WalletHistory: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Fetch wallet history when component mounts or dependencies change
   useEffect(() => {
-    console.log('useEffect triggered:', { userId, currentPage, pageSize, showOnlyBonus }); // Debug log
     if (userId) {
       fetchWalletHistory();
     }
   }, [userId, currentPage, pageSize, showOnlyBonus]);
 
-
-
   const fetchWalletHistory = async () => {
     try {
       setLoading(true);
-      setError(null);
+      const typeParam = showOnlyBonus ? 'BONUS' : undefined;
+      const response = await api.getUserWalletHistory(currentPage, pageSize, typeParam);
       
-      const typeParam = showOnlyBonus ? 'bonus' : '';
-      console.log('Fetching wallet history:', { currentPage, pageSize, typeParam }); // Debug log
-      
-      const response = await api.getDBWalletHistory(currentPage, pageSize, typeParam);
-      
-      console.log('API Response:', response); // Debug log
-      
-      setTransactions(response.walletHistory || []);
-      setFilteredTransactions(response.walletHistory || []);
-      setTotalPages(response.totalPages || 1);
-      setTotalCount(response.totalCount || 0);
-      
-      console.log('State updated:', { 
-        transactionsCount: response.walletHistory?.length || 0,
-        totalPages: response.totalPages || 1,
-        totalCount: response.totalCount || 0
-      }); // Debug log
+      if (response.success && response.data) {
+        setTransactions(response.data.walletHistory || []);
+        setTotalPages(response.data.totalPages || 1);
+        setTotalCount(response.data.totalItems || 0);
+      } else {
+        setTransactions([]);
+        setTotalPages(1);
+        setTotalCount(0);
+      }
     } catch (err: any) {
-      console.error('Error fetching wallet history:', err); // Debug log
-      setError(err?.message || 'Failed to fetch wallet history');
-      notification.show('Failed to fetch wallet history', 'error');
+      notification.show(err?.response?.data?.message || 'Failed to fetch wallet history', 'error');
+      setTransactions([]);
+      setTotalPages(1);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -149,13 +141,11 @@ const WalletHistory: React.FC = () => {
   };
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
-    console.log('Page changed to:', page); // Debug log
     setCurrentPage(page);
   };
 
-  const handlePageSizeChange = (event: any) => {
-    const newPageSize = event.target.value;
-    console.log('Page size changed to:', newPageSize); // Debug log
+  const handlePageSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newPageSize = parseInt(event.target.value, 10);
     setPageSize(newPageSize);
     setCurrentPage(1); // Reset to first page when changing page size
   };

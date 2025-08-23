@@ -3,14 +3,6 @@ import { persist } from 'zustand/middleware';
 import type { 
   AppState, 
   User, 
-  GameSetting, 
-  LotteryGameSetting, 
-  LotteryGamePermission, 
-  LotteryGameBoard, 
-  LotteryGameResult, 
-  LotteryGamePlay, 
-  Recharge, 
-  Withdraw, 
   ExtendedBankCard, 
   Notification, 
   ModalState 
@@ -27,25 +19,13 @@ interface LotteryStore extends AppState {
   // Loading Actions
   setLoading: (isLoading: boolean) => void;
   
-  // Game Data Actions
-  setGameSettings: (settings: GameSetting | null) => void;
-  setLotteryGameSettings: (settings: LotteryGameSetting[]) => void;
-  setLotteryGamePermissions: (permissions: LotteryGamePermission[]) => void;
-  setLotteryGameBoards: (boards: LotteryGameBoard[]) => void;
-  setLotteryGameResults: (results: LotteryGameResult[]) => void;
-  
   // User Data Actions
-  setUserGameHistory: (history: LotteryGamePlay[]) => void;
-  setUserRecharges: (recharges: Recharge[]) => void;
-  setUserWithdrawals: (withdrawals: Withdraw[]) => void;
   setUserBankCards: (cards: ExtendedBankCard[]) => void;
   
   // UI Actions
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
-  openModal: (type: string, data?: any) => void;
-  closeModal: () => void;
   
   // Utility Actions
   updateUserBalance: (amount: number) => void;
@@ -71,15 +51,6 @@ export const useStore = create<LotteryStore>()(
         isAuthenticated: false,
         isLoading: false,
         
-        gameSettings: null,
-        lotteryGameSettings: [],
-        lotteryGamePermissions: [],
-        lotteryGameBoards: [],
-        lotteryGameResults: [],
-        
-        userGameHistory: [],
-        userRecharges: [],
-        userWithdrawals: [],
         userBankCards: [],
         
         notifications: [],
@@ -107,9 +78,6 @@ export const useStore = create<LotteryStore>()(
             user: null,
             token: null,
             isAuthenticated: false,
-            userGameHistory: [],
-            userRecharges: [],
-            userWithdrawals: [],
             userBankCards: [],
           });
         },
@@ -117,17 +85,7 @@ export const useStore = create<LotteryStore>()(
         // Loading Actions
         setLoading: (isLoading) => set({ isLoading }),
 
-        // Game Data Actions
-        setGameSettings: (settings) => set({ gameSettings: settings }),
-        setLotteryGameSettings: (settings) => set({ lotteryGameSettings: settings }),
-        setLotteryGamePermissions: (permissions) => set({ lotteryGamePermissions: permissions }),
-        setLotteryGameBoards: (boards) => set({ lotteryGameBoards: boards }),
-        setLotteryGameResults: (results) => set({ lotteryGameResults: results }),
-
         // User Data Actions
-        setUserGameHistory: (history) => set({ userGameHistory: history }),
-        setUserRecharges: (recharges) => set({ userRecharges: recharges }),
-        setUserWithdrawals: (withdrawals) => set({ userWithdrawals: withdrawals }),
         setUserBankCards: (cards) => set({ userBankCards: cards }),
 
         // UI Actions
@@ -158,24 +116,6 @@ export const useStore = create<LotteryStore>()(
           })),
 
         clearNotifications: () => set({ notifications: [] }),
-
-        openModal: (type, data) =>
-          set({
-            modals: {
-              isOpen: true,
-              type,
-              data,
-            },
-          }),
-
-        closeModal: () =>
-          set({
-            modals: {
-              isOpen: false,
-              type: '',
-              data: null,
-            },
-          }),
 
         // Utility Actions
         updateUserBalance: (amount) =>
@@ -209,10 +149,7 @@ export const useStore = create<LotteryStore>()(
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
-        gameSettings: state.gameSettings,
-        lotteryGameSettings: state.lotteryGameSettings,
-        lotteryGamePermissions: state.lotteryGamePermissions,
-        lotteryGameBoards: state.lotteryGameBoards,
+        userBankCards: state.userBankCards,
       }),
     }
   )

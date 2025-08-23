@@ -44,41 +44,37 @@ const MyProfile: React.FC = () => {
   } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Single useEffect for data fetching - always fetch on page visit
+  // Fetch user info and game settings on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
+    if (user?.userId) {
+      fetchMyProfileData();
+    }
+  }, [user?.userId]);
+
+  const fetchMyProfileData = async () => {
+    try {
+      setIsLoading(true);
       const userId = user?.userId || user?._id;
       if (!userId) return;
+      
+      const [userInfoRes, gameSettingsRes] = await Promise.all([
+        api.getUserInfo(userId),
+        api.getGameSettings()
+      ]);
 
-      setIsLoading(true);
-      try {
-        console.log('Fetching MyProfile data for user:', userId);
-        
-        // Fetch user info and game settings in parallel
-        const [userInfoResponse, gameSettingsResponse] = await Promise.all([
-          api.getUserInfo(userId),
-          api.getGameSettings()
-        ]);
-
-        // Update user info
-        if (userInfoResponse.success && userInfoResponse.userInfo) {
-          setUser(userInfoResponse.userInfo);
-        }
-        
-        // Update game settings
-        if (gameSettingsResponse.success && gameSettingsResponse.gameSettings) {
-          setGameSettings(gameSettingsResponse.gameSettings);
-        }
-        
-      } catch (error) {
-        console.error('Error fetching MyProfile data:', error);
-      } finally {
-        setIsLoading(false);
+      if (userInfoRes.success && userInfoRes.userInfo) {
+        setUser(userInfoRes.userInfo);
       }
-    };
 
-    fetchUserData();
-  }, [user?.userId, user?._id]); // Only depend on user ID changes, not on functions
+      if (gameSettingsRes.success && gameSettingsRes.gameSettings) {
+        setGameSettings(gameSettingsRes.gameSettings);
+      }
+    } catch (error: any) {
+      // notification.show(error?.response?.data?.message || 'Failed to fetch profile data', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const quickActions = [
     { title: 'Wallet History', icon: <AccountBalanceWallet />, path: '/wallethistory' },

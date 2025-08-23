@@ -287,17 +287,7 @@ export interface AppState {
   isAuthenticated: boolean;
   isLoading: boolean;
   
-  // Game Data
-  gameSettings: GameSetting | null;
-  lotteryGameSettings: LotteryGameSetting[];
-  lotteryGamePermissions: LotteryGamePermission[];
-  lotteryGameBoards: LotteryGameBoard[];
-  lotteryGameResults: LotteryGameResult[];
-  
   // User Data
-  userGameHistory: LotteryGamePlay[];
-  userRecharges: Recharge[];
-  userWithdrawals: Withdraw[];
   userBankCards: ExtendedBankCard[];
   
   // UI State
