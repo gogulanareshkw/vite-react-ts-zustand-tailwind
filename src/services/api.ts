@@ -643,15 +643,21 @@ class ApiService {
     );
   }
 
-  async getUserWalletHistory(userId: string, pageNumber = 1, pageSize = 10, type = ""): Promise<{ walletHistory: any[]; totalCount: number; totalPages: number }> {
+  async getUserWalletHistory(pageNumber = 1, pageSize = 10, type = ""): Promise<{ success: boolean; walletHistory: any[]; totalCount: number; totalPages: number }> {
     const params = new URLSearchParams({
       pageNumber: pageNumber.toString(),
       pageSize: pageSize.toString(),
       ...(type && { type })
     });
     
-    return this.enhancedRequest<{ walletHistory: any[]; totalCount: number; totalPages: number }>('get', 
-      `${API_ENDPOINTS.USER_WALLET_HISTORY}/${userId}?${params.toString()}`,
+    return this.enhancedRequest<{ 
+      success: boolean; 
+      walletHistory: any[]; 
+      totalCount: number; 
+      totalPages: number 
+    }>(
+      'get',
+      `${API_ENDPOINTS.DB_WALLET_HISTORY}?${params.toString()}`,
       undefined,
       { params: { retry: { retries: 0, retryDelay: 0 } } }
     );

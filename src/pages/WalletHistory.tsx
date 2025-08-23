@@ -11,19 +11,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Switch,
   FormControlLabel,
   Button,
-  Chip,
   CircularProgress,
   Alert,
-  Divider,
   Pagination,
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
 } from '@mui/material';
 import {
   AccountBalanceWallet,
@@ -31,7 +27,6 @@ import {
   FilterList,
 } from '@mui/icons-material';
 import { useStore } from '../store/useStore';
-import { useParams } from 'react-router-dom';
 
 interface WalletTransaction {
   _id: string;
@@ -49,12 +44,10 @@ interface WalletTransaction {
 
 
 const WalletHistory: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
   const { user, api, notification } = useStore();
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [showOnlyBonus, setShowOnlyBonus] = useState(false);
   const [downloading, setDownloading] = useState(false);
   
@@ -66,21 +59,19 @@ const WalletHistory: React.FC = () => {
 
   // Fetch wallet history when component mounts or dependencies change
   useEffect(() => {
-    if (userId) {
-      fetchWalletHistory();
-    }
-  }, [userId, currentPage, pageSize, showOnlyBonus]);
+    fetchWalletHistory();
+  }, [currentPage, pageSize, showOnlyBonus]);
 
   const fetchWalletHistory = async () => {
     try {
       setLoading(true);
-      const typeParam = showOnlyBonus ? 'BONUS' : undefined;
+      const typeParam = showOnlyBonus ? 'BONUS' : '';
       const response = await api.getUserWalletHistory(currentPage, pageSize, typeParam);
       
-      if (response.success && response.data) {
-        setTransactions(response.data.walletHistory || []);
-        setTotalPages(response.data.totalPages || 1);
-        setTotalCount(response.data.totalItems || 0);
+      if (response.success) {
+        setTransactions(response.walletHistory || []);
+        setTotalPages(response.totalPages || 1);
+        setTotalCount(response.totalCount || 0);
       } else {
         setTransactions([]);
         setTotalPages(1);
@@ -140,12 +131,12 @@ const WalletHistory: React.FC = () => {
     });
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
   };
 
-  const handlePageSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newPageSize = parseInt(event.target.value, 10);
+  const handlePageSizeChange = (event: { target: { value: unknown } }) => {
+    const newPageSize = Number(event.target.value);
     setPageSize(newPageSize);
     setCurrentPage(1); // Reset to first page when changing page size
   };
