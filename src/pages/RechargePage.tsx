@@ -31,6 +31,8 @@ const RechargePage: React.FC = () => {
 
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -93,6 +95,22 @@ const RechargePage: React.FC = () => {
       return false;
     }
 
+    if (!transactionId.trim()) {
+      setError('Please enter Transaction ID/UTR No');
+      return false;
+    }
+
+    if (!mobileNumber.trim()) {
+      setError('Please enter Mobile Number');
+      return false;
+    }
+
+    // Validate mobile number format (10 digits)
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      setError('Please enter a valid 10-digit mobile number');
+      return false;
+    }
+
     const selectedMethod = paymentMethods.find(m => m.id === paymentMethod);
     if (selectedMethod) {
       if (numAmount < selectedMethod.minAmount) {
@@ -124,6 +142,8 @@ const RechargePage: React.FC = () => {
       await apiService.createRecharge({
         amount: parseFloat(amount),
         paymentMethod,
+        transactionId,
+        mobileNumber,
       });
       
       setSuccess(true);
@@ -135,6 +155,8 @@ const RechargePage: React.FC = () => {
       // Clear form
       setAmount('');
       setPaymentMethod('');
+      setTransactionId('');
+      setMobileNumber('');
       
     } catch (error: any) {
       // Error will be handled by API service and shown as snackbar automatically
@@ -216,9 +238,14 @@ const RechargePage: React.FC = () => {
                 sx={{ mb: 4 }}
               />
 
+
               {amount && parseFloat(amount) > 0 && (
                 <>
-                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                  <Box sx={{ my: 2 }}>
+                    <hr style={{ border: 'none', borderTop: '2px solid #eee' }} />
+                  </Box>
+
+                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                     Select Payment Method
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
@@ -258,11 +285,48 @@ const RechargePage: React.FC = () => {
                 </>
               )}
 
+
+              {paymentMethod && (
+                <>
+                  <Box sx={{ my: 2 }}>
+                    <hr style={{ border: 'none', borderTop: '2px solid #eee' }} />
+                  </Box>
+                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                    Payment Details
+                  </Typography>
+                  <Box sx={{ mb: 4 }}>
+                    <TextField
+                      label="Transaction ID/UTR No"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      sx={{ mb: 2 }}
+                    />
+                    <TextField
+                      label="Mobile Number"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      type="tel"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      inputProps={{ maxLength: 10 }}
+                      placeholder="Enter 10-digit mobile number"
+                    />
+                  </Box>
+                  <Box sx={{ my: 2 }}>
+                    <hr style={{ border: 'none', borderTop: '2px solid #eee' }} />
+                  </Box>
+                </>
+              )}
+
               <Button
                 variant="contained"
                 size="large"
                 fullWidth
-                disabled={isLoading || !amount || !paymentMethod}
+                disabled={isLoading || !amount || !paymentMethod || !transactionId || !mobileNumber}
                 onClick={handleSubmit}
                 sx={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -273,7 +337,7 @@ const RechargePage: React.FC = () => {
                   },
                 }}
               >
-                {isLoading ? 'Processing...' : 'Proceed to Recharge'}
+                {isLoading ? 'Processing...' : 'Submit'}
               </Button>
             </CardContent>
           </Card>
@@ -298,4 +362,4 @@ const RechargePage: React.FC = () => {
   );
 };
 
-export default RechargePage; 
+export default RechargePage;
