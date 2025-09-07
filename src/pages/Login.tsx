@@ -8,13 +8,10 @@ import {
   CardContent,
   TextField,
   Button,
-  Paper,
-  Alert,
   useTheme,
   useMediaQuery,
   InputAdornment,
   IconButton,
-  Divider,
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
@@ -58,10 +55,27 @@ const Login: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-              navigate('/my-profile');
+    // Check for session expiration query parameter
+    const searchParams = new URLSearchParams(window.location.search);
+    const sessionExpired = searchParams.get('sessionExpired') === 'true';
+    
+    if (sessionExpired) {
+      // Show session expired notification
+      addNotification({
+        message: 'Your session has expired. Please log in again.',
+        type: 'warning',
+        duration: 5000
+      });
+      
+      // Clean up the URL
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
     }
-  }, [isAuthenticated, navigate]);
+    
+    if (isAuthenticated) {
+      navigate('/my-profile');
+    }
+  }, [isAuthenticated, navigate, addNotification]);
 
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [field]: event.target.value }));
@@ -128,14 +142,14 @@ const Login: React.FC = () => {
         try {
           // Fetch user details
           const userInfoResponse = await apiService.getUserInfo(response.user.userId);
-          if (userInfoResponse.success && userInfoResponse.data) {
-            setUser(userInfoResponse.data);
+          if (userInfoResponse.success) {
+            setUser(userInfoResponse.userInfo);
           }
           
           // Fetch game settings
           const gameSettingsResponse = await apiService.getGameSettings();
-          if (gameSettingsResponse.success && gameSettingsResponse.data) {
-            setGameSettings(gameSettingsResponse.data);
+          if (gameSettingsResponse.success) {
+            setGameSettings(gameSettingsResponse.gameSettings);
           }
         } catch (error) {
           console.error('Error fetching additional data:', error);
@@ -167,9 +181,7 @@ const Login: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleForgotPassword = () => {
-    navigate('/forgot-password');
-  };
+  // Forgot password is handled by the Link component directly
 
   return (
     <Container 

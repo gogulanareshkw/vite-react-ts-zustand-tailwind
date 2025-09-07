@@ -283,16 +283,12 @@ export interface PaginatedResponse<T> {
 
 // Store Types
 export interface AppState {
-  // Auth
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  
-  // User Data
   userBankCards: ExtendedBankCard[];
-  
-  // UI State
+  gameSettings: GameSetting | null;
   notifications: Notification[];
   modals: ModalState;
 }

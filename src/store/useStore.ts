@@ -4,8 +4,7 @@ import type {
   AppState, 
   User, 
   ExtendedBankCard, 
-  Notification, 
-  ModalState 
+  Notification
 } from '../types';
 import apiService from '../services/api';
 
@@ -21,6 +20,7 @@ interface LotteryStore extends AppState {
   
   // User Data Actions
   setUserBankCards: (cards: ExtendedBankCard[]) => void;
+  setGameSettings: (settings: any) => void;
   
   // UI Actions
   addNotification: (notification: Omit<Notification, 'id'>) => void;
@@ -50,9 +50,8 @@ export const useStore = create<LotteryStore>()(
         token: null,
         isAuthenticated: false,
         isLoading: false,
-        
         userBankCards: [],
-        
+        gameSettings: null,
         notifications: [],
         modals: {
           isOpen: false,
@@ -87,6 +86,7 @@ export const useStore = create<LotteryStore>()(
 
         // User Data Actions
         setUserBankCards: (cards) => set({ userBankCards: cards }),
+        setGameSettings: (settings) => set({ gameSettings: settings }),
 
         // UI Actions
         addNotification: (notification) => {
